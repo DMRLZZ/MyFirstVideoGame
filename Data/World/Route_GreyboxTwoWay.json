@@ -1,0 +1,73 @@
+{
+	"type": "RouteDefinition",
+	"id": "greybox_two_way",
+	"version": 1,
+	"comment": "Greybox endless two-way road: 2 + 2 lanes, small painted median with a double yellow line and no median barrier. Used by EndlessTwoWay.",
+	"data": {
+		"Profile": {
+			"LanesPerDirection": 2,
+			"LaneWidthMeters": 3.7,
+			"ShoulderWidthMeters": 2.5,
+			"MedianWidthMeters": 0.6,
+			"bTwoWay": true
+		},
+		"GenParams": {
+			"InitialStraightLengthM": 800.0,
+			"MinStraightLengthM": 400.0,
+			"MaxStraightLengthM": 1500.0,
+			"MinArcLengthM": 200.0,
+			"MaxArcLengthM": 800.0,
+			"MinRadiusM": 1200.0,
+			"MaxRadiusM": 3500.0,
+			"CurveProbability": 0.6,
+			"TurnReversalProbability": 0.65,
+			"MaxArcHeadingChangeDeg": 45.0,
+			"TransitionLengthM": 120.0,
+			"TransitionSteps": 4,
+			"MaxGrade": 0.04,
+			"GradeChangeProbability": 0.35,
+			"MinVerticalCurveRadiusM": 8000.0
+		},
+		"SpeedLimitKmh": 100.0,
+		"SpawnS": 400.0,
+		"EnvironmentPresetFile": "World/Environment_Day.json",
+		"DefaultPlayerLane": 3,
+		"OriginCm": { "X": 0.0, "Y": 0.0, "Z": 0.0 },
+		"StartYawDeg": 0.0,
+		"Streaming": {
+			"GenerateAheadM": 3000.0,
+			"KeepBehindM": 1000.0,
+			"VisibleBehindM": 300.0,
+			"VisibleAheadM": 2000.0,
+			"ChunkLengthM": 100.0,
+			"MeshSampleStepM": 5.0,
+			"MaxChunkBuildsPerFrame": 2,
+			"SyncCookRadiusM": 250.0
+		},
+		"Dressing": {
+			"LineWidthM": 0.15,
+			"EdgeLineWidthM": 0.2,
+			"DashLengthM": 3.0,
+			"DashGapM": 9.0,
+			"DoubleLineSpacingM": 0.35,
+			"PaintHeightM": 0.01,
+			"BarrierOffsetM": 0.6,
+			"BarrierBaseWidthM": 0.6,
+			"BarrierTopWidthM": 0.2,
+			"BarrierHeightM": 0.85,
+			"LampPostSpacingM": 50.0,
+			"LampPostHeightM": 10.0,
+			"LampPostRadiusM": 0.12,
+			"LampArmLengthM": 2.0,
+			"LampSetbackM": 1.0,
+			"ReflectorSpacingM": 25.0,
+			"ReflectorHeightM": 0.25,
+			"ReflectorRadiusM": 0.05,
+			"AsphaltColor": { "R": 0.035, "G": 0.035, "B": 0.038, "A": 1.0 },
+			"WhitePaintColor": { "R": 0.8, "G": 0.8, "B": 0.78, "A": 1.0 },
+			"YellowPaintColor": { "R": 0.85, "G": 0.55, "B": 0.05, "A": 1.0 },
+			"ConcreteColor": { "R": 0.45, "G": 0.44, "B": 0.42, "A": 1.0 },
+			"MetalColor": { "R": 0.25, "G": 0.26, "B": 0.27, "A": 1.0 }
+		}
+	}
+}
