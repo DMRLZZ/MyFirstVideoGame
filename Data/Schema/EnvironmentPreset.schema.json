@@ -1,0 +1,138 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/EnvironmentPreset.schema.json",
+	"title": "EnvironmentPreset",
+	"description": "Validates the data object of Data/World/Environment_*.json (FLREnvironmentPreset).",
+	"type": "object",
+	"properties": {
+		"SunPitchDeg": {
+			"type": "number",
+			"description": "Sun light direction pitch, degrees (negative = sun above the horizon).",
+			"minimum": -90,
+			"maximum": 90
+		},
+		"SunYawDeg": {
+			"type": "number",
+			"description": "Sun light direction yaw, degrees.",
+			"minimum": -360,
+			"maximum": 360
+		},
+		"SunIntensityLux": {
+			"type": "number",
+			"description": "Directional light illuminance, lux.",
+			"minimum": 0,
+			"maximum": 150000
+		},
+		"SunColor": {
+			"type": "object",
+			"description": "Directional light color (linear).",
+			"properties": {
+				"R": {
+					"type": "number",
+					"description": "Red (linear).",
+					"minimum": 0,
+					"maximum": 100
+				},
+				"G": {
+					"type": "number",
+					"description": "Green (linear).",
+					"minimum": 0,
+					"maximum": 100
+				},
+				"B": {
+					"type": "number",
+					"description": "Blue (linear).",
+					"minimum": 0,
+					"maximum": 100
+				},
+				"A": {
+					"type": "number",
+					"description": "Alpha.",
+					"minimum": 0,
+					"maximum": 1
+				}
+			},
+			"required": [
+				"R",
+				"G",
+				"B"
+			],
+			"additionalProperties": false
+		},
+		"SunSourceAngleDeg": {
+			"type": "number",
+			"description": "Angular diameter of the light source, degrees.",
+			"minimum": 0,
+			"maximum": 10
+		},
+		"SkyLightIntensity": {
+			"type": "number",
+			"description": "Sky light intensity scale.",
+			"minimum": 0,
+			"maximum": 20
+		},
+		"FogDensity": {
+			"type": "number",
+			"description": "Exponential height fog density.",
+			"minimum": 0,
+			"maximum": 0.5
+		},
+		"FogHeightFalloff": {
+			"type": "number",
+			"description": "Fog height falloff.",
+			"minimum": 0.001,
+			"maximum": 2
+		},
+		"FogInscatteringColor": {
+			"type": "object",
+			"description": "Fog inscattering color (linear).",
+			"properties": {
+				"R": {
+					"type": "number",
+					"description": "Red (linear).",
+					"minimum": 0,
+					"maximum": 100
+				},
+				"G": {
+					"type": "number",
+					"description": "Green (linear).",
+					"minimum": 0,
+					"maximum": 100
+				},
+				"B": {
+					"type": "number",
+					"description": "Blue (linear).",
+					"minimum": 0,
+					"maximum": 100
+				},
+				"A": {
+					"type": "number",
+					"description": "Alpha.",
+					"minimum": 0,
+					"maximum": 1
+				}
+			},
+			"required": [
+				"R",
+				"G",
+				"B"
+			],
+			"additionalProperties": false
+		},
+		"bVolumetricFog": {
+			"type": "boolean",
+			"description": "Enables volumetric fog."
+		},
+		"ExposureCompensation": {
+			"type": "number",
+			"description": "Exposure compensation, EV.",
+			"minimum": -15,
+			"maximum": 15
+		},
+		"bNight": {
+			"type": "boolean",
+			"description": "Night preset (headlights, street lamps)."
+		}
+	},
+	"additionalProperties": false
+}

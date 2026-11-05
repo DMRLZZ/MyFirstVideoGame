@@ -1,0 +1,20 @@
+{
+	"type": "EnvironmentPreset",
+	"id": "day",
+	"version": 1,
+	"comment": "Clear midday sun, physically based illuminance (auto exposure).",
+	"data": {
+		"SunPitchDeg": -50.0,
+		"SunYawDeg": 30.0,
+		"SunIntensityLux": 100000.0,
+		"SunColor": { "R": 1.0, "G": 0.96, "B": 0.9, "A": 1.0 },
+		"SunSourceAngleDeg": 0.5357,
+		"SkyLightIntensity": 1.0,
+		"FogDensity": 0.01,
+		"FogHeightFalloff": 0.2,
+		"FogInscatteringColor": { "R": 0.447, "G": 0.638, "B": 1.0, "A": 1.0 },
+		"bVolumetricFog": false,
+		"ExposureCompensation": 0.0,
+		"bNight": false
+	}
+}
