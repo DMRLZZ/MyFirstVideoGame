@@ -104,3 +104,12 @@ Formato: contexto → decisión → alternativas descartadas → consecuencias. 
 - **Decisión:** `ULRVehicleAudioComponent` hereda de `USynthComponent` y sintetiza motor (armónicos de la frecuencia de encendido), viento, rodadura y *whoosh* de near miss en el hilo de audio, con perfiles JSON por coche.
 - **Consecuencias:** hay sonido desde el primer día. En M3 se añade la capa de muestras reales (MetaSounds) y el sintetizador queda como refuerzo o *fallback*.
 
+## ADR-013 · Ajuste de dependencias entre módulos
+
+- **Contexto:** al definir los contratos de código hicieron falta dependencias distintas a las de la tabla inicial.
+- **Decisión:**
+  - `LRVehicle` depende de `LRWorld` (el asistente de carril usa coordenadas de carretera).
+  - `LRUI` depende de `LRCore` y `LRVehicle`: escucha el bus de eventos y no depende de `LRGameplay`.
+  - `LRGameplay` depende de `LRUI`, `LRCamera`, `LRAudio`, `LRReplay` y `LRProgression`, porque configura las clases de HUD, cámara y audio.
+  - `ILRRoadParticipant` (en `LRCore`) permite al tráfico leer la huella y la velocidad del jugador sin depender de `LRVehicle`.
+- **Consecuencias:** el grafo sigue siendo acíclico. `LRGameplay` es el integrador.
