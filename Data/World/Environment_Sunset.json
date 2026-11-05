@@ -1,0 +1,20 @@
+{
+	"type": "EnvironmentPreset",
+	"id": "sunset",
+	"version": 1,
+	"comment": "Low warm sun close to the horizon, long shadows, volumetric haze.",
+	"data": {
+		"SunPitchDeg": -6.0,
+		"SunYawDeg": 250.0,
+		"SunIntensityLux": 10000.0,
+		"SunColor": { "R": 1.0, "G": 0.62, "B": 0.35, "A": 1.0 },
+		"SunSourceAngleDeg": 0.5357,
+		"SkyLightIntensity": 1.0,
+		"FogDensity": 0.02,
+		"FogHeightFalloff": 0.25,
+		"FogInscatteringColor": { "R": 0.9, "G": 0.55, "B": 0.35, "A": 1.0 },
+		"bVolumetricFog": true,
+		"ExposureCompensation": 0.5,
+		"bNight": false
+	}
+}
