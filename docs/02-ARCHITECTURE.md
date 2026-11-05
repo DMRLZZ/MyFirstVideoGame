@@ -248,18 +248,18 @@ Cada perfil de conductor tiene su `v0`, `T`, `s0`, `a_max` y `b`: tranquilo, nor
 - `ALRSkyController`: Sky Atmosphere, Volumetric Clouds, Exponential Height Fog, luz direccional, hora del día por curvas, y una `MaterialParameterCollection` global de humedad (`Wetness`, `Puddles`, `RainIntensity`).
 - Lluvia con Niagara (pantalla y mundo), salpicaduras de neumáticos, gotas y limpiaparabrisas en cabina.
 
-## 6. Datos: del JSON al DataAsset
+## 6. Datos: JSON leído en tiempo de ejecución (ADR-010)
 
 ```
-Data/**/*.json  ──(validate: JSON Schema, sin motor)──►  OK
+Data/**/*.json  ──(validate-data.ps1: JSON Schema, sin motor)──►  OK
         │
-        └──(commandlet: UnrealEditor-Cmd -run=LRImportData)──►  Content/LeftRight/Data/Generated/*.uasset
+        └──(juego: FLRDataLoader / ULRDataSubsystem, recarga con lr.Data.Reload)──►  USTRUCT tipado
 ```
 
-- **Tipos primarios** (Asset Manager): `Vehicle`, `TrafficProfile`, `DriverProfile`, `Route`, `Mission`, `ScoringRules` y `Economy`.
-- Los agentes **solo editan JSON**. El commandlet es idempotente: genera el mismo asset para el mismo JSON.
-- `Tools/Scripts/validate-data.ps1` valida contra los esquemas sin abrir el motor (Python + `jsonschema`). Es lo primero que se ejecuta en la CI.
-- Las referencias a assets dentro del JSON usan rutas de objeto (`/Game/LeftRight/Vehicles/...`) y el validador del editor comprueba que existen.
+- Cada archivo usa el sobre `{"type", "id", "version", "data"}`. Las claves de `data` son **exactamente** los nombres de los `UPROPERTY` del struct de destino. Los campos ausentes conservan el valor por defecto de C++.
+- Los agentes **solo editan JSON**. `LeftRight.Build.cs` empaqueta `Data/` en el build (`RuntimeDependencies`, UFS).
+- `Tools/Scripts/validate-data.ps1` valida contra `Data/Schema/<type>.schema.json` sin abrir el motor (Python + `jsonschema`). Es lo primero que se ejecuta en la CI.
+- Las referencias a assets dentro del JSON usan rutas de objeto (`/Game/LeftRight/Vehicles/...`). Los assets referenciados deben estar en las reglas de cocinado.
 
 ## 7. Determinismo y semillas
 
