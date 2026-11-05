@@ -1,0 +1,744 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/VehicleDefinition.schema.json",
+	"title": "VehicleDefinition",
+	"description": "Validates the data object of Data/Vehicles/<id>.json (FLRVehicleDefinition, Source/LRVehicle/Public/LRVehicleTypes.h).",
+	"type": "object",
+	"properties": {
+		"Id": {
+			"type": "string",
+			"description": "Unique id, equal to the file name without extension.",
+			"pattern": "^[a-z0-9_]+$"
+		},
+		"DisplayName": {
+			"type": "string",
+			"description": "Garage name (fictional brand, ADR-006).",
+			"minLength": 1,
+			"maxLength": 64
+		},
+		"SkeletalMesh": {
+			"type": "string",
+			"description": "Soft object path of the skeletal mesh (with physics asset and wheel bones).",
+			"pattern": "^/[A-Za-z0-9_/]+\\.[A-Za-z0-9_]+$"
+		},
+		"AnimClass": {
+			"type": "string",
+			"description": "Soft class path of the vehicle animation blueprint (ends with _C).",
+			"pattern": "^/[A-Za-z0-9_/]+\\.[A-Za-z0-9_]+_C$"
+		},
+		"AudioProfile": {
+			"type": "string",
+			"description": "Id of Data/Audio/<AudioProfile>.json.",
+			"pattern": "^[a-z0-9_]+$"
+		},
+		"LengthMeters": {
+			"type": "number",
+			"description": "Body length (footprint X), meters.",
+			"minimum": 2,
+			"maximum": 8
+		},
+		"WidthMeters": {
+			"type": "number",
+			"description": "Body width without mirrors (footprint Y), meters.",
+			"minimum": 1.2,
+			"maximum": 3
+		},
+		"WheelbaseMeters": {
+			"type": "number",
+			"description": "Axle distance, meters.",
+			"minimum": 1.5,
+			"maximum": 5
+		},
+		"MassKg": {
+			"type": "number",
+			"description": "Total mass, kg.",
+			"minimum": 500,
+			"maximum": 5000
+		},
+		"bOverrideCenterOfMass": {
+			"type": "boolean",
+			"description": "Use CenterOfMassOffsetCm instead of the physics asset center of mass."
+		},
+		"CenterOfMassOffsetCm": {
+			"$ref": "#/$defs/Vector",
+			"description": "Center of mass relative to the actor origin, cm."
+		},
+		"TopSpeedKmh": {
+			"type": "number",
+			"description": "Electronic top speed, km/h.",
+			"minimum": 60,
+			"maximum": 600
+		},
+		"TopSpeedFadeFraction": {
+			"type": "number",
+			"description": "Fraction of the top speed over which the throttle fades out.",
+			"minimum": 0.001,
+			"maximum": 0.5
+		},
+		"ReverseEngageSpeedKmh": {
+			"type": "number",
+			"description": "Holding the brake engages reverse below this speed, km/h.",
+			"minimum": 0.5,
+			"maximum": 30
+		},
+		"CrashImpactKmh": {
+			"type": "number",
+			"description": "Impact speed along the contact normal considered severe, km/h.",
+			"minimum": 1,
+			"maximum": 200
+		},
+		"CrashMinReportKmh": {
+			"type": "number",
+			"description": "Impacts below this speed are not reported, km/h.",
+			"minimum": 0,
+			"maximum": 50
+		},
+		"CrashDebounceSeconds": {
+			"type": "number",
+			"description": "Repeated hits against the same actor inside this window are ignored, s.",
+			"minimum": 0,
+			"maximum": 5
+		},
+		"CrashFloorNormalZ": {
+			"type": "number",
+			"description": "Hits with |normal Z| above this are ground contacts.",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"AccelerationSmoothingSeconds": {
+			"type": "number",
+			"description": "Time constant of the smoothed local acceleration, s.",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"SpawnHeightOffsetCm": {
+			"type": "number",
+			"description": "Extra height when teleporting onto the road, cm.",
+			"minimum": 0,
+			"maximum": 200
+		},
+		"Engine": {
+			"$ref": "#/$defs/Engine"
+		},
+		"Transmission": {
+			"$ref": "#/$defs/Transmission"
+		},
+		"Differential": {
+			"$ref": "#/$defs/Differential"
+		},
+		"FrontWheels": {
+			"$ref": "#/$defs/Axle",
+			"description": "Front (steered) axle."
+		},
+		"RearWheels": {
+			"$ref": "#/$defs/Axle",
+			"description": "Rear axle."
+		},
+		"Aero": {
+			"$ref": "#/$defs/Aero"
+		},
+		"Steering": {
+			"$ref": "#/$defs/Steering"
+		},
+		"Cameras": {
+			"$ref": "#/$defs/Cameras"
+		},
+		"LaneAssist": {
+			"$ref": "#/$defs/LaneAssist"
+		},
+		"StabilityAssist": {
+			"$ref": "#/$defs/StabilityAssist"
+		}
+	},
+	"additionalProperties": false,
+	"required": [
+		"Id",
+		"DisplayName",
+		"SkeletalMesh",
+		"AnimClass",
+		"AudioProfile",
+		"LengthMeters",
+		"WidthMeters",
+		"MassKg",
+		"TopSpeedKmh",
+		"Engine",
+		"Transmission",
+		"FrontWheels",
+		"RearWheels"
+	],
+	"$defs": {
+		"Vector": {
+			"type": "object",
+			"description": "FVector, centimeters in actor space (X forward, Y right, Z up).",
+			"properties": {
+				"X": {
+					"type": "number"
+				},
+				"Y": {
+					"type": "number"
+				},
+				"Z": {
+					"type": "number"
+				}
+			},
+			"additionalProperties": false,
+			"required": [
+				"X",
+				"Y",
+				"Z"
+			]
+		},
+		"NormalizedPoint": {
+			"type": "object",
+			"description": "FVector2D point of a normalized curve, both coordinates in [0, 1].",
+			"properties": {
+				"X": {
+					"type": "number",
+					"description": "Normalized input.",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"Y": {
+					"type": "number",
+					"description": "Normalized output.",
+					"minimum": 0,
+					"maximum": 1
+				}
+			},
+			"additionalProperties": false,
+			"required": [
+				"X",
+				"Y"
+			]
+		},
+		"SpeedScalePoint": {
+			"type": "object",
+			"description": "FVector2D point: X = speed km/h, Y = steering scale (0, 1].",
+			"properties": {
+				"X": {
+					"type": "number",
+					"description": "Speed, km/h.",
+					"minimum": 0,
+					"maximum": 600
+				},
+				"Y": {
+					"type": "number",
+					"description": "Steering scale.",
+					"exclusiveMinimum": 0,
+					"maximum": 1
+				}
+			},
+			"additionalProperties": false,
+			"required": [
+				"X",
+				"Y"
+			]
+		},
+		"Engine": {
+			"type": "object",
+			"description": "FLREngineParams (maps to the Chaos FVehicleEngineConfig).",
+			"properties": {
+				"MaxTorqueNm": {
+					"type": "number",
+					"description": "Peak engine torque, N.m.",
+					"minimum": 50,
+					"maximum": 3000
+				},
+				"MaxRpm": {
+					"type": "number",
+					"description": "Rev limiter, rpm.",
+					"minimum": 1000,
+					"maximum": 20000
+				},
+				"IdleRpm": {
+					"type": "number",
+					"description": "Idle speed, rpm.",
+					"minimum": 300,
+					"maximum": 3000
+				},
+				"TorqueCurve": {
+					"type": "array",
+					"description": "X = rpm / MaxRpm, Y = torque / MaxTorqueNm, sorted by X.",
+					"items": {
+						"$ref": "#/$defs/NormalizedPoint"
+					},
+					"minItems": 2,
+					"maxItems": 32
+				},
+				"EngineBrakeEffect": {
+					"type": "number",
+					"description": "Engine braking with the throttle released.",
+					"minimum": 0,
+					"maximum": 2
+				},
+				"RevUpMOI": {
+					"type": "number",
+					"description": "Rotational inertia when revving up (lower = snappier).",
+					"minimum": 0.01,
+					"maximum": 50
+				},
+				"RevDownRate": {
+					"type": "number",
+					"description": "Rpm drop per second with the throttle closed.",
+					"minimum": 0.01,
+					"maximum": 20000
+				}
+			},
+			"additionalProperties": false
+		},
+		"Transmission": {
+			"type": "object",
+			"description": "FLRTransmissionParams (maps to the Chaos FVehicleTransmissionConfig).",
+			"properties": {
+				"bAutomatic": {
+					"type": "boolean",
+					"description": "Automatic gearbox."
+				},
+				"FinalDriveRatio": {
+					"type": "number",
+					"description": "Differential ratio.",
+					"minimum": 1,
+					"maximum": 8
+				},
+				"ForwardGearRatios": {
+					"type": "array",
+					"description": "Forward ratios, first gear first, strictly decreasing.",
+					"items": {
+						"type": "number",
+						"description": "Gear ratio.",
+						"minimum": 0.2,
+						"maximum": 8
+					},
+					"minItems": 1,
+					"maxItems": 10
+				},
+				"ReverseGearRatio": {
+					"type": "number",
+					"description": "Reverse ratio (positive).",
+					"minimum": 0.5,
+					"maximum": 8
+				},
+				"ChangeUpRpm": {
+					"type": "number",
+					"description": "Automatic upshift rpm (<= Engine.MaxRpm).",
+					"minimum": 1000,
+					"maximum": 20000
+				},
+				"ChangeDownRpm": {
+					"type": "number",
+					"description": "Automatic downshift rpm (< ChangeUpRpm).",
+					"minimum": 500,
+					"maximum": 20000
+				},
+				"GearChangeTime": {
+					"type": "number",
+					"description": "Seconds without drive torque during a shift.",
+					"minimum": 0,
+					"maximum": 2
+				},
+				"TransmissionEfficiency": {
+					"type": "number",
+					"description": "Drivetrain efficiency.",
+					"minimum": 0.1,
+					"maximum": 1
+				}
+			},
+			"additionalProperties": false
+		},
+		"Differential": {
+			"type": "object",
+			"description": "FLRDifferentialParams.",
+			"properties": {
+				"DriveType": {
+					"type": "string",
+					"description": "ELRDriveType.",
+					"enum": [
+						"RearWheelDrive",
+						"FrontWheelDrive",
+						"AllWheelDrive"
+					]
+				},
+				"FrontRearSplit": {
+					"type": "number",
+					"description": "All-wheel drive: torque fraction sent to the front axle.",
+					"minimum": 0,
+					"maximum": 1
+				}
+			},
+			"additionalProperties": false
+		},
+		"Axle": {
+			"type": "object",
+			"description": "FLRWheelAxleParams: tire, brake and suspension values shared by one axle.",
+			"properties": {
+				"BoneNames": {
+					"type": "array",
+					"description": "Wheel bones of the skeletal mesh, left first.",
+					"items": {
+						"type": "string",
+						"pattern": "^[A-Za-z0-9_]+$"
+					},
+					"minItems": 1,
+					"maxItems": 4
+				},
+				"RadiusCm": {
+					"type": "number",
+					"description": "Tire radius, cm.",
+					"minimum": 15,
+					"maximum": 80
+				},
+				"WidthCm": {
+					"type": "number",
+					"description": "Tire width, cm.",
+					"minimum": 10,
+					"maximum": 60
+				},
+				"FrictionForceMultiplier": {
+					"type": "number",
+					"description": "Tire grip multiplier.",
+					"minimum": 0.5,
+					"maximum": 10
+				},
+				"CorneringStiffness": {
+					"type": "number",
+					"description": "Lateral tire stiffness.",
+					"minimum": 100,
+					"maximum": 5000
+				},
+				"MaxSteerAngleDeg": {
+					"type": "number",
+					"description": "Road-wheel angle at full lock, degrees (0 = not steered).",
+					"minimum": 0,
+					"maximum": 60
+				},
+				"MaxBrakeTorqueNm": {
+					"type": "number",
+					"description": "Service brake torque per wheel, N.m.",
+					"minimum": 0,
+					"maximum": 10000
+				},
+				"MaxHandBrakeTorqueNm": {
+					"type": "number",
+					"description": "Handbrake torque per wheel, N.m (0 = no handbrake).",
+					"minimum": 0,
+					"maximum": 10000
+				},
+				"SuspensionMaxRaiseCm": {
+					"type": "number",
+					"description": "Bump travel, cm.",
+					"minimum": 1,
+					"maximum": 50
+				},
+				"SuspensionMaxDropCm": {
+					"type": "number",
+					"description": "Rebound travel, cm.",
+					"minimum": 1,
+					"maximum": 50
+				},
+				"SpringRate": {
+					"type": "number",
+					"description": "Chaos spring rate.",
+					"minimum": 10,
+					"maximum": 5000
+				},
+				"SpringPreload": {
+					"type": "number",
+					"description": "Chaos spring preload.",
+					"minimum": 0,
+					"maximum": 5000
+				},
+				"SuspensionDampingRatio": {
+					"type": "number",
+					"description": "Damping ratio.",
+					"minimum": 0.05,
+					"maximum": 2
+				}
+			},
+			"additionalProperties": false
+		},
+		"Aero": {
+			"type": "object",
+			"description": "FLRAeroParams.",
+			"properties": {
+				"DragCoefficient": {
+					"type": "number",
+					"description": "Cd.",
+					"minimum": 0.1,
+					"maximum": 1.5
+				},
+				"DownforceCoefficient": {
+					"type": "number",
+					"description": "Cl (positive pushes down).",
+					"minimum": -0.5,
+					"maximum": 3
+				},
+				"ChassisWidthCm": {
+					"type": "number",
+					"description": "Frontal width for the drag area, cm.",
+					"minimum": 100,
+					"maximum": 300
+				},
+				"ChassisHeightCm": {
+					"type": "number",
+					"description": "Frontal height for the drag area, cm.",
+					"minimum": 80,
+					"maximum": 300
+				}
+			},
+			"additionalProperties": false
+		},
+		"Steering": {
+			"type": "object",
+			"description": "FLRSteeringParams.",
+			"properties": {
+				"AngleRatio": {
+					"type": "number",
+					"description": "Ackermann angle ratio.",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"InputRiseRate": {
+					"type": "number",
+					"description": "Steering input rise rate, 1/s.",
+					"minimum": 0.5,
+					"maximum": 50
+				},
+				"InputFallRate": {
+					"type": "number",
+					"description": "Steering input fall rate, 1/s.",
+					"minimum": 0.5,
+					"maximum": 50
+				}
+			},
+			"additionalProperties": false
+		},
+		"Cameras": {
+			"type": "object",
+			"description": "FLRCameraAnchors: camera mounts in actor space, centimeters.",
+			"properties": {
+				"CockpitEyeCm": {
+					"$ref": "#/$defs/Vector",
+					"description": "Driver eye."
+				},
+				"HoodCm": {
+					"$ref": "#/$defs/Vector",
+					"description": "Hood camera."
+				},
+				"BumperCm": {
+					"$ref": "#/$defs/Vector",
+					"description": "Front bumper camera."
+				},
+				"ViralMountCm": {
+					"$ref": "#/$defs/Vector",
+					"description": "GoPro / dashcam mount."
+				},
+				"ChaseFarDistanceCm": {
+					"type": "number",
+					"description": "Far chase distance behind the car, cm.",
+					"minimum": 100,
+					"maximum": 3000
+				},
+				"ChaseFarHeightCm": {
+					"type": "number",
+					"description": "Far chase height, cm.",
+					"minimum": 0,
+					"maximum": 1000
+				},
+				"ChaseNearDistanceCm": {
+					"type": "number",
+					"description": "Near chase distance behind the car, cm.",
+					"minimum": 100,
+					"maximum": 3000
+				},
+				"ChaseNearHeightCm": {
+					"type": "number",
+					"description": "Near chase height, cm.",
+					"minimum": 0,
+					"maximum": 1000
+				},
+				"ChaseLookAtHeightCm": {
+					"type": "number",
+					"description": "Chase look-at height above the car origin, cm.",
+					"minimum": 0,
+					"maximum": 500
+				}
+			},
+			"additionalProperties": false
+		},
+		"LaneAssist": {
+			"type": "object",
+			"description": "FLRLaneAssistParams (Arcade lane-keeping / lane-change controller).",
+			"properties": {
+				"bEnabled": {
+					"type": "boolean",
+					"description": "Assist active in the Arcade scheme."
+				},
+				"LateralGain": {
+					"type": "number",
+					"description": "Desired lateral speed per meter of error, 1/s.",
+					"minimum": 0.1,
+					"maximum": 10
+				},
+				"MaxLateralSpeedMs": {
+					"type": "number",
+					"description": "Maximum lateral speed during a lane change, m/s.",
+					"minimum": 0.5,
+					"maximum": 15
+				},
+				"HeadingGain": {
+					"type": "number",
+					"description": "Steering per radian of heading error at the reference speed.",
+					"minimum": 0,
+					"maximum": 20
+				},
+				"YawRateDamping": {
+					"type": "number",
+					"description": "Steering per rad/s of relative yaw rate at the reference speed.",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"ReferenceSpeedMs": {
+					"type": "number",
+					"description": "Speed where the heading gains apply unscaled, m/s.",
+					"minimum": 1,
+					"maximum": 100
+				},
+				"SpeedGainExponent": {
+					"type": "number",
+					"description": "Exponent of the (Vref / v) gain scheduling.",
+					"minimum": 0,
+					"maximum": 2
+				},
+				"MinGainScale": {
+					"type": "number",
+					"description": "Lower clamp of the gain scale.",
+					"minimum": 0.01,
+					"maximum": 1
+				},
+				"MaxGainScale": {
+					"type": "number",
+					"description": "Upper clamp of the gain scale.",
+					"minimum": 1,
+					"maximum": 10
+				},
+				"MinSpeedMs": {
+					"type": "number",
+					"description": "Speed floor used in divisions, m/s.",
+					"minimum": 0.5,
+					"maximum": 20
+				},
+				"MinActiveSpeedMs": {
+					"type": "number",
+					"description": "Below this speed the raw steering passes through, m/s.",
+					"minimum": 0,
+					"maximum": 20
+				},
+				"CurvatureFeedForward": {
+					"type": "number",
+					"description": "Steering per unit of path curvature (~ wheelbase / max steer angle in rad).",
+					"minimum": 0,
+					"maximum": 50
+				},
+				"MaxLateralAccelMs2": {
+					"type": "number",
+					"description": "Lateral acceleration budget of the assist, m/s^2.",
+					"minimum": 1,
+					"maximum": 40
+				},
+				"LateralDecelFraction": {
+					"type": "number",
+					"description": "Fraction of the budget reserved to stop at the target lane.",
+					"minimum": 0.05,
+					"maximum": 1
+				},
+				"MaxSteering": {
+					"type": "number",
+					"description": "Output clamp.",
+					"minimum": 0.05,
+					"maximum": 1
+				},
+				"LaneChangeHysteresisMeters": {
+					"type": "number",
+					"description": "Hysteresis of the reported current lane, meters.",
+					"minimum": 0,
+					"maximum": 1.5
+				}
+			},
+			"additionalProperties": false
+		},
+		"StabilityAssist": {
+			"type": "object",
+			"description": "FLRStabilityAssistParams (Simcade aids).",
+			"properties": {
+				"bSteeringScaleEnabled": {
+					"type": "boolean",
+					"description": "Scale the analog steering with speed."
+				},
+				"SteeringScaleCurve": {
+					"type": "array",
+					"description": "Speed (km/h) -> steering scale, sorted by X, non-increasing in Y.",
+					"items": {
+						"$ref": "#/$defs/SpeedScalePoint"
+					},
+					"minItems": 1,
+					"maxItems": 32
+				},
+				"bYawDampingEnabled": {
+					"type": "boolean",
+					"description": "Counter-steer against oversteer."
+				},
+				"YawDampingGain": {
+					"type": "number",
+					"description": "Counter-steer per rad/s of excess yaw rate.",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"YawRateDeadbandRadS": {
+					"type": "number",
+					"description": "Excess yaw rate tolerated, rad/s.",
+					"minimum": 0,
+					"maximum": 2
+				},
+				"CounterSteerGain": {
+					"type": "number",
+					"description": "Counter-steer per radian of side slip beyond the threshold.",
+					"minimum": 0,
+					"maximum": 10
+				},
+				"SideSlipThresholdRad": {
+					"type": "number",
+					"description": "Side slip tolerated, radians.",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"MaxCorrection": {
+					"type": "number",
+					"description": "Maximum steering correction.",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"MaxLateralAccelMs2": {
+					"type": "number",
+					"description": "Grip limit used to cap the requested yaw rate, m/s^2.",
+					"minimum": 1,
+					"maximum": 30
+				},
+				"MinSpeedMs": {
+					"type": "number",
+					"description": "Aids inactive below this speed, m/s.",
+					"minimum": 0,
+					"maximum": 30
+				},
+				"bTractionControlEnabled": {
+					"type": "boolean",
+					"description": "Chaos traction control on the driven wheels."
+				},
+				"bABSEnabled": {
+					"type": "boolean",
+					"description": "Chaos ABS on every wheel."
+				}
+			},
+			"additionalProperties": false
+		}
+	}
+}
