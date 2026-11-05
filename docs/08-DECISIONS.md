@@ -98,3 +98,9 @@ Formato: contexto → decisión → alternativas descartadas → consecuencias. 
   - El tráfico gris usa formas básicas del motor.
 - **Consecuencias:** el prototipo funciona solo con texto en el repo. Cuando lleguen los assets reales (M3) se sustituyen las mallas y el HUD, manteniendo las mismas APIs.
 
+## ADR-012 · Audio procedural de motor en el prototipo
+
+- **Contexto:** no hay muestras de motor con licencia todavía.
+- **Decisión:** `ULRVehicleAudioComponent` hereda de `USynthComponent` y sintetiza motor (armónicos de la frecuencia de encendido), viento, rodadura y *whoosh* de near miss en el hilo de audio, con perfiles JSON por coche.
+- **Consecuencias:** hay sonido desde el primer día. En M3 se añade la capa de muestras reales (MetaSounds) y el sintetizador queda como refuerzo o *fallback*.
+
