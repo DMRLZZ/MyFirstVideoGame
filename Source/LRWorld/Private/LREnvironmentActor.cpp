@@ -1,0 +1,95 @@
+// Copyright LEFTRIGHT. All Rights Reserved.
+
+#include "LREnvironmentActor.h"
+
+#include "Components/DirectionalLightComponent.h"
+#include "Components/ExponentialHeightFogComponent.h"
+#include "Components/PostProcessComponent.h"
+#include "Components/SceneComponent.h"
+#include "Components/SkyAtmosphereComponent.h"
+#include "Components/SkyLightComponent.h"
+#include "LRDataLoader.h"
+#include "LRWorld.h"
+
+ALREnvironmentActor::ALREnvironmentActor()
+{
+	PrimaryActorTick.bCanEverTick = false;
+
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	Root->SetMobility(EComponentMobility::Movable);
+	SetRootComponent(Root);
+
+	SunLight = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("SunLight"));
+	SunLight->SetupAttachment(Root);
+	SunLight->SetMobility(EComponentMobility::Movable);
+	// Plain field writes in the constructor (setters would try to dirty a render state that does not exist yet).
+	SunLight->bAtmosphereSunLight = true;
+	SunLight->AtmosphereSunLightIndex = 0;
+	SunLight->CastShadows = true;
+
+	SkyAtmosphere = CreateDefaultSubobject<USkyAtmosphereComponent>(TEXT("SkyAtmosphere"));
+	SkyAtmosphere->SetupAttachment(Root);
+
+	SkyLight = CreateDefaultSubobject<USkyLightComponent>(TEXT("SkyLight"));
+	SkyLight->SetupAttachment(Root);
+	SkyLight->SetMobility(EComponentMobility::Movable);
+	SkyLight->bRealTimeCapture = true;
+	SkyLight->SourceType = ESkyLightSourceType::SLS_CapturedScene;
+
+	HeightFog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("HeightFog"));
+	HeightFog->SetupAttachment(Root);
+
+	PostProcess = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcess"));
+	PostProcess->SetupAttachment(Root);
+	PostProcess->bUnbound = true;
+	PostProcess->Priority = 0.f;
+}
+
+void ALREnvironmentActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (!bPresetApplied)
+	{
+		ApplyPreset(CurrentPreset);
+	}
+}
+
+bool ALREnvironmentActor::LoadAndApplyPreset(const FString& RelativePath)
+{
+	FLREnvironmentPreset Preset;
+	FString Error;
+	if (!FLRDataLoader::Load(RelativePath, Preset, &Error))
+	{
+		UE_LOG(LogLRWorld, Warning, TEXT("Environment preset '%s' could not be loaded: %s"), *RelativePath, *Error);
+		return false;
+	}
+
+	ApplyPreset(Preset);
+	return true;
+}
+
+void ALREnvironmentActor::ApplyPreset(const FLREnvironmentPreset& Preset)
+{
+	CurrentPreset = Preset;
+	bPresetApplied = true;
+
+	SunLight->SetWorldRotation(FRotator(Preset.SunPitchDeg, Preset.SunYawDeg, 0.f));
+	SunLight->SetIntensity(FMath::Max(0.f, Preset.SunIntensityLux));
+	SunLight->SetLightColor(Preset.SunColor, /*bSRGB*/ false);
+	SunLight->SetLightSourceAngle(FMath::Max(0.f, Preset.SunSourceAngleDeg));
+
+	SkyLight->SetIntensity(FMath::Max(0.f, Preset.SkyLightIntensity));
+	SkyLight->SetRealTimeCapture(true);
+
+	HeightFog->SetFogDensity(FMath::Max(0.f, Preset.FogDensity));
+	HeightFog->SetFogHeightFalloff(FMath::Max(0.001f, Preset.FogHeightFalloff));
+	HeightFog->SetFogInscatteringColor(Preset.FogInscatteringColor);
+	HeightFog->SetVolumetricFog(Preset.bVolumetricFog);
+
+	PostProcess->Settings.bOverride_AutoExposureBias = true;
+	PostProcess->Settings.AutoExposureBias = Preset.ExposureCompensation;
+
+	UE_LOG(LogLRWorld, Verbose, TEXT("Environment preset applied (sun pitch %.1f, %.0f lux, night=%d)"),
+		Preset.SunPitchDeg, Preset.SunIntensityLux, Preset.bNight ? 1 : 0);
+}
