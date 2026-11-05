@@ -88,3 +88,13 @@ Formato: contexto → decisión → alternativas descartadas → consecuencias. 
 - **Descartadas:** commandlet JSON → DataAsset (más pasos, más binarios); DataTables desde CSV (peor para estructuras anidadas).
 - **Consecuencias:** cero binarios para datos de diseño y ajuste sin recompilar. Las referencias a assets en JSON (`FSoftObjectPath`) no las descubre el *cooker*: los assets referenciados se añaden a las reglas de cocinado del Asset Manager o a `DirectoriesToAlwaysCook`.
 
+## ADR-011 · Prototipo sin assets binarios: mundo, input y HUD desde código
+
+- **Contexto:** los agentes no pueden editar `.uasset` y el prototipo gris debe ser jugable cuanto antes.
+- **Decisión:**
+  - El mundo gris (carretera con mallas procedurales, barreras, farolas, cielo, sol, niebla y post-proceso) lo genera C++ sobre el mapa vacío del motor `/Engine/Maps/Entry`.
+  - Las acciones y contextos de Enhanced Input se crean con `NewObject` en tiempo de ejecución (teclado y mando).
+  - El HUD se dibuja con `UCanvas` hasta la UI definitiva con CommonUI.
+  - El tráfico gris usa formas básicas del motor.
+- **Consecuencias:** el prototipo funciona solo con texto en el repo. Cuando lleguen los assets reales (M3) se sustituyen las mallas y el HUD, manteniendo las mismas APIs.
+
