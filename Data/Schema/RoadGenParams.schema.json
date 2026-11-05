@@ -1,0 +1,100 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/RoadGenParams.schema.json",
+	"title": "RoadGenParams",
+	"description": "Validates FLRRoadGenParams: the GenParams object of RouteDefinition files, or the data object of a standalone RoadGenParams file.",
+	"type": "object",
+	"properties": {
+		"InitialStraightLengthM": {
+			"type": "number",
+			"description": "Length of the first straight (spawn area), meters.",
+			"minimum": 0,
+			"maximum": 10000
+		},
+		"MinStraightLengthM": {
+			"type": "number",
+			"description": "Minimum straight length, meters.",
+			"minimum": 10,
+			"maximum": 20000
+		},
+		"MaxStraightLengthM": {
+			"type": "number",
+			"description": "Maximum straight length, meters.",
+			"minimum": 10,
+			"maximum": 20000
+		},
+		"MinArcLengthM": {
+			"type": "number",
+			"description": "Minimum length of the constant-radius part of a curve, meters.",
+			"minimum": 10,
+			"maximum": 10000
+		},
+		"MaxArcLengthM": {
+			"type": "number",
+			"description": "Maximum length of the constant-radius part of a curve, meters.",
+			"minimum": 10,
+			"maximum": 10000
+		},
+		"MinRadiusM": {
+			"type": "number",
+			"description": "Minimum curve radius, meters (>= 1000 to be drivable at 300 km/h).",
+			"minimum": 1000,
+			"maximum": 50000
+		},
+		"MaxRadiusM": {
+			"type": "number",
+			"description": "Maximum curve radius, meters.",
+			"minimum": 1000,
+			"maximum": 100000
+		},
+		"CurveProbability": {
+			"type": "number",
+			"description": "Probability that a straight is followed by a curve.",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"TurnReversalProbability": {
+			"type": "number",
+			"description": "Probability that a curve turns opposite to the previous one.",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"MaxArcHeadingChangeDeg": {
+			"type": "number",
+			"description": "Maximum heading change of the constant-radius part, degrees.",
+			"minimum": 1,
+			"maximum": 90
+		},
+		"TransitionLengthM": {
+			"type": "number",
+			"description": "Easement length at each end of a curve, meters (0 = none).",
+			"minimum": 0,
+			"maximum": 1000
+		},
+		"TransitionSteps": {
+			"type": "integer",
+			"description": "Constant-curvature steps per easement.",
+			"minimum": 1,
+			"maximum": 16
+		},
+		"MaxGrade": {
+			"type": "number",
+			"description": "Maximum absolute grade (0.04 = 4 %).",
+			"minimum": 0,
+			"maximum": 0.08
+		},
+		"GradeChangeProbability": {
+			"type": "number",
+			"description": "Probability that a piece changes the grade.",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"MinVerticalCurveRadiusM": {
+			"type": "number",
+			"description": "Minimum vertical curve radius, meters.",
+			"minimum": 500,
+			"maximum": 100000
+		}
+	},
+	"additionalProperties": false
+}

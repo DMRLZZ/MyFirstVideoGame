@@ -1,0 +1,567 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/RouteDefinition.schema.json",
+	"title": "RouteDefinition",
+	"description": "Validates the data object of Data/World/Route_*.json (FLRRouteDefinition).",
+	"type": "object",
+	"properties": {
+		"Profile": {
+			"$ref": "#/$defs/Profile"
+		},
+		"GenParams": {
+			"$ref": "#/$defs/GenParams"
+		},
+		"SpeedLimitKmh": {
+			"type": "number",
+			"description": "Posted speed limit, km/h.",
+			"minimum": 30,
+			"maximum": 300
+		},
+		"SpawnS": {
+			"type": "number",
+			"description": "Road S where the player starts, meters.",
+			"minimum": 0,
+			"maximum": 100000
+		},
+		"EnvironmentPresetFile": {
+			"type": "string",
+			"description": "Environment preset path relative to Data/.",
+			"pattern": "^[A-Za-z0-9_/.-]+\\.json$"
+		},
+		"DefaultPlayerLane": {
+			"type": "integer",
+			"description": "Global lane index (0 = leftmost) where the player starts; must be a player-direction lane.",
+			"minimum": 0,
+			"maximum": 11
+		},
+		"OriginCm": {
+			"$ref": "#/$defs/Vector"
+		},
+		"StartYawDeg": {
+			"type": "number",
+			"description": "Heading at S = 0, degrees.",
+			"minimum": -360,
+			"maximum": 360
+		},
+		"Streaming": {
+			"$ref": "#/$defs/Streaming"
+		},
+		"Dressing": {
+			"$ref": "#/$defs/Dressing"
+		}
+	},
+	"additionalProperties": false,
+	"required": [
+		"Profile",
+		"GenParams",
+		"SpeedLimitKmh",
+		"SpawnS",
+		"EnvironmentPresetFile",
+		"DefaultPlayerLane"
+	],
+	"$defs": {
+		"Profile": {
+			"description": "Road cross-section profile (FLRRoadProfile).",
+			"type": "object",
+			"properties": {
+				"LanesPerDirection": {
+					"type": "integer",
+					"description": "Lanes per direction of travel.",
+					"minimum": 1,
+					"maximum": 6
+				},
+				"LaneWidthMeters": {
+					"type": "number",
+					"description": "Lane width, meters.",
+					"minimum": 2.5,
+					"maximum": 5
+				},
+				"ShoulderWidthMeters": {
+					"type": "number",
+					"description": "Shoulder width on each outer side, meters.",
+					"minimum": 0,
+					"maximum": 6
+				},
+				"MedianWidthMeters": {
+					"type": "number",
+					"description": "Median width, meters (two-way: painted gap; one-way: twice the distance from the left shoulder to the median barrier).",
+					"minimum": 0,
+					"maximum": 30
+				},
+				"bTwoWay": {
+					"type": "boolean",
+					"description": "Two-way road with oncoming lanes on the left."
+				}
+			},
+			"additionalProperties": false
+		},
+		"GenParams": {
+			"description": "Procedural layout parameters (FLRRoadGenParams, same rules as RoadGenParams.schema.json).",
+			"type": "object",
+			"properties": {
+				"InitialStraightLengthM": {
+					"type": "number",
+					"description": "Length of the first straight (spawn area), meters.",
+					"minimum": 0,
+					"maximum": 10000
+				},
+				"MinStraightLengthM": {
+					"type": "number",
+					"description": "Minimum straight length, meters.",
+					"minimum": 10,
+					"maximum": 20000
+				},
+				"MaxStraightLengthM": {
+					"type": "number",
+					"description": "Maximum straight length, meters.",
+					"minimum": 10,
+					"maximum": 20000
+				},
+				"MinArcLengthM": {
+					"type": "number",
+					"description": "Minimum length of the constant-radius part of a curve, meters.",
+					"minimum": 10,
+					"maximum": 10000
+				},
+				"MaxArcLengthM": {
+					"type": "number",
+					"description": "Maximum length of the constant-radius part of a curve, meters.",
+					"minimum": 10,
+					"maximum": 10000
+				},
+				"MinRadiusM": {
+					"type": "number",
+					"description": "Minimum curve radius, meters (>= 1000 to be drivable at 300 km/h).",
+					"minimum": 1000,
+					"maximum": 50000
+				},
+				"MaxRadiusM": {
+					"type": "number",
+					"description": "Maximum curve radius, meters.",
+					"minimum": 1000,
+					"maximum": 100000
+				},
+				"CurveProbability": {
+					"type": "number",
+					"description": "Probability that a straight is followed by a curve.",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"TurnReversalProbability": {
+					"type": "number",
+					"description": "Probability that a curve turns opposite to the previous one.",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"MaxArcHeadingChangeDeg": {
+					"type": "number",
+					"description": "Maximum heading change of the constant-radius part, degrees.",
+					"minimum": 1,
+					"maximum": 90
+				},
+				"TransitionLengthM": {
+					"type": "number",
+					"description": "Easement length at each end of a curve, meters (0 = none).",
+					"minimum": 0,
+					"maximum": 1000
+				},
+				"TransitionSteps": {
+					"type": "integer",
+					"description": "Constant-curvature steps per easement.",
+					"minimum": 1,
+					"maximum": 16
+				},
+				"MaxGrade": {
+					"type": "number",
+					"description": "Maximum absolute grade (0.04 = 4 %).",
+					"minimum": 0,
+					"maximum": 0.08
+				},
+				"GradeChangeProbability": {
+					"type": "number",
+					"description": "Probability that a piece changes the grade.",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"MinVerticalCurveRadiusM": {
+					"type": "number",
+					"description": "Minimum vertical curve radius, meters.",
+					"minimum": 500,
+					"maximum": 100000
+				}
+			},
+			"additionalProperties": false
+		},
+		"Streaming": {
+			"description": "Streaming distances (FLRRoadStreamingParams).",
+			"type": "object",
+			"properties": {
+				"GenerateAheadM": {
+					"type": "number",
+					"description": "Layout generated up to playerS + this, meters.",
+					"minimum": 500,
+					"maximum": 20000
+				},
+				"KeepBehindM": {
+					"type": "number",
+					"description": "Layout trimmed before playerS - this, meters.",
+					"minimum": 100,
+					"maximum": 20000
+				},
+				"VisibleBehindM": {
+					"type": "number",
+					"description": "Meshes kept down to playerS - this, meters.",
+					"minimum": 50,
+					"maximum": 5000
+				},
+				"VisibleAheadM": {
+					"type": "number",
+					"description": "Meshes built up to playerS + this, meters.",
+					"minimum": 200,
+					"maximum": 10000
+				},
+				"ChunkLengthM": {
+					"type": "number",
+					"description": "Chunk length, meters.",
+					"minimum": 20,
+					"maximum": 500
+				},
+				"MeshSampleStepM": {
+					"type": "number",
+					"description": "Longitudinal mesh sampling step, meters.",
+					"minimum": 0.5,
+					"maximum": 50
+				},
+				"MaxChunkBuildsPerFrame": {
+					"type": "integer",
+					"description": "Chunks built per frame while streaming.",
+					"minimum": 1,
+					"maximum": 64
+				},
+				"SyncCookRadiusM": {
+					"type": "number",
+					"description": "Synchronous collision cooking radius on reset, meters.",
+					"minimum": 0,
+					"maximum": 2000
+				}
+			},
+			"additionalProperties": false
+		},
+		"Dressing": {
+			"description": "Greybox dressing (FLRRoadDressing).",
+			"type": "object",
+			"properties": {
+				"LineWidthM": {
+					"type": "number",
+					"description": "Dashed line width, meters.",
+					"minimum": 0.05,
+					"maximum": 0.5
+				},
+				"EdgeLineWidthM": {
+					"type": "number",
+					"description": "Solid line width, meters.",
+					"minimum": 0.05,
+					"maximum": 0.5
+				},
+				"DashLengthM": {
+					"type": "number",
+					"description": "Dash length, meters.",
+					"minimum": 0.5,
+					"maximum": 50
+				},
+				"DashGapM": {
+					"type": "number",
+					"description": "Gap between dashes, meters.",
+					"minimum": 0.5,
+					"maximum": 100
+				},
+				"DoubleLineSpacingM": {
+					"type": "number",
+					"description": "Center-to-center spacing of the double yellow line, meters.",
+					"minimum": 0.1,
+					"maximum": 2
+				},
+				"PaintHeightM": {
+					"type": "number",
+					"description": "Paint height above the asphalt, meters.",
+					"minimum": 0.001,
+					"maximum": 0.05
+				},
+				"BarrierOffsetM": {
+					"type": "number",
+					"description": "Shoulder edge to barrier center, meters.",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"BarrierBaseWidthM": {
+					"type": "number",
+					"description": "Barrier base width, meters.",
+					"minimum": 0.1,
+					"maximum": 2
+				},
+				"BarrierTopWidthM": {
+					"type": "number",
+					"description": "Barrier top width, meters.",
+					"minimum": 0.05,
+					"maximum": 2
+				},
+				"BarrierHeightM": {
+					"type": "number",
+					"description": "Barrier height, meters.",
+					"minimum": 0.2,
+					"maximum": 3
+				},
+				"LampPostSpacingM": {
+					"type": "number",
+					"description": "Lamp post spacing, meters (0 = none).",
+					"minimum": 0,
+					"maximum": 1000
+				},
+				"LampPostHeightM": {
+					"type": "number",
+					"description": "Lamp post height, meters.",
+					"minimum": 1,
+					"maximum": 30
+				},
+				"LampPostRadiusM": {
+					"type": "number",
+					"description": "Lamp post radius, meters.",
+					"minimum": 0.02,
+					"maximum": 1
+				},
+				"LampArmLengthM": {
+					"type": "number",
+					"description": "Lamp arm length, meters.",
+					"minimum": 0,
+					"maximum": 6
+				},
+				"LampSetbackM": {
+					"type": "number",
+					"description": "Barrier to lamp post distance, meters.",
+					"minimum": 0.3,
+					"maximum": 10
+				},
+				"ReflectorSpacingM": {
+					"type": "number",
+					"description": "Reflector post spacing, meters (0 = none).",
+					"minimum": 0,
+					"maximum": 1000
+				},
+				"ReflectorHeightM": {
+					"type": "number",
+					"description": "Reflector height above the barrier top, meters.",
+					"minimum": 0.05,
+					"maximum": 2
+				},
+				"ReflectorRadiusM": {
+					"type": "number",
+					"description": "Reflector radius, meters.",
+					"minimum": 0.01,
+					"maximum": 0.5
+				},
+				"AsphaltColor": {
+					"type": "object",
+					"description": "Asphalt color (linear).",
+					"properties": {
+						"R": {
+							"type": "number",
+							"description": "Red (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"G": {
+							"type": "number",
+							"description": "Green (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"B": {
+							"type": "number",
+							"description": "Blue (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"A": {
+							"type": "number",
+							"description": "Alpha.",
+							"minimum": 0,
+							"maximum": 1
+						}
+					},
+					"required": [
+						"R",
+						"G",
+						"B"
+					],
+					"additionalProperties": false
+				},
+				"WhitePaintColor": {
+					"type": "object",
+					"description": "White paint color (linear).",
+					"properties": {
+						"R": {
+							"type": "number",
+							"description": "Red (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"G": {
+							"type": "number",
+							"description": "Green (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"B": {
+							"type": "number",
+							"description": "Blue (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"A": {
+							"type": "number",
+							"description": "Alpha.",
+							"minimum": 0,
+							"maximum": 1
+						}
+					},
+					"required": [
+						"R",
+						"G",
+						"B"
+					],
+					"additionalProperties": false
+				},
+				"YellowPaintColor": {
+					"type": "object",
+					"description": "Yellow paint color (linear).",
+					"properties": {
+						"R": {
+							"type": "number",
+							"description": "Red (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"G": {
+							"type": "number",
+							"description": "Green (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"B": {
+							"type": "number",
+							"description": "Blue (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"A": {
+							"type": "number",
+							"description": "Alpha.",
+							"minimum": 0,
+							"maximum": 1
+						}
+					},
+					"required": [
+						"R",
+						"G",
+						"B"
+					],
+					"additionalProperties": false
+				},
+				"ConcreteColor": {
+					"type": "object",
+					"description": "Concrete color (linear).",
+					"properties": {
+						"R": {
+							"type": "number",
+							"description": "Red (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"G": {
+							"type": "number",
+							"description": "Green (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"B": {
+							"type": "number",
+							"description": "Blue (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"A": {
+							"type": "number",
+							"description": "Alpha.",
+							"minimum": 0,
+							"maximum": 1
+						}
+					},
+					"required": [
+						"R",
+						"G",
+						"B"
+					],
+					"additionalProperties": false
+				},
+				"MetalColor": {
+					"type": "object",
+					"description": "Metal color (linear).",
+					"properties": {
+						"R": {
+							"type": "number",
+							"description": "Red (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"G": {
+							"type": "number",
+							"description": "Green (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"B": {
+							"type": "number",
+							"description": "Blue (linear).",
+							"minimum": 0,
+							"maximum": 100
+						},
+						"A": {
+							"type": "number",
+							"description": "Alpha.",
+							"minimum": 0,
+							"maximum": 1
+						}
+					},
+					"required": [
+						"R",
+						"G",
+						"B"
+					],
+					"additionalProperties": false
+				}
+			},
+			"additionalProperties": false
+		},
+		"Vector": {
+			"type": "object",
+			"description": "Vector in centimeters.",
+			"properties": {
+				"X": {
+					"type": "number"
+				},
+				"Y": {
+					"type": "number"
+				},
+				"Z": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"X",
+				"Y",
+				"Z"
+			],
+			"additionalProperties": false
+		}
+	}
+}
