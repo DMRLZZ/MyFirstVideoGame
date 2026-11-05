@@ -1,0 +1,49 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.game/schema/EconomyRules.schema.json",
+	"title": "EconomyRules",
+	"description": "Validates the \"data\" object of Data/Economy/*.json (FLREconomyRules, module LRProgression). All amounts are credits.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"CreditsPerPoint": { "type": "number", "minimum": 0, "maximum": 10, "description": "Credits per score point." },
+		"MinCreditsPerRun": { "type": "integer", "minimum": 0, "maximum": 1000000, "description": "Minimum credits of a non-empty run." },
+		"DistanceCreditsPerKm": { "type": "number", "minimum": 0, "maximum": 100000, "description": "Credits per kilometer driven." },
+		"StartingCredits": { "type": "integer", "minimum": 0, "maximum": 100000000, "description": "Credits of a new profile." },
+		"StarterVehicle": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "Vehicle id granted to a new profile." },
+		"VehiclePrices": {
+			"type": "array",
+			"maxItems": 256,
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": ["VehicleId", "Price"],
+				"properties": {
+					"VehicleId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+					"Price": { "type": "integer", "minimum": 0, "maximum": 1000000000 },
+					"UpgradeCostMultiplier": { "type": "number", "minimum": 0, "maximum": 100 }
+				}
+			}
+		},
+		"UpgradeLevelPrices": {
+			"type": "array",
+			"minItems": 1,
+			"maxItems": 5,
+			"items": { "type": "integer", "minimum": 0, "maximum": 1000000000 },
+			"description": "Base price to go from level i to i+1 (index = current level, 5 levels)."
+		},
+		"ModeMultipliers": {
+			"type": "array",
+			"maxItems": 16,
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": ["Mode", "Multiplier"],
+				"properties": {
+					"Mode": { "enum": ["EndlessOneWay", "EndlessTwoWay", "TimeAttack", "FreeRide", "Daily"] },
+					"Multiplier": { "type": "number", "minimum": 0, "maximum": 10 }
+				}
+			}
+		}
+	}
+}

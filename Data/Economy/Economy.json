@@ -1,0 +1,32 @@
+{
+	"type": "EconomyRules",
+	"id": "default",
+	"version": 1,
+	"data": {
+		"CreditsPerPoint": 0.1,
+		"MinCreditsPerRun": 100,
+		"DistanceCreditsPerKm": 50.0,
+		"StartingCredits": 5000,
+		"StarterVehicle": "bauer_r3_sport",
+		"VehiclePrices": [
+			{ "VehicleId": "bauer_r3_sport", "Price": 0, "UpgradeCostMultiplier": 0.5 },
+			{ "VehicleId": "aurelion_vanta_s", "Price": 60000, "UpgradeCostMultiplier": 0.75 },
+			{ "VehicleId": "ironclad_hellion", "Price": 85000, "UpgradeCostMultiplier": 0.85 },
+			{ "VehicleId": "volta_nine", "Price": 120000, "UpgradeCostMultiplier": 1.0 },
+			{ "VehicleId": "kessler_kurve_r", "Price": 160000, "UpgradeCostMultiplier": 1.15 },
+			{ "VehicleId": "aurelion_kaiser_gt", "Price": 220000, "UpgradeCostMultiplier": 1.3 },
+			{ "VehicleId": "halcourt_regent_gt", "Price": 300000, "UpgradeCostMultiplier": 1.5 },
+			{ "VehicleId": "ardent_vireo", "Price": 420000, "UpgradeCostMultiplier": 1.8 },
+			{ "VehicleId": "vittore_saetta", "Price": 600000, "UpgradeCostMultiplier": 2.2 },
+			{ "VehicleId": "ardent_spectre_lm", "Price": 1000000, "UpgradeCostMultiplier": 3.0 }
+		],
+		"UpgradeLevelPrices": [5000, 10000, 20000, 35000, 60000],
+		"ModeMultipliers": [
+			{ "Mode": "EndlessOneWay", "Multiplier": 1.0 },
+			{ "Mode": "EndlessTwoWay", "Multiplier": 1.0 },
+			{ "Mode": "TimeAttack", "Multiplier": 1.0 },
+			{ "Mode": "FreeRide", "Multiplier": 0.5 },
+			{ "Mode": "Daily", "Multiplier": 1.25 }
+		]
+	}
+}
