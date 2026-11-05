@@ -1,0 +1,41 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/Envelope.schema.json",
+	"title": "LEFTRIGHT data envelope",
+	"description": "Common wrapper of every Data/**/*.json file. The 'data' object is validated separately against Data/Schema/<type>.schema.json.",
+	"type": "object",
+	"properties": {
+		"$schema": {
+			"description": "Optional editor hint pointing at a schema file. Ignored by the game.",
+			"type": "string"
+		},
+		"type": {
+			"description": "Schema name in PascalCase. Must match a file Data/Schema/<type>.schema.json.",
+			"type": "string",
+			"pattern": "^[A-Z][A-Za-z0-9]*$",
+			"maxLength": 64
+		},
+		"id": {
+			"description": "Unique id inside its type (lower case recommended, e.g. 'default', 'sport_coupe').",
+			"type": "string",
+			"pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+			"maxLength": 128
+		},
+		"version": {
+			"description": "Schema version of this file. Starts at 1 and grows when the struct layout changes incompatibly.",
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 1000
+		},
+		"comment": {
+			"description": "Free text for designers. Ignored by the game.",
+			"type": "string"
+		},
+		"data": {
+			"description": "Payload. Keys are EXACTLY the UPROPERTY names of the target C++ struct.",
+			"type": "object"
+		}
+	},
+	"required": ["type", "id", "version", "data"],
+	"additionalProperties": false
+}
