@@ -39,7 +39,14 @@ Juego de conducción fotorrealista en autopista: esquivar tráfico con superdepo
 - Estándar de código de Epic, con prefijos `LR` en las clases (`ULRTrafficSubsystem`, `ALRVehicle`, `FLRRoadCoord`).
 - **Código, identificadores y comentarios de código en inglés. Documentación en español.**
 - Un módulo C++ por sistema (`Source/LR*`). Los tests van en `Private/Tests/` como Automation Specs, con nombre `LeftRight.<Módulo>.<Caso>`.
-- Ramas `feat/<ID-tarea>-<slug>`. Commits en presente y en inglés, con el ID de tarea.
+- Ramas `feat/<ID-tarea>-<slug>`.
+
+## Commits (obligatorio)
+
+- **Muy granulares:** un cambio lógico por commit (un archivo nuevo, una función, un test, un ajuste de datos). Nunca agrupes muchos cambios en un solo commit. Una tarea normal termina con muchos commits pequeños, no con uno grande.
+- Cada commit tiene sentido por sí solo y no rompe la compilación. Nada de commits vacíos o de relleno.
+- Mensajes en inglés y en presente, con el ID de tarea cuando exista: `M1-05: add IDM acceleration function`.
+- **Nunca añadas `Co-Authored-By: Claude` ni ninguna otra atribución a Claude o a IA** en commits ni en PR.
 
 ## Comandos
 
