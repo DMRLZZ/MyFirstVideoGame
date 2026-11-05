@@ -1,0 +1,26 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.8",
+	"Category": "",
+	"Description": "LEFTRIGHT - photorealistic highway traffic-weaving driving game",
+	"Modules": [
+		{ "Name": "LeftRight", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRCore", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRWorld", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRTraffic", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRVehicle", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRInput", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRCamera", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRUI", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRAudio", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRReplay", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRProgression", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LRGameplay", "Type": "Runtime", "LoadingPhase": "Default" },
+		{ "Name": "LREditor", "Type": "Editor", "LoadingPhase": "Default" }
+	],
+	"Plugins": [
+		{ "Name": "ChaosVehiclesPlugin", "Enabled": true },
+		{ "Name": "EnhancedInput", "Enabled": true },
+		{ "Name": "ProceduralMeshComponent", "Enabled": true }
+	]
+}
