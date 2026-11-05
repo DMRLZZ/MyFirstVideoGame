@@ -76,12 +76,12 @@ MyFirstVideoGame/                 ← raíz del repo = raíz del proyecto Unreal
 | `LRCore` | Tipos comunes, `ULRGameEventSubsystem` (bus de eventos), Gameplay Tags nativos, log categories, utilidades de datos | Engine | `lead-architect` |
 | `LRWorld` | Modelo de autopista (`ULRRoadSubsystem`), tramos y streaming, decoración PCG, `ALRSkyController` (hora del día y clima) | LRCore | `world-builder` |
 | `LRTraffic` | `ULRTrafficSubsystem`: simulación IDM/MOBIL, generación, pooling, LOD, detección de near miss, choques del tráfico | LRCore, LRWorld | `traffic-ai-engineer` |
-| `LRVehicle` | `ALRVehicle`, `ULRVehicleMovementComponent`, asistencias, daños, luces, `ULRVehicleDefinition` | LRCore, ChaosVehicles | `vehicle-physics-engineer` |
-| `LRGameplay` | `ALRGameMode*`, máquina de estados de la partida, puntuación y combos, misiones | LRCore, LRWorld, LRTraffic, LRVehicle | `gameplay-engineer` |
+| `LRVehicle` | `ALRVehicle`, `ULRVehicleMovementComponent`, asistencias, daños, luces, `FLRVehicleDefinition` | LRCore, LRWorld, ChaosVehicles | `vehicle-physics-engineer` |
+| `LRGameplay` | `ALRGameMode*`, máquina de estados de la partida, puntuación y combos, misiones, controlador del jugador | LRCore, LRWorld, LRTraffic, LRVehicle, LRInput, LRCamera, LRUI, LRAudio, LRReplay, LRProgression | `gameplay-engineer` |
 | `LRCamera` | `ALRPlayerCameraManager`, modos de cámara, cabeza en cabina, espejos, Modo Cámara Viral | LRCore, LRVehicle | `camera-engineer` |
 | `LRAudio` | Motor (MetaSound), viento, neumáticos, pass-by, tráfico, mezcla interior/exterior, música | LRCore, LRVehicle | `audio-engineer` |
 | `LRInput` | Enhanced Input, contextos, perfiles de mando y volante, vibración y force feedback | LRCore | `ui-engineer` |
-| `LRUI` | CommonUI + MVVM: HUD, menús, garaje, ajustes, resultados | LRCore, LRGameplay, LRProgression | `ui-engineer` |
+| `LRUI` | HUD (Canvas en el prototipo; CommonUI + MVVM después), menús, garaje, ajustes, resultados | LRCore, LRVehicle | `ui-engineer` |
 | `LRReplay` | Búfer circular de repetición, reproducción con cámaras cinemáticas, modo foto | LRCore, LRTraffic, LRVehicle | `camera-engineer` |
 | `LRProgression` | Guardado (`USaveGame` versionado), créditos, garaje, mejoras, desbloqueos | LRCore | `gameplay-engineer` |
 | `LeftRight` | `ULRGameInstance`, conexión de módulos, ajustes de usuario | todos los de runtime | `lead-architect` |
