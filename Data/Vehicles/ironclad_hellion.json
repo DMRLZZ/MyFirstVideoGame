@@ -1,0 +1,217 @@
+{
+	"type": "VehicleDefinition",
+	"id": "ironclad_hellion",
+	"version": 1,
+	"data": {
+		"Id": "ironclad_hellion",
+		"DisplayName": "Ironclad Hellion",
+		"SkeletalMesh": "/Game/Vehicles/SportsCar/SKM_SportsCar.SKM_SportsCar",
+		"AnimClass": "/Game/Vehicles/SportsCar/ABP_SportsCar.ABP_SportsCar_C",
+		"AudioProfile": "engine_v8_supercharged",
+		"LengthMeters": 4.8,
+		"WidthMeters": 1.92,
+		"WheelbaseMeters": 2.85,
+		"MassKg": 1780,
+		"bOverrideCenterOfMass": true,
+		"CenterOfMassOffsetCm": {
+			"X": 15,
+			"Y": 0,
+			"Z": -2
+		},
+		"TopSpeedKmh": 300,
+		"TopSpeedFadeFraction": 0.03,
+		"ReverseEngageSpeedKmh": 5,
+		"CrashImpactKmh": 25,
+		"CrashMinReportKmh": 3,
+		"CrashDebounceSeconds": 0.25,
+		"CrashFloorNormalZ": 0.7,
+		"AccelerationSmoothingSeconds": 0.1,
+		"SpawnHeightOffsetCm": 15,
+		"Engine": {
+			"MaxTorqueNm": 880,
+			"MaxRpm": 6500,
+			"IdleRpm": 800,
+			"TorqueCurve": [
+				{
+					"X": 0,
+					"Y": 0.6
+				},
+				{
+					"X": 0.2,
+					"Y": 0.88
+				},
+				{
+					"X": 0.4,
+					"Y": 1.0
+				},
+				{
+					"X": 0.6,
+					"Y": 0.98
+				},
+				{
+					"X": 0.85,
+					"Y": 0.86
+				},
+				{
+					"X": 1.0,
+					"Y": 0.7
+				}
+			],
+			"EngineBrakeEffect": 0.12,
+			"RevUpMOI": 3.5,
+			"RevDownRate": 900
+		},
+		"Transmission": {
+			"bAutomatic": true,
+			"FinalDriveRatio": 3.42,
+			"ForwardGearRatios": [
+				2.97,
+				2.07,
+				1.43,
+				1.0,
+				0.84,
+				0.62
+			],
+			"ReverseGearRatio": 2.9,
+			"ChangeUpRpm": 6200,
+			"ChangeDownRpm": 3300,
+			"GearChangeTime": 0.25,
+			"TransmissionEfficiency": 0.9
+		},
+		"Differential": {
+			"DriveType": "RearWheelDrive",
+			"FrontRearSplit": 0.4
+		},
+		"FrontWheels": {
+			"BoneNames": [
+				"Phys_Wheel_FL",
+				"Phys_Wheel_FR"
+			],
+			"RadiusCm": 35,
+			"WidthCm": 25,
+			"FrictionForceMultiplier": 3.0,
+			"CorneringStiffness": 1200,
+			"MaxSteerAngleDeg": 40,
+			"MaxBrakeTorqueNm": 2000,
+			"MaxHandBrakeTorqueNm": 0,
+			"SuspensionMaxRaiseCm": 9,
+			"SuspensionMaxDropCm": 11,
+			"SpringRate": 230,
+			"SpringPreload": 50,
+			"SuspensionDampingRatio": 0.45
+		},
+		"RearWheels": {
+			"BoneNames": [
+				"Phys_Wheel_BL",
+				"Phys_Wheel_BR"
+			],
+			"RadiusCm": 35,
+			"WidthCm": 28,
+			"FrictionForceMultiplier": 2.5,
+			"CorneringStiffness": 850,
+			"MaxSteerAngleDeg": 0,
+			"MaxBrakeTorqueNm": 1500,
+			"MaxHandBrakeTorqueNm": 3500,
+			"SuspensionMaxRaiseCm": 9,
+			"SuspensionMaxDropCm": 11,
+			"SpringRate": 220,
+			"SpringPreload": 50,
+			"SuspensionDampingRatio": 0.42
+		},
+		"Aero": {
+			"DragCoefficient": 0.36,
+			"DownforceCoefficient": 0.05,
+			"ChassisWidthCm": 192,
+			"ChassisHeightCm": 135
+		},
+		"Steering": {
+			"AngleRatio": 0.75,
+			"InputRiseRate": 10,
+			"InputFallRate": 12
+		},
+		"Cameras": {
+			"CockpitEyeCm": {
+				"X": -35,
+				"Y": -37,
+				"Z": 105
+			},
+			"HoodCm": {
+				"X": 60,
+				"Y": 0,
+				"Z": 122
+			},
+			"BumperCm": {
+				"X": 240,
+				"Y": 0,
+				"Z": 52
+			},
+			"ViralMountCm": {
+				"X": 5,
+				"Y": 0,
+				"Z": 118
+			},
+			"ChaseFarDistanceCm": 740,
+			"ChaseFarHeightCm": 230,
+			"ChaseNearDistanceCm": 530,
+			"ChaseNearHeightCm": 170,
+			"ChaseLookAtHeightCm": 90
+		},
+		"LaneAssist": {
+			"bEnabled": true,
+			"LateralGain": 3.0,
+			"MaxLateralSpeedMs": 7.0,
+			"HeadingGain": 2.2,
+			"YawRateDamping": 0.1,
+			"ReferenceSpeedMs": 30.0,
+			"SpeedGainExponent": 1.0,
+			"MinGainScale": 0.1,
+			"MaxGainScale": 2.0,
+			"MinSpeedMs": 5.0,
+			"MinActiveSpeedMs": 2.0,
+			"CurvatureFeedForward": 4.08,
+			"MaxLateralAccelMs2": 16.0,
+			"LateralDecelFraction": 0.3,
+			"MaxSteering": 1.0,
+			"LaneChangeHysteresisMeters": 0.2
+		},
+		"StabilityAssist": {
+			"bSteeringScaleEnabled": true,
+			"SteeringScaleCurve": [
+				{
+					"X": 0,
+					"Y": 1.0
+				},
+				{
+					"X": 60,
+					"Y": 0.88
+				},
+				{
+					"X": 120,
+					"Y": 0.6
+				},
+				{
+					"X": 200,
+					"Y": 0.4
+				},
+				{
+					"X": 300,
+					"Y": 0.28
+				},
+				{
+					"X": 400,
+					"Y": 0.22
+				}
+			],
+			"bYawDampingEnabled": true,
+			"YawDampingGain": 0.2,
+			"YawRateDeadbandRadS": 0.1,
+			"CounterSteerGain": 0.8,
+			"SideSlipThresholdRad": 0.1,
+			"MaxCorrection": 0.25,
+			"MaxLateralAccelMs2": 9.5,
+			"MinSpeedMs": 3.0,
+			"bTractionControlEnabled": false,
+			"bABSEnabled": true
+		}
+	}
+}
