@@ -80,3 +80,11 @@ Formato: contexto → decisión → alternativas descartadas → consecuencias. 
 - **Contexto:** el realismo percibido de Unrecord y similares viene en gran parte de imitar una cámara real. Además, nuestra fantasía nace de vídeos virales.
 - **Decisión:** la Cámara Viral (GoPro, dashcam, móvil) es una funcionalidad de primera clase desde M3, disponible desde el principio del juego.
 - **Consecuencias:** se convierte en el motor de marketing (clips para redes). Los efectos de artefacto tienen que poder desactivarse por accesibilidad.
+
+## ADR-010 · Datos JSON cargados en tiempo de ejecución (sustituye el commandlet de importación)
+
+- **Contexto:** la arquitectura inicial (§6) convertía los JSON en DataAssets binarios con un commandlet. Eso añade un paso, genera binarios y obliga a abrir el editor para cada cambio de balance.
+- **Decisión:** los JSON de `Data/` se leen **en tiempo de ejecución** con `FLRDataLoader` (sobre `FJsonObjectConverter`) y `ULRDataSubsystem`, con recarga en caliente (`lr.Data.Reload`). `LeftRight.Build.cs` empaqueta `Data/` con `RuntimeDependencies` (UFS). Los esquemas se validan sin motor (`Tools/Data/validate_data.py`).
+- **Descartadas:** commandlet JSON → DataAsset (más pasos, más binarios); DataTables desde CSV (peor para estructuras anidadas).
+- **Consecuencias:** cero binarios para datos de diseño y ajuste sin recompilar. Las referencias a assets en JSON (`FSoftObjectPath`) no las descubre el *cooker*: los assets referenciados se añaden a las reglas de cocinado del Asset Manager o a `DirectoriesToAlwaysCook`.
+
