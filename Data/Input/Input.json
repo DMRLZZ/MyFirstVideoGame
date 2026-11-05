@@ -1,0 +1,14 @@
+{
+	"type": "InputTuning",
+	"id": "default",
+	"version": 1,
+	"data": {
+		"StickDeadZone": 0.15,
+		"TriggerDeadZone": 0.05,
+		"SteeringExponent": 1.5,
+		"LaneChangeThreshold": 0.55,
+		"LaneChangeReleaseThreshold": 0.3,
+		"LaneChangeRepeatDelaySeconds": 0.35,
+		"bInvertSteering": false
+	}
+}

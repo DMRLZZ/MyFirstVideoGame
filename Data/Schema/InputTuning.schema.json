@@ -1,0 +1,50 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/InputTuning.schema.json",
+	"title": "InputTuning",
+	"description": "The 'data' object of Data/Input/*.json. Mirrors FLRInputTuning (Source/LRInput/Public/LRInputTypes.h). Axis values are normalized [0, 1].",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"StickDeadZone": {
+			"description": "Inner dead zone of the analog sticks.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 0.95
+		},
+		"TriggerDeadZone": {
+			"description": "Inner dead zone of the analog triggers.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 0.95
+		},
+		"SteeringExponent": {
+			"description": "Exponent of the stick steering response curve (1 = linear).",
+			"type": "number",
+			"minimum": 0.2,
+			"maximum": 5
+		},
+		"LaneChangeThreshold": {
+			"description": "Arcade: |steer| that fires a lane change request.",
+			"type": "number",
+			"minimum": 0.05,
+			"maximum": 1
+		},
+		"LaneChangeReleaseThreshold": {
+			"description": "Arcade: |steer| under which the lane change detector re-arms. Must not exceed LaneChangeThreshold (clamped at runtime).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"LaneChangeRepeatDelaySeconds": {
+			"description": "Arcade: seconds between repeated lane change requests while the stick is held. 0 disables repeat.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 5
+		},
+		"bInvertSteering": {
+			"description": "Inverts the analog stick steering axis.",
+			"type": "boolean"
+		}
+	}
+}
