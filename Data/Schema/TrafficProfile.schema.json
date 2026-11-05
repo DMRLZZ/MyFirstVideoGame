@@ -1,0 +1,609 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/TrafficProfile.schema.json",
+	"title": "TrafficProfile",
+	"description": "The 'data' object of Data/Traffic/TrafficProfile_*.json. Mirrors FLRTrafficProfile (Source/LRTraffic/Public/LRTrafficTypes.h). SI units unless the name says otherwise.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"Archetypes": {
+			"description": "Vehicle body types.",
+			"type": "array",
+			"minItems": 1,
+			"maxItems": 64,
+			"items": {
+				"$ref": "#/$defs/Archetype"
+			}
+		},
+		"DriverProfiles": {
+			"description": "Driver behavior classes.",
+			"type": "array",
+			"minItems": 1,
+			"maxItems": 64,
+			"items": {
+				"$ref": "#/$defs/DriverProfile"
+			}
+		},
+		"PlayerDriverProfile": {
+			"description": "Driver profile used to predict the player's reaction when the player is a MOBIL follower.",
+			"type": "string",
+			"pattern": "^[A-Za-z0-9_]+$",
+			"maxLength": 64
+		},
+		"DensityCurve": {
+			"description": "Density over run time (piecewise linear, clamped at both ends).",
+			"type": "array",
+			"minItems": 1,
+			"maxItems": 64,
+			"items": {
+				"$ref": "#/$defs/DensityPoint"
+			}
+		},
+		"OncomingDensityFactor": {
+			"description": "Density multiplier of the oncoming lanes (two-way roads).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 4
+		},
+		"MaxVehicles": {
+			"description": "Simulation capacity (both directions).",
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 1000
+		},
+		"MaxPooledActors": {
+			"description": "Number of pooled collision actors.",
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 256
+		},
+		"FixedStepHz": {
+			"description": "Fixed simulation rate, Hz.",
+			"type": "number",
+			"minimum": 10,
+			"maximum": 240
+		},
+		"MaxStepsPerFrame": {
+			"description": "Maximum simulation steps per rendered frame.",
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 16
+		},
+		"MaxSpawnAttemptsPerStep": {
+			"description": "Spawn attempts per simulation step.",
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 32
+		},
+		"SpawnMinGapM": {
+			"description": "Minimum bumper-to-bumper distance around a new vehicle, meters.",
+			"type": "number",
+			"minimum": 5,
+			"maximum": 500
+		},
+		"WreckLifetimeSeconds": {
+			"description": "Wrecks stay in the simulation as stopped obstacles for this long, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 120
+		},
+		"WreckImpulseScale": {
+			"description": "Wreck impulse as a fraction of (mass x player impact speed).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 5
+		},
+		"bDrawFarVehicles": {
+			"description": "Draw the vehicles beyond the actor window with one instanced mesh.",
+			"type": "boolean"
+		},
+		"BrakeLightDecelMs2": {
+			"description": "Brake lights turn on above this deceleration, m/s2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 9
+		},
+		"BlinkerFrequencyHz": {
+			"description": "Blinker frequency, Hz (visual only).",
+			"type": "number",
+			"minimum": 0.2,
+			"maximum": 5
+		},
+		"DefaultSpeedLimitKmh": {
+			"description": "Speed limit used when the road gives none, km/h.",
+			"type": "number",
+			"minimum": 30,
+			"maximum": 300
+		},
+		"Windows": {
+			"$ref": "#/$defs/Windows"
+		},
+		"Fairness": {
+			"$ref": "#/$defs/Fairness"
+		},
+		"LaneChange": {
+			"$ref": "#/$defs/LaneChange"
+		},
+		"NearMiss": {
+			"$ref": "#/$defs/NearMiss"
+		}
+	},
+	"required": [
+		"Archetypes",
+		"DriverProfiles",
+		"DensityCurve"
+	],
+	"$defs": {
+		"Color": {
+			"description": "Linear color (FLinearColor).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"R": {
+					"description": "Red, linear.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 10
+				},
+				"G": {
+					"description": "Green, linear.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 10
+				},
+				"B": {
+					"description": "Blue, linear.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 10
+				},
+				"A": {
+					"description": "Alpha.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			},
+			"required": [
+				"R",
+				"G",
+				"B"
+			]
+		},
+		"DensityPoint": {
+			"description": "Density curve key (FVector2D): X = seconds since the run started, Y = vehicles per km per lane.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"X": {
+					"description": "Run time, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 36000
+				},
+				"Y": {
+					"description": "Vehicles per km per lane.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 120
+				}
+			},
+			"required": [
+				"X",
+				"Y"
+			]
+		},
+		"Archetype": {
+			"description": "Vehicle body type (FLRTrafficArchetype).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"Name": {
+					"description": "Unique archetype name (reported in near-miss events and snapshots).",
+					"type": "string",
+					"pattern": "^[A-Za-z0-9_]+$",
+					"maxLength": 64
+				},
+				"LengthMeters": {
+					"description": "Body length, meters.",
+					"type": "number",
+					"minimum": 2,
+					"maximum": 25
+				},
+				"WidthMeters": {
+					"description": "Body width, meters.",
+					"type": "number",
+					"minimum": 1,
+					"maximum": 3
+				},
+				"HeightMeters": {
+					"description": "Body height, meters.",
+					"type": "number",
+					"minimum": 0.8,
+					"maximum": 5
+				},
+				"Weight": {
+					"description": "Relative spawn probability.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 10000
+				},
+				"SpeedFactorMin": {
+					"description": "Lower bound of the factor applied to the posted speed limit.",
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 2
+				},
+				"SpeedFactorMax": {
+					"description": "Upper bound of the factor applied to the posted speed limit.",
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 2
+				},
+				"bPreferRightLanes": {
+					"description": "Spawns in the right lanes, extra keep-right bias, never the leftmost lane on roads with 3+ lanes.",
+					"type": "boolean"
+				},
+				"DriverProfile": {
+					"description": "Forced driver profile name; empty = weighted random among all profiles.",
+					"type": "string",
+					"pattern": "^[A-Za-z0-9_]*$",
+					"maxLength": 64
+				},
+				"MassKg": {
+					"description": "Mass of the physics wreck, kilograms.",
+					"type": "number",
+					"minimum": 100,
+					"maximum": 40000
+				},
+				"Colors": {
+					"description": "Paint colors (linear), one picked per vehicle.",
+					"type": "array",
+					"maxItems": 255,
+					"items": {
+						"$ref": "#/$defs/Color"
+					}
+				},
+				"CabinLengthFraction": {
+					"description": "Grey-box cabin length as a fraction of the body length.",
+					"type": "number",
+					"minimum": 0.05,
+					"maximum": 1
+				},
+				"CabinOffsetFraction": {
+					"description": "Grey-box cabin center offset as a fraction of the body length (+ = front).",
+					"type": "number",
+					"minimum": -0.5,
+					"maximum": 0.5
+				},
+				"LowerBodyHeightFraction": {
+					"description": "Grey-box lower body height as a fraction of the total height.",
+					"type": "number",
+					"minimum": 0.2,
+					"maximum": 1
+				}
+			},
+			"required": [
+				"Name",
+				"LengthMeters",
+				"WidthMeters"
+			]
+		},
+		"DriverProfile": {
+			"description": "Driver behavior class (FLRTrafficDriverProfile): IDM and MOBIL parameters.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"Name": {
+					"description": "Unique driver profile name.",
+					"type": "string",
+					"pattern": "^[A-Za-z0-9_]+$",
+					"maxLength": 64
+				},
+				"Weight": {
+					"description": "Relative spawn probability among the profiles not forced by an archetype.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 10000
+				},
+				"DesiredSpeedFactorMin": {
+					"description": "Lower bound of the desired speed factor.",
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 3
+				},
+				"DesiredSpeedFactorMax": {
+					"description": "Upper bound of the desired speed factor.",
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 3
+				},
+				"TimeHeadwayS": {
+					"description": "IDM safe time headway T, seconds.",
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 5
+				},
+				"MinGapM": {
+					"description": "IDM jam distance s0, meters.",
+					"type": "number",
+					"minimum": 0.5,
+					"maximum": 20
+				},
+				"MaxAccelMs2": {
+					"description": "IDM maximum acceleration, m/s2.",
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 8
+				},
+				"ComfortDecelMs2": {
+					"description": "IDM comfortable deceleration, m/s2 (positive).",
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 9
+				},
+				"Politeness": {
+					"description": "MOBIL politeness factor p.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1.5
+				},
+				"LaneChangeThresholdMs2": {
+					"description": "MOBIL switching threshold, m/s2.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 3
+				},
+				"KeepRightBiasMs2": {
+					"description": "MOBIL keep-right bias, m/s2 (> 0 favours moving right).",
+					"type": "number",
+					"minimum": -2,
+					"maximum": 2
+				},
+				"SafeDecelMs2": {
+					"description": "MOBIL safety: maximum deceleration imposed on the new follower, m/s2.",
+					"type": "number",
+					"minimum": 0.5,
+					"maximum": 9
+				},
+				"AggressiveEventChance": {
+					"description": "Chance per MOBIL evaluation of an announced aggressive lane change.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"bSpawnInLeftLanes": {
+					"description": "Spawns preferably in the left lanes.",
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"Name"
+			]
+		},
+		"Windows": {
+			"description": "Longitudinal windows around the player, meters (FLRTrafficWindows).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"SimBehindM": {
+					"description": "Vehicles further behind the player are despawned.",
+					"type": "number",
+					"minimum": 50,
+					"maximum": 2000
+				},
+				"SimAheadM": {
+					"description": "Vehicles further ahead of the player are despawned.",
+					"type": "number",
+					"minimum": 200,
+					"maximum": 5000
+				},
+				"MobilBehindM": {
+					"description": "Lane changes are evaluated from this distance behind the player.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 2000
+				},
+				"MobilAheadM": {
+					"description": "Lane changes are evaluated up to this distance ahead of the player.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5000
+				},
+				"SpawnAheadMinM": {
+					"description": "Closest spawn distance ahead of the player.",
+					"type": "number",
+					"minimum": 100,
+					"maximum": 5000
+				},
+				"SpawnAheadMaxM": {
+					"description": "Furthest spawn distance ahead of the player.",
+					"type": "number",
+					"minimum": 100,
+					"maximum": 5000
+				},
+				"SpawnBehindMinM": {
+					"description": "Closest spawn distance behind the player (only while the player is slower than traffic).",
+					"type": "number",
+					"minimum": 50,
+					"maximum": 2000
+				},
+				"SpawnBehindMaxM": {
+					"description": "Furthest spawn distance behind the player.",
+					"type": "number",
+					"minimum": 50,
+					"maximum": 2000
+				},
+				"ActorBehindM": {
+					"description": "Pooled collision actors are used from this distance behind the player.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 2000
+				},
+				"ActorAheadM": {
+					"description": "Pooled collision actors are used up to this distance ahead of the player.",
+					"type": "number",
+					"minimum": 50,
+					"maximum": 5000
+				},
+				"InitialFillMinAheadM": {
+					"description": "Run reset prefill: closest distance ahead of the player.",
+					"type": "number",
+					"minimum": 10,
+					"maximum": 2000
+				},
+				"InitialClearLaneAheadM": {
+					"description": "Run reset prefill: the lanes occupied by the player stay empty up to this distance.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 2000
+				}
+			}
+		},
+		"Fairness": {
+			"description": "Fair-play rules (FLRTrafficFairness).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"FairnessTtcSeconds": {
+					"description": "No lane change into the player's lane ahead of the player below this time-to-collision, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 10
+				},
+				"MinGapToPlayerM": {
+					"description": "No lane change into the player's lane closer than this to the player, meters.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 100
+				},
+				"bEnforceSolvability": {
+					"description": "Never let every player-direction lane be blocked inside a solvability window.",
+					"type": "boolean"
+				},
+				"SolvabilityWindowM": {
+					"description": "Length of the solvability window, meters.",
+					"type": "number",
+					"minimum": 5,
+					"maximum": 200
+				},
+				"SolvabilityLaneChangeMarginM": {
+					"description": "Extra distance checked ahead when approving a lane change, meters.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 100
+				},
+				"AggressiveMinBlinkSeconds": {
+					"description": "Minimum blinker time of aggressive lane changes, seconds.",
+					"type": "number",
+					"minimum": 1,
+					"maximum": 5
+				},
+				"AggressiveMoveSeconds": {
+					"description": "Lateral move duration of aggressive lane changes, seconds.",
+					"type": "number",
+					"minimum": 0.5,
+					"maximum": 6
+				}
+			}
+		},
+		"LaneChange": {
+			"description": "Lane change timing and MOBIL scheduling (FLRTrafficLaneChangeParams).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"BlinkerMinSeconds": {
+					"description": "Minimum blinker time before the lateral motion, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"BlinkerMaxSeconds": {
+					"description": "Maximum blinker time before the lateral motion, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"MoveMinSeconds": {
+					"description": "Minimum duration of the lateral smootherstep motion, seconds.",
+					"type": "number",
+					"minimum": 0.5,
+					"maximum": 10
+				},
+				"MoveMaxSeconds": {
+					"description": "Maximum duration of the lateral smootherstep motion, seconds.",
+					"type": "number",
+					"minimum": 0.5,
+					"maximum": 10
+				},
+				"MobilIntervalSeconds": {
+					"description": "MOBIL evaluation period of each vehicle, seconds.",
+					"type": "number",
+					"minimum": 0.05,
+					"maximum": 5
+				},
+				"CooldownSeconds": {
+					"description": "Minimum time between two lane changes of the same vehicle, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 60
+				},
+				"AbortMoveSeconds": {
+					"description": "Duration of the move back of an aborted lane change, seconds.",
+					"type": "number",
+					"minimum": 0.3,
+					"maximum": 5
+				},
+				"MaxPauseSeconds": {
+					"description": "A lane change paused at mid-lane is aborted after this time, seconds.",
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 10
+				},
+				"HeavyKeepRightBiasMs2": {
+					"description": "Extra keep-right bias of archetypes that prefer the right lanes, m/s2.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 3
+				}
+			}
+		},
+		"NearMiss": {
+			"description": "Near-miss thresholds (FLRNearMissParams).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"CloseThresholdM": {
+					"description": "Clearance below which a pass is Close, meters.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"VeryCloseThresholdM": {
+					"description": "Clearance below which a pass is VeryClose, meters.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"RazorThresholdM": {
+					"description": "Clearance below which a pass is Razor, meters.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"MinRelativeSpeedKmh": {
+					"description": "Minimum relative speed for a pass to count, km/h.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 300
+				},
+				"ThreadWindowSeconds": {
+					"description": "Window of the thread-the-needle detection, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				}
+			}
+		}
+	}
+}
