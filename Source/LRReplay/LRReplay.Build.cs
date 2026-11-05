@@ -10,5 +10,6 @@ public class LRReplay : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "LRCore", "LRVehicle", "LRTraffic" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "LRWorld" });
 	}
 }
