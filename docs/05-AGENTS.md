@@ -51,7 +51,7 @@ Backlog (06-ROADMAP.md)
    ▼
 Plan breve del agente dueño (qué archivos, qué interfaces, qué tests)
    ▼
-Implementación en rama feat/<id>-<slug> (worktree si solo toca texto)
+Implementación en rama feat/<id>-<slug> (worktree si solo toca texto), en commits pequeños (uno por cambio lógico)
    ▼
 Tools/Scripts/build.ps1  +  Tools/Scripts/test.ps1  +  validate-data.ps1   ← obligatorio, en verde
    ▼
@@ -69,6 +69,7 @@ qa-perf-engineer: tests funcionales y benchmark en el siguiente ciclo
 4. No supera el presupuesto de rendimiento de su sistema (si aplica).
 5. Si cambia una interfaz pública o una decisión, la documentación y el ADR están actualizados.
 6. `code-reviewer` lo aprueba.
+7. El historial está en **commits granulares** (uno por cambio lógico), sin atribución a Claude o a IA (ver `CLAUDE.md`, sección Commits).
 
 ## 5. Reglas de concurrencia
 
