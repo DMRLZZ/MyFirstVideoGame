@@ -9,7 +9,7 @@ public class LRWorld : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "LRCore" });
-		PrivateDependencyModuleNames.AddRange(new string[] { "ProceduralMeshComponent" });
+		// ProceduralMeshComponent and DeveloperSettings are public: LRRoadStreamer.h and LRWorldSettings.h expose their types.
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "DeveloperSettings", "ProceduralMeshComponent", "LRCore" });
 	}
 }
