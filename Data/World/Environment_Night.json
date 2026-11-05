@@ -1,0 +1,20 @@
+{
+	"type": "EnvironmentPreset",
+	"id": "night",
+	"version": 1,
+	"comment": "Moonlit night: dim bluish directional light, dark sky, higher exposure compensation.",
+	"data": {
+		"SunPitchDeg": -40.0,
+		"SunYawDeg": 120.0,
+		"SunIntensityLux": 0.5,
+		"SunColor": { "R": 0.6, "G": 0.7, "B": 1.0, "A": 1.0 },
+		"SunSourceAngleDeg": 0.5,
+		"SkyLightIntensity": 0.3,
+		"FogDensity": 0.015,
+		"FogHeightFalloff": 0.2,
+		"FogInscatteringColor": { "R": 0.05, "G": 0.07, "B": 0.12, "A": 1.0 },
+		"bVolumetricFog": false,
+		"ExposureCompensation": 2.0,
+		"bNight": true
+	}
+}
