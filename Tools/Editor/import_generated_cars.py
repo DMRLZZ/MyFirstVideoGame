@@ -53,7 +53,7 @@ SLOTS = {
     # Very low specular also lowers the reflection at grazing angles, where a lens this flat mirrors the white horizon.
     "HeadLight": surface_instance("MI_Car_HeadLight", (0.02, 0.022, 0.026), 0.12, specular=0.12, emissive=(0.02, 0.02, 0.025)),
     "DRL": surface_instance("MI_Car_DRL", (0.9, 0.92, 1.0), 0.3, emissive=(14.0, 14.5, 16.0)),
-    "TailLight": surface_instance("MI_Car_TailLight", (0.09, 0.003, 0.004), 0.1, emissive=(0.03, 0.0, 0.0)),
+    "TailLight": surface_instance("MI_Car_TailLight", (0.15, 0.004, 0.005), 0.15, emissive=(0.7, 0.015, 0.015)),
     "TailLED": surface_instance("MI_Car_TailLED", (0.6, 0.02, 0.02), 0.3, emissive=(5.0, 0.12, 0.07)),
     "Screen": surface_instance("MI_Car_Screen", (0.01, 0.015, 0.02), 0.2, emissive=(0.5, 0.75, 1.0)),
     "Caliper": surface_instance("MI_Car_Caliper", (0.6, 0.03, 0.02), 0.35, specular=0.6),
