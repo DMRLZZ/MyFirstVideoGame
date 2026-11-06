@@ -1,0 +1,240 @@
+{
+	"type": "VehicleDefinition",
+	"id": "aurelion_kaiser_gt",
+	"version": 1,
+	"data": {
+		"Id": "aurelion_kaiser_gt",
+		"DisplayName": "Aurelion Kaiser GT",
+		"SkeletalMesh": "/Game/Vehicles/SportsCar/SKM_SportsCar.SKM_SportsCar",
+		"AudioProfile": "engine_v8_biturbo",
+		"LengthMeters": 4.72,
+		"WidthMeters": 1.95,
+		"WheelbaseMeters": 2.98,
+		"MassKg": 1950,
+		"bOverrideCenterOfMass": true,
+		"CenterOfMassOffsetCm": {
+			"X": 10,
+			"Y": 0,
+			"Z": -5
+		},
+		"TopSpeedKmh": 290,
+		"TopSpeedFadeFraction": 0.03,
+		"ReverseEngageSpeedKmh": 5,
+		"CrashImpactKmh": 25,
+		"CrashMinReportKmh": 3,
+		"CrashDebounceSeconds": 0.25,
+		"CrashFloorNormalZ": 0.7,
+		"AccelerationSmoothingSeconds": 0.15,
+		"SpawnHeightOffsetCm": 15,
+		"Engine": {
+			"MaxTorqueNm": 850,
+			"MaxRpm": 6800,
+			"IdleRpm": 700,
+			"TorqueCurve": [
+				{
+					"X": 0,
+					"Y": 0.5
+				},
+				{
+					"X": 0.15,
+					"Y": 0.9
+				},
+				{
+					"X": 0.25,
+					"Y": 1.0
+				},
+				{
+					"X": 0.7,
+					"Y": 1.0
+				},
+				{
+					"X": 0.88,
+					"Y": 0.88
+				},
+				{
+					"X": 1.0,
+					"Y": 0.72
+				}
+			],
+			"EngineBrakeEffect": 0.08,
+			"RevUpMOI": 6.0,
+			"RevDownRate": 550
+		},
+		"Transmission": {
+			"bAutomatic": true,
+			"FinalDriveRatio": 2.85,
+			"ForwardGearRatios": [
+				5.0,
+				3.2,
+				2.14,
+				1.72,
+				1.31,
+				1.0,
+				0.82,
+				0.64
+			],
+			"ReverseGearRatio": 3.46,
+			"ChangeUpRpm": 6400,
+			"ChangeDownRpm": 3400,
+			"GearChangeTime": 0.15,
+			"TransmissionEfficiency": 0.9
+		},
+		"Differential": {
+			"DriveType": "AllWheelDrive",
+			"FrontRearSplit": 0.35
+		},
+		"FrontWheels": {
+			"BoneNames": [
+				"Phys_Wheel_FL",
+				"Phys_Wheel_FR"
+			],
+			"RadiusCm": 35,
+			"WidthCm": 26,
+			"FrictionForceMultiplier": 3.1,
+			"CorneringStiffness": 1100,
+			"MaxSteerAngleDeg": 36,
+			"MaxBrakeTorqueNm": 2200,
+			"MaxHandBrakeTorqueNm": 0,
+			"SuspensionMaxRaiseCm": 7,
+			"SuspensionMaxDropCm": 9,
+			"SpringRate": 280,
+			"SpringPreload": 60,
+			"SuspensionDampingRatio": 0.6
+		},
+		"RearWheels": {
+			"BoneNames": [
+				"Phys_Wheel_BL",
+				"Phys_Wheel_BR"
+			],
+			"RadiusCm": 35,
+			"WidthCm": 28,
+			"FrictionForceMultiplier": 3.2,
+			"CorneringStiffness": 1150,
+			"MaxSteerAngleDeg": 0,
+			"MaxBrakeTorqueNm": 1800,
+			"MaxHandBrakeTorqueNm": 2500,
+			"SuspensionMaxRaiseCm": 7,
+			"SuspensionMaxDropCm": 9,
+			"SpringRate": 290,
+			"SpringPreload": 60,
+			"SuspensionDampingRatio": 0.6
+		},
+		"Aero": {
+			"DragCoefficient": 0.3,
+			"DownforceCoefficient": 0.15,
+			"ChassisWidthCm": 195,
+			"ChassisHeightCm": 145
+		},
+		"Steering": {
+			"AngleRatio": 0.7,
+			"InputRiseRate": 6,
+			"InputFallRate": 8
+		},
+		"Cameras": {
+			"CockpitEyeCm": {
+				"X": -56,
+				"Y": -38,
+				"Z": 88
+			},
+			"HoodCm": {
+				"X": 50,
+				"Y": 0,
+				"Z": 128
+			},
+			"BumperCm": {
+				"X": 245,
+				"Y": 0,
+				"Z": 55
+			},
+			"ViralMountCm": {
+				"X": 5,
+				"Y": 0,
+				"Z": 118
+			},
+			"ChaseFarDistanceCm": 760,
+			"ChaseFarHeightCm": 240,
+			"ChaseNearDistanceCm": 560,
+			"ChaseNearHeightCm": 180,
+			"ChaseLookAtHeightCm": 95
+		},
+		"LaneAssist": {
+			"bEnabled": true,
+			"LateralGain": 2.2,
+			"MaxLateralSpeedMs": 6.0,
+			"YawRateDamping": 0.3,
+			"MinSpeedMs": 5.0,
+			"MinActiveSpeedMs": 2.0,
+			"MaxLateralAccelMs2": 11.0,
+			"LateralDecelFraction": 0.25,
+			"MaxSteering": 1.0,
+			"LaneChangeHysteresisMeters": 0.2,
+			"LateralSpeedGain": 6.0,
+			"SteeringToLateralAccelMs2": 15.0,
+			"KinematicCurvaturePerSteering": 0.262
+		},
+		"StabilityAssist": {
+			"bSteeringScaleEnabled": true,
+			"SteeringScaleCurve": [
+				{
+					"X": 0,
+					"Y": 1.0
+				},
+				{
+					"X": 60,
+					"Y": 0.75
+				},
+				{
+					"X": 120,
+					"Y": 0.45
+				},
+				{
+					"X": 200,
+					"Y": 0.28
+				},
+				{
+					"X": 300,
+					"Y": 0.19
+				},
+				{
+					"X": 400,
+					"Y": 0.15
+				}
+			],
+			"bYawDampingEnabled": true,
+			"YawDampingGain": 0.5,
+			"YawRateDeadbandRadS": 0.05,
+			"CounterSteerGain": 1.5,
+			"SideSlipThresholdRad": 0.06,
+			"MaxCorrection": 0.4,
+			"MaxLateralAccelMs2": 8.5,
+			"MinSpeedMs": 3.0,
+			"bTractionControlEnabled": true,
+			"bABSEnabled": true
+		},
+		"BodyMesh": "/Game/LeftRight/Vehicles/Generated/SM_aurelion_kaiser_gt_Body/SM_aurelion_kaiser_gt_Body/StaticMeshes/SM_aurelion_kaiser_gt_Body.SM_aurelion_kaiser_gt_Body",
+		"GlassMesh": "/Game/LeftRight/Vehicles/Generated/SM_aurelion_kaiser_gt_Glass/SM_aurelion_kaiser_gt_Glass/StaticMeshes/SM_aurelion_kaiser_gt_Glass.SM_aurelion_kaiser_gt_Glass",
+		"WheelMesh": "/Game/LeftRight/Vehicles/Generated/SM_aurelion_kaiser_gt_Wheel/SM_aurelion_kaiser_gt_Wheel/StaticMeshes/SM_aurelion_kaiser_gt_Wheel.SM_aurelion_kaiser_gt_Wheel",
+		"VisualOffsetCm": {
+			"X": 0,
+			"Y": 0,
+			"Z": -11
+		},
+		"FrontWheelCm": {
+			"X": 147.0,
+			"Y": 82.0,
+			"Z": 34.5
+		},
+		"RearWheelCm": {
+			"X": -120.0,
+			"Y": 82.5,
+			"Z": 35.5
+		},
+		"WheelMeshRadiusCm": 35.5,
+		"PaintColor": {
+			"R": 0.42,
+			"G": 0.43,
+			"B": 0.45,
+			"A": 1.0
+		}
+	}
+}

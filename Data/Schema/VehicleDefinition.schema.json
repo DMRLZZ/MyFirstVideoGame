@@ -158,9 +158,6 @@
 		"WheelMesh": {
 			"type": "string"
 		},
-		"bFlipLeftWheels": {
-			"type": "boolean"
-		},
 		"ImpactMinDeltaKmh": {
 			"type": "number",
 			"minimum": 1,
@@ -184,13 +181,18 @@
 		"VisualOffsetCm": {
 			"type": "object"
 		},
-		"VisualWheelInsetCm": {
-			"type": "number",
-			"minimum": 0,
-			"maximum": 50
-		},
 		"PaintColor": {
 			"type": "object"
+		},
+		"FrontWheelCm": {
+			"type": "object"
+		},
+		"RearWheelCm": {
+			"type": "object"
+		},
+		"WheelMeshRadiusCm": {
+			"type": "number",
+			"minimum": 1
 		}
 	},
 	"additionalProperties": false,
@@ -198,7 +200,6 @@
 		"Id",
 		"DisplayName",
 		"SkeletalMesh",
-		"AnimClass",
 		"AudioProfile",
 		"LengthMeters",
 		"WidthMeters",
