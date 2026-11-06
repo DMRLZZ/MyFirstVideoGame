@@ -4,27 +4,27 @@
 	"version": 1,
 	"comment": "Low warm sun close to the horizon, long shadows, volumetric haze.",
 	"data": {
-		"SunPitchDeg": -18.0,
+		"SunPitchDeg": -24.0,
 		"SunYawDeg": 35.0,
 		"SunIntensityLux": 10000.0,
 		"SunColor": {
 			"R": 1.0,
-			"G": 0.8,
-			"B": 0.62,
+			"G": 0.88,
+			"B": 0.76,
 			"A": 1.0
 		},
 		"SunSourceAngleDeg": 0.5357,
-		"SkyLightIntensity": 1.0,
+		"SkyLightIntensity": 1.3,
 		"FogDensity": 0.005,
 		"FogHeightFalloff": 0.25,
 		"FogInscatteringColor": {
-			"R": 0.62,
-			"G": 0.58,
-			"B": 0.55,
+			"R": 0.6,
+			"G": 0.62,
+			"B": 0.66,
 			"A": 1.0
 		},
 		"bVolumetricFog": false,
-		"ExposureCompensation": -0.5,
+		"ExposureCompensation": -0.8,
 		"bNight": false,
 		"GroundColor": {
 			"R": 0.05,
