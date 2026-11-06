@@ -31,6 +31,39 @@ END_DEFINE_SPEC(FLRVehicleMathSpec)
 
 void FLRVehicleMathSpec::Define()
 {
+	Describe("IsImpactSpike", [this]()
+	{
+		It("flags a sudden velocity change as an impact", [this]()
+		{
+			TestTrue(TEXT("227 to 69 km/h in one frame"), LRVehicleMath::IsImpactSpike(158.f, 0.03f, 8.f, 30.f));
+			TestTrue(TEXT("A barrier scrape"), LRVehicleMath::IsImpactSpike(10.f, 0.03f, 8.f, 30.f));
+		});
+
+		It("ignores hard braking and long frame hitches", [this]()
+		{
+			TestFalse(TEXT("1.2 g of braking in 30 ms"), LRVehicleMath::IsImpactSpike(1.3f, 0.03f, 8.f, 30.f));
+			TestFalse(TEXT("A 1 s hitch while braking at 1.2 g"), LRVehicleMath::IsImpactSpike(42.f, 1.f, 8.f, 30.f));
+			TestFalse(TEXT("Zero time step"), LRVehicleMath::IsImpactSpike(50.f, 0.f, 8.f, 30.f));
+		});
+	});
+
+	Describe("IsOffRoad", [this]()
+	{
+		It("keeps a car on the surface between the barriers on the road", [this]()
+		{
+			TestFalse(TEXT("on road"), LRVehicleMath::IsOffRoad(1.f, 0.5, -10.f, 10.f, 2.5f, 3.f));
+			TestFalse(TEXT("slightly below the surface"), LRVehicleMath::IsOffRoad(1.f, -1.f, -10.f, 10.f, 2.5f, 3.f));
+			TestFalse(TEXT("within the barrier margin"), LRVehicleMath::IsOffRoad(12.f, 0.f, -10.f, 10.f, 2.5f, 3.f));
+		});
+
+		It("detects falling through the surface and leaving past either barrier", [this]()
+		{
+			TestTrue(TEXT("below the surface"), LRVehicleMath::IsOffRoad(1.f, -3.f, -10.f, 10.f, 2.5f, 3.f));
+			TestTrue(TEXT("past the right barrier"), LRVehicleMath::IsOffRoad(13.5f, 0.f, -10.f, 10.f, 2.5f, 3.f));
+			TestTrue(TEXT("past the left barrier"), LRVehicleMath::IsOffRoad(-13.5f, 0.f, -10.f, 10.f, 2.5f, 3.f));
+		});
+	});
+
 	using namespace LRVehicleMathSpecPrivate;
 
 	Describe("Lanes", [this]()

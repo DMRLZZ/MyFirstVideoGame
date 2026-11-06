@@ -48,6 +48,28 @@ namespace LRVehicleMath
 	 */
 	LRVEHICLE_API float ComputeImpactSpeedKmh(const FVector& RelativeVelocityCms, const FVector& Normal);
 
+	/**
+	 * True when a velocity change between two frames is a physical impact rather than braking or a frame hitch.
+	 *
+	 * @param DeltaVelocityKmh  Size of the horizontal velocity change, km/h.
+	 * @param DeltaSeconds      Frame time, seconds.
+	 * @param MinDeltaKmh       Smallest change considered an impact, km/h.
+	 * @param MinAccelMs2       Smallest deceleration considered an impact, m/s^2.
+	 */
+	LRVEHICLE_API bool IsImpactSpike(float DeltaVelocityKmh, float DeltaSeconds, float MinDeltaKmh, float MinAccelMs2);
+
+	/**
+	 * True when the vehicle left the drivable corridor: fell below the surface or went past a barrier.
+	 *
+	 * @param D                 Lateral road coordinate, meters.
+	 * @param HeightAboveRoadM  Vehicle height relative to the road surface, meters (negative = below).
+	 * @param LeftBarrierD      Lateral position of the left barrier, meters.
+	 * @param RightBarrierD     Lateral position of the right barrier, meters.
+	 * @param BelowLimitM       Allowed distance below the surface, meters (positive).
+	 * @param LateralMarginM    Allowed distance beyond a barrier, meters.
+	 */
+	LRVEHICLE_API bool IsOffRoad(float D, double HeightAboveRoadM, float LeftBarrierD, float RightBarrierD, float BelowLimitM, float LateralMarginM);
+
 	/** Exponential smoothing factor for a time constant: 1 - exp(-Dt / Tau) (1 when Tau <= 0). */
 	LRVEHICLE_API float ComputeSmoothingAlpha(float DeltaSeconds, float TimeConstantSeconds);
 

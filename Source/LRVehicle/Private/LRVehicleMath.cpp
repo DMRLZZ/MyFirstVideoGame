@@ -78,6 +78,22 @@ namespace LRVehicleMath
 		return NumGears;
 	}
 
+	bool IsImpactSpike(float DeltaVelocityKmh, float DeltaSeconds, float MinDeltaKmh, float MinAccelMs2)
+	{
+		if (DeltaVelocityKmh < MinDeltaKmh || DeltaSeconds <= UE_KINDA_SMALL_NUMBER)
+		{
+			return false;
+		}
+		return static_cast<float>(LRUnits::KmhToMs(DeltaVelocityKmh)) / DeltaSeconds >= MinAccelMs2;
+	}
+
+	bool IsOffRoad(float D, double HeightAboveRoadM, float LeftBarrierD, float RightBarrierD, float BelowLimitM, float LateralMarginM)
+	{
+		return HeightAboveRoadM < -static_cast<double>(BelowLimitM)
+			|| D < LeftBarrierD - LateralMarginM
+			|| D > RightBarrierD + LateralMarginM;
+	}
+
 	float ComputeImpactSpeedKmh(const FVector& RelativeVelocityCms, const FVector& Normal)
 	{
 		const FVector SafeNormal = Normal.GetSafeNormal();
@@ -297,7 +313,7 @@ namespace LRVehicleMath
 				break;
 			}
 		}
-		if (Def.LaneAssist.LateralGain <= 0.f || Def.LaneAssist.MaxLateralSpeedMs <= 0.f || Def.LaneAssist.HeadingGain <= 0.f)
+		if (Def.LaneAssist.LateralGain <= 0.f || Def.LaneAssist.MaxLateralSpeedMs <= 0.f || Def.LaneAssist.LateralSpeedGain <= 0.f)
 		{
 			OutProblems.Add(TEXT("LaneAssist gains must be positive"));
 		}
