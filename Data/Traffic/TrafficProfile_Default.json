@@ -6,7 +6,7 @@
 		"Archetypes": [
 			{
 				"Name": "sedan",
-				"LengthMeters": 4.85,
+				"LengthMeters": 4.72,
 				"WidthMeters": 1.85,
 				"HeightMeters": 1.45,
 				"Weight": 45,
@@ -68,13 +68,13 @@
 				"CabinLengthFraction": 0.5,
 				"CabinOffsetFraction": -0.05,
 				"LowerBodyHeightFraction": 0.55,
-				"ModelMesh": "/Game/ConceptCar/Car/SM_AutomotiveTP_Car.SM_AutomotiveTP_Car",
+				"ModelMesh": "/Game/LeftRight/Vehicles/Generated/SM_bauer_r3_sport_Traffic/SM_bauer_r3_sport_Traffic/StaticMeshes/SM_bauer_r3_sport_Traffic.SM_bauer_r3_sport_Traffic",
 				"PaintMaterialHint": "Paint",
 				"PaintParameter": "PaintColor"
 			},
 			{
 				"Name": "hatchback",
-				"LengthMeters": 4.5,
+				"LengthMeters": 4.58,
 				"WidthMeters": 1.78,
 				"HeightMeters": 1.48,
 				"Weight": 25,
@@ -136,16 +136,9 @@
 				"CabinLengthFraction": 0.55,
 				"CabinOffsetFraction": -0.08,
 				"LowerBodyHeightFraction": 0.55,
-				"ModelMesh": "/Game/Vehicles/SportsCar/SM_SportsCar.SM_SportsCar",
-				"ModelWheelMesh": "/Game/Vehicles/SportsCar/SM_SportsCar_Wheel.SM_SportsCar_Wheel",
-				"PaintMaterialHint": "Body",
-				"PaintParameter": "Paint Tint",
-				"ModelWheelOffsetCm": {
-					"X": 135,
-					"Y": 80,
-					"Z": 35
-				},
-				"ModelWheelbaseCm": 270
+				"ModelMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Traffic/SM_ardent_vireo_Traffic/StaticMeshes/SM_ardent_vireo_Traffic.SM_ardent_vireo_Traffic",
+				"PaintMaterialHint": "Paint",
+				"PaintParameter": "PaintColor"
 			},
 			{
 				"Name": "suv",
@@ -224,10 +217,10 @@
 			},
 			{
 				"Name": "pickup",
-				"LengthMeters": 5.6,
+				"LengthMeters": 4.72,
 				"WidthMeters": 2.0,
 				"HeightMeters": 1.85,
-				"Weight": 0,
+				"Weight": 20,
 				"SpeedFactorMin": 0.92,
 				"SpeedFactorMax": 1.0,
 				"bPreferRightLanes": false,
@@ -267,14 +260,17 @@
 				],
 				"CabinLengthFraction": 0.32,
 				"CabinOffsetFraction": 0.05,
-				"LowerBodyHeightFraction": 0.6
+				"LowerBodyHeightFraction": 0.6,
+				"ModelMesh": "/Game/LeftRight/Vehicles/Generated/SM_aurelion_kaiser_gt_Traffic/SM_aurelion_kaiser_gt_Traffic/StaticMeshes/SM_aurelion_kaiser_gt_Traffic.SM_aurelion_kaiser_gt_Traffic",
+				"PaintMaterialHint": "Paint",
+				"PaintParameter": "PaintColor"
 			},
 			{
 				"Name": "van",
-				"LengthMeters": 5.3,
+				"LengthMeters": 4.6,
 				"WidthMeters": 2.0,
 				"HeightMeters": 2.3,
-				"Weight": 0,
+				"Weight": 12,
 				"SpeedFactorMin": 0.88,
 				"SpeedFactorMax": 0.96,
 				"bPreferRightLanes": false,
@@ -302,7 +298,10 @@
 				],
 				"CabinLengthFraction": 0.75,
 				"CabinOffsetFraction": 0.08,
-				"LowerBodyHeightFraction": 0.45
+				"LowerBodyHeightFraction": 0.45,
+				"ModelMesh": "/Game/ConceptCar/Car/SM_AutomotiveTP_Car.SM_AutomotiveTP_Car",
+				"PaintMaterialHint": "Paint",
+				"PaintParameter": "PaintColor"
 			},
 			{
 				"Name": "truck",
