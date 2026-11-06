@@ -1,0 +1,58 @@
+{
+	"type": "EngineAudioProfile",
+	"id": "engine_v8_biturbo",
+	"version": 1,
+	"data": {
+		"Id": "engine_v8_biturbo",
+		"CylinderCount": 8,
+		"Harmonics": [
+			{
+				"Order": 0.5,
+				"OffLoadGain": 0.18,
+				"OnLoadGain": 0.26
+			},
+			{
+				"Order": 1,
+				"OffLoadGain": 0.55,
+				"OnLoadGain": 0.65
+			},
+			{
+				"Order": 1.5,
+				"OffLoadGain": 0.1,
+				"OnLoadGain": 0.14
+			},
+			{
+				"Order": 2,
+				"OffLoadGain": 0.3,
+				"OnLoadGain": 0.42
+			},
+			{
+				"Order": 3,
+				"OffLoadGain": 0.12,
+				"OnLoadGain": 0.22
+			},
+			{
+				"Order": 4,
+				"OffLoadGain": 0.05,
+				"OnLoadGain": 0.12
+			}
+		],
+		"EngineGain": 0.55,
+		"OffLoadLevel": 0.5,
+		"IdleLevel": 0.48,
+		"OffLoadCutoffHz": 950,
+		"OnLoadCutoffHz": 3600,
+		"CutoffRpmTracking": 0.45,
+		"Drive": 1.8,
+		"CycleJitter": 0.005,
+		"AmplitudeJitter": 0.07,
+		"IntakeNoiseGain": 0.2,
+		"IntakeNoiseOrder": 4,
+		"IntakeNoiseQ": 1.5,
+		"ExhaustNoiseGain": 0.1,
+		"ExhaustNoiseCutoffHz": 450,
+		"OverrunCrackleProbability": 0.025,
+		"OverrunCrackleGain": 0.3,
+		"FallbackMaxRpm": 6800
+	}
+}
