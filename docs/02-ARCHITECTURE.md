@@ -280,6 +280,15 @@ Data/**/*.json  ──(validate-data.ps1: JSON Schema, sin motor)──►  OK
 | RAM | ≤ 12 GB | — |
 | Reinicio de partida | < 2 s | — |
 
+**Medición real (2026-11-06):** portátil con Quadro RTX 3000, por debajo del objetivo recomendado, con salida a 1080p y el piloto automático:
+
+| Estado | Reloj de la GPU | Resolución interna | Resultado |
+|---|---|---|---|
+| Frío, primeros 30 s | 1500-1800 MHz | 73 % | 15,8 ms de GPU, con TSR en calidad épica |
+| Caliente, a 86-91 °C, con freno térmico | 720-945 MHz | 50-60 % | 50-60 fps, con caídas a unos 40 fps |
+
+Pasado el primer minuto manda el freno térmico de la GPU. Por eso el juego limita a 60 fps y usa resolución dinámica (ADR-014). Con energía limitada también se han visto 300 MHz y 8-26 fps, sin resolución dinámica; ese caso no se ha vuelto a medir.
+
 **Mapa de benchmark:** `Content/LeftRight/Tests/Maps/Benchmark_Freeway`. Usa semilla fija y un piloto automático con guion durante 90 s, y captura `csvprofile` e Insights. La CI compara contra la línea base y falla con una regresión mayor del 10 %.
 
 ## 9. Compilación, tests y CI
