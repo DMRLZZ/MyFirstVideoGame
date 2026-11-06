@@ -35,11 +35,15 @@ struct LRREPLAY_API FLRReplaySettings
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Replay", meta = (ClampMin = "0", ClampMax = "256"))
 	int32 MaxTrafficVehicles = 64;
 
-	/** Number of frames the ring buffer must hold: ceil(DurationSeconds * SampleRateHz), at least 2. */
+	/**
+	 * Number of frames the ring buffer must hold: ceil(DurationSeconds * SampleRateHz), at least 2.
+	 * Inputs are clamped to the ranges above because JSON data bypasses the ClampMin/ClampMax metadata; this bounds
+	 * the allocation at 72000 frames.
+	 */
 	int32 GetFrameCapacity() const
 	{
-		const float SafeDuration = FMath::Max(DurationSeconds, 0.f);
-		const float SafeRate = FMath::Max(SampleRateHz, 0.f);
+		const float SafeDuration = FMath::Clamp(DurationSeconds, 0.f, 600.f);
+		const float SafeRate = FMath::Clamp(SampleRateHz, 0.f, 120.f);
 		return FMath::Max(2, FMath::CeilToInt32(SafeDuration * SafeRate));
 	}
 
