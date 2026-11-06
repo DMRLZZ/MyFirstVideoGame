@@ -114,6 +114,8 @@ void ULRInputActions::Build(const FLRInputTuning& InTuning)
 	Restart = MakeAction(this, TEXT("IA_Restart"), EInputActionValueType::Boolean, LOCTEXT("Restart", "Restart"));
 	ToggleControlScheme = MakeAction(this, TEXT("IA_ToggleControlScheme"), EInputActionValueType::Boolean,
 		LOCTEXT("ToggleControlScheme", "Arcade / Simcade"));
+	CycleVehicle = MakeAction(this, TEXT("IA_CycleVehicle"), EInputActionValueType::Boolean,
+		LOCTEXT("CycleVehicle", "Next car"));
 	MenuConfirm = MakeAction(this, TEXT("IA_MenuConfirm"), EInputActionValueType::Boolean, LOCTEXT("MenuConfirm", "Confirm"));
 	MenuBack = MakeAction(this, TEXT("IA_MenuBack"), EInputActionValueType::Boolean, LOCTEXT("MenuBack", "Back"));
 
@@ -173,6 +175,8 @@ void ULRInputActions::Build(const FLRInputTuning& InTuning)
 
 	MapPressed(Drive, ToggleControlScheme, EKeys::T);
 	MapPressed(Drive, ToggleControlScheme, EKeys::Gamepad_LeftShoulder);
+	MapPressed(Drive, CycleVehicle, EKeys::V);
+	MapPressed(Drive, CycleVehicle, EKeys::Gamepad_DPad_Up);
 
 	// Menu context.
 	MenuContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Menu"), RF_Transient);

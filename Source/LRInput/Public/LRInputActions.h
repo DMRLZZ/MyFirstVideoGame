@@ -130,6 +130,10 @@ public:
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category = "Input|Driving")
 	TObjectPtr<UInputAction> ToggleControlScheme;
 
+	/** Switches to the next car (no garage screen yet): V, D-pad up. */
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> CycleVehicle;
+
 	/** Menu confirm, Boolean pressed. Keys: Enter, SpaceBar, Gamepad face button bottom. */
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category = "Input|Menu")
 	TObjectPtr<UInputAction> MenuConfirm;

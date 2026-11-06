@@ -156,6 +156,7 @@ void FLRInputActionsSpec::Define()
 			TestMappedKeys(TEXT("Horn"), Drive, A->Horn, { EKeys::H, EKeys::Gamepad_LeftThumbstick });
 			TestMappedKeys(TEXT("Pause"), Drive, A->Pause, { EKeys::Escape, EKeys::P, EKeys::Gamepad_Special_Right });
 			TestMappedKeys(TEXT("Restart"), Drive, A->Restart, { EKeys::R, EKeys::Gamepad_Special_Left });
+			TestMappedKeys(TEXT("CycleVehicle"), Drive, A->CycleVehicle, { EKeys::V, EKeys::Gamepad_DPad_Up });
 			TestMappedKeys(TEXT("ToggleControlScheme"), Drive, A->ToggleControlScheme, { EKeys::T, EKeys::Gamepad_LeftShoulder });
 		});
 
