@@ -50,7 +50,7 @@ Las claves de `data` son exactamente los nombres de los `UPROPERTY`. Un campo qu
 1. Crea `Data/Vehicles/<id>.json` copiando el coche más parecido. El `id` del sobre, `data.Id` y el nombre del archivo deben coincidir (minúsculas y `_`). Marca ficticia (ADR-006).
 2. Ajusta `SkeletalMesh` y `AnimClass` (ruta de clase terminada en `_C`) y los huesos de las ruedas (`FrontWheels.BoneNames`, `RearWheels.BoneNames`, izquierda primero). La malla necesita un Physics Asset.
 3. Ajusta motor, caja y radio de rueda: la velocidad máxima por desarrollo (`MaxRpm`, última marcha, `FinalDriveRatio`, radio trasero) debe ser mayor que `TopSpeedKmh`, o la validación falla.
-4. `LaneAssist.CurvatureFeedForward` ≈ batalla (m) / ángulo máximo de dirección (rad). `MaxLateralAccelMs2` define lo rápido que cambia de carril; no subas `HeadingGain` ni bajes `YawRateDamping` sin pasar los tests.
+4. `LaneAssist.SteeringToLateralAccelMs2`: mídelo en el juego con `Tools/Scripts/devdrive.ps1` (aceleración lateral / dirección en `Saved/DevShots/trace.csv`) y `KinematicCurvaturePerSteering` ≈ tan(ángulo máximo de dirección) / batalla.
 5. `StabilityAssist.SteeringScaleCurve` debe estar ordenada por velocidad y no crecer nunca.
 6. Añade el `AudioProfile` correspondiente en `Data/Audio/` (módulo `LRAudio`).
 7. Ejecuta `Tools/Scripts/validate-data.ps1` y `Tools/Scripts/test.ps1 -Filter LeftRight.Vehicle`: el test `LeftRight.Vehicle.Definitions` carga y valida todos los archivos de `Data/Vehicles/`.
