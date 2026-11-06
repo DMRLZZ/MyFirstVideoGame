@@ -1,0 +1,27 @@
+{
+	"type": "ScoringRules",
+	"id": "default",
+	"version": 1,
+	"data": {
+		"MetersPerDistancePoint": 10,
+		"SpeedTiers": [
+			{ "MinKmh": 0, "Multiplier": 0.5 },
+			{ "MinKmh": 120, "Multiplier": 1 },
+			{ "MinKmh": 200, "Multiplier": 1.5 },
+			{ "MinKmh": 280, "Multiplier": 2 }
+		],
+		"NearMissBasePoints": 250,
+		"CloseFactor": 1,
+		"VeryCloseFactor": 2,
+		"RazorFactor": 3,
+		"RelativeSpeedReferenceKmh": 100,
+		"RelativeSpeedFactorMin": 0.5,
+		"RelativeSpeedFactorMax": 3,
+		"OncomingFactor": 2,
+		"ThreadTheNeedleFactor": 2,
+		"ComboWindowSeconds": 3,
+		"ComboStepPerChain": 0.25,
+		"ComboMaxMultiplier": 5,
+		"ComboBreakSpeedKmh": 120
+	}
+}

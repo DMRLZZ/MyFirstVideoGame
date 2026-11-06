@@ -1,0 +1,118 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/ScoringRules.schema.json",
+	"title": "ScoringRules",
+	"description": "The 'data' object of Data/Gameplay/Scoring.json. Mirrors FLRScoringRules (Source/LRGameplay/Public/LRScoring.h).",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"MetersPerDistancePoint": {
+			"description": "Meters to drive for one distance point, before the speed multiplier.",
+			"type": "number",
+			"minimum": 0.01,
+			"maximum": 10000
+		},
+		"SpeedTiers": {
+			"description": "Speed multiplier table. A tier applies from MinKmh (inclusive) up to the next tier.",
+			"type": "array",
+			"minItems": 1,
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"properties": {
+					"MinKmh": {
+						"description": "Lowest speed of the tier, km/h.",
+						"type": "number",
+						"minimum": 0,
+						"maximum": 1000
+					},
+					"Multiplier": {
+						"description": "Multiplier of the distance points in this tier.",
+						"type": "number",
+						"minimum": 0,
+						"maximum": 100
+					}
+				},
+				"required": ["MinKmh", "Multiplier"]
+			}
+		},
+		"NearMissBasePoints": {
+			"description": "Points of a near miss before any factor.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1000000
+		},
+		"CloseFactor": {
+			"description": "Factor of the Close tier.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"VeryCloseFactor": {
+			"description": "Factor of the VeryClose tier.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"RazorFactor": {
+			"description": "Factor of the Razor tier.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"RelativeSpeedReferenceKmh": {
+			"description": "Relative speed that gives a factor of 1, km/h.",
+			"type": "number",
+			"minimum": 1,
+			"maximum": 1000
+		},
+		"RelativeSpeedFactorMin": {
+			"description": "Lower clamp of the relative speed factor.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"RelativeSpeedFactorMax": {
+			"description": "Upper clamp of the relative speed factor.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"OncomingFactor": {
+			"description": "Factor against a vehicle driving in the opposite direction.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"ThreadTheNeedleFactor": {
+			"description": "Factor when passing between two vehicles at the same time.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"ComboWindowSeconds": {
+			"description": "Seconds a combo stays alive after a near miss.",
+			"type": "number",
+			"minimum": 0.1,
+			"maximum": 60
+		},
+		"ComboStepPerChain": {
+			"description": "Combo multiplier gained per chained near miss.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 10
+		},
+		"ComboMaxMultiplier": {
+			"description": "Upper limit of the combo multiplier.",
+			"type": "number",
+			"minimum": 1,
+			"maximum": 100
+		},
+		"ComboBreakSpeedKmh": {
+			"description": "Below this player speed the combo breaks and cannot grow, km/h.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1000
+		}
+	}
+}
