@@ -50,7 +50,8 @@ SLOTS = {
     # Gunmetal: brighter metal mirrors the sky at sunset and the spokes read as flat white.
     "Rim": surface_instance("MI_Car_Rim", (0.07, 0.072, 0.08), 0.3, metallic=1.0),
     "Brake": surface_instance("MI_Car_Brake", (0.25, 0.25, 0.26), 0.4, metallic=1.0),
-    "HeadLight": surface_instance("MI_Car_HeadLight", (0.02, 0.022, 0.026), 0.06, specular=0.8, emissive=(0.02, 0.02, 0.025)),
+    # Very low specular also lowers the reflection at grazing angles, where a lens this flat mirrors the white horizon.
+    "HeadLight": surface_instance("MI_Car_HeadLight", (0.02, 0.022, 0.026), 0.12, specular=0.12, emissive=(0.02, 0.02, 0.025)),
     "DRL": surface_instance("MI_Car_DRL", (0.9, 0.92, 1.0), 0.3, emissive=(14.0, 14.5, 16.0)),
     "TailLight": surface_instance("MI_Car_TailLight", (0.09, 0.003, 0.004), 0.1, emissive=(0.03, 0.0, 0.0)),
     "TailLED": surface_instance("MI_Car_TailLED", (0.6, 0.02, 0.02), 0.3, emissive=(5.0, 0.12, 0.07)),
