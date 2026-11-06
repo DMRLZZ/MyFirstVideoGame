@@ -5,6 +5,7 @@ Todo lo que no hayamos creado nosotros se registra aquí **antes** de entrar en 
 | Fecha | Elemento | Tipo | Origen (URL) | Licencia | Versión | Aprobado por | Uso en el proyecto |
 |---|---|---|---|---|---|---|---|
 | 2026-11-05 | SportsCar de la plantilla de vehículos de UE (malla, esqueleto, física, ABP, materiales, texturas) y PhysicsMaterials | 3d-model | `UE_5.8/Templates/TemplateResources/Standard/Vehicles/Content` (instalación de Unreal Engine) | Contenido de Epic para proyectos Unreal (EULA de Unreal Engine) | UE 5.8.4 | Director del proyecto | Coche **provisional** del prototipo gris en `/Game/Vehicles/`. Se sustituye por coches propios en M3/M4 |
+| 2026-11-05 | Coche conceptual y SUV de las plantillas de UE (mallas, materiales, texturas) | 3d-model | `UE_5.8/Templates/TemplateResources/Standard/{ConceptCar,Vehicles}` (instalación de Unreal Engine) | Contenido de Epic para proyectos Unreal (EULA de Unreal Engine) | UE 5.8.4 | Director del proyecto | Tráfico **provisional** del prototipo en `/Game/ConceptCar/` y `/Game/Vehicles/OffroadCar/` |
 
 **Tipos:** `plugin`, `code`, `3d-model`, `material`, `texture`, `audio`, `music`, `font`, `hdri`.
 
