@@ -279,37 +279,21 @@ struct LRVEHICLE_API FLRLaneAssistParams
 
 	/** Lateral P gain: desired lateral speed per meter of error, 1/s. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.1", ClampMax = "10.0"))
-	float LateralGain = 3.f;
+	float LateralGain = 2.2f;
 
 	/** Maximum lateral speed requested during a lane change, m/s. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.5", ClampMax = "15.0"))
-	float MaxLateralSpeedMs = 7.f;
+	float MaxLateralSpeedMs = 6.f;
 
-	/** Heading P gain at the reference speed: steering per radian of heading error. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.0", ClampMax = "20.0"))
-	float HeadingGain = 2.2f;
+	/** Inner loop gain: lateral acceleration per m/s of lateral speed error, 1/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.1", ClampMax = "20.0"))
+	float LateralSpeedGain = 6.f;
 
-	/** Yaw damping at the reference speed: steering per rad/s of yaw rate relative to the road. */
+	/** Damping: fraction of the lateral acceleration from yaw (v * yaw rate relative to the road) that is subtracted. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.0", ClampMax = "5.0"))
-	float YawRateDamping = 0.1f;
+	float YawRateDamping = 0.3f;
 
-	/** Speed at which HeadingGain and YawRateDamping apply unscaled, m/s. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "1.0", ClampMax = "100.0"))
-	float ReferenceSpeedMs = 30.f;
-
-	/** Exponent of the speed scheduling (1 = exact compensation of the kinematic yaw gain). */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.0", ClampMax = "2.0"))
-	float SpeedGainExponent = 1.f;
-
-	/** Lower clamp of the speed gain scale. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.01", ClampMax = "1.0"))
-	float MinGainScale = 0.1f;
-
-	/** Upper clamp of the speed gain scale (limits low-speed twitchiness). */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "1.0", ClampMax = "10.0"))
-	float MaxGainScale = 2.f;
-
-	/** Speed floor used in divisions and atan2, m/s. */
+	/** Speed floor used in the control law, m/s. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.5", ClampMax = "20.0"))
 	float MinSpeedMs = 5.f;
 
@@ -318,25 +302,26 @@ struct LRVEHICLE_API FLRLaneAssistParams
 	float MinActiveSpeedMs = 2.f;
 
 	/**
-	 * Steering input per unit of path curvature (~ wheelbase / max road-wheel angle in radians), steering * m.
-	 * Used as road-curvature feed-forward and to convert MaxLateralAccelMs2 into a steering limit.
+	 * Lateral acceleration produced by one unit of steering input at road speed, m/s^2. MEASURED in the running game
+	 * (Saved/DevShots/trace.csv from Tools/Scripts/devdrive.ps1): lateral acceleration / steering in a steady turn.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.0", ClampMax = "50.0"))
-	float CurvatureFeedForward = 4.07f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "1.0", ClampMax = "100.0"))
+	float SteeringToLateralAccelMs2 = 15.f;
 
-	/**
-	 * Lateral acceleration the assist may ask for on top of the road curve, m/s^2. The feedback steering is clamped
-	 * to CurvatureFeedForward * MaxLateralAccelMs2 / v^2 so the tires are never asked for more than they can give.
-	 */
+	/** Low-speed limit of the authority: path curvature per unit of steering (~ tan(max wheel angle) / wheelbase), 1/m. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.01", ClampMax = "2.0"))
+	float KinematicCurvaturePerSteering = 0.25f;
+
+	/** Lateral acceleration the assist may ask for on top of the road curve, m/s^2. Keep it below the tire grip. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "1.0", ClampMax = "40.0"))
-	float MaxLateralAccelMs2 = 18.f;
+	float MaxLateralAccelMs2 = 11.f;
 
 	/**
 	 * Fraction of MaxLateralAccelMs2 budgeted to stop the lateral motion at the target: the desired lateral speed never
 	 * exceeds sqrt(2 * fraction * MaxLateralAccel * |error|), which removes overshoot when the grip limit is reached.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.05", ClampMax = "1.0"))
-	float LateralDecelFraction = 0.3f;
+	float LateralDecelFraction = 0.25f;
 
 	/** Output clamp, 0..1. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LaneAssist", meta = (ClampMin = "0.05", ClampMax = "1.0"))
@@ -489,6 +474,41 @@ struct LRVEHICLE_API FLRVehicleDefinition
 	/** Hits whose normal Z exceeds this value are treated as ground contact and ignored. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crash", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float CrashFloorNormalZ = 0.7f;
+
+	/** A horizontal velocity change of at least this much within one frame counts as an impact, km/h. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crash", meta = (ClampMin = "1.0", ClampMax = "100.0"))
+	float ImpactMinDeltaKmh = 8.f;
+
+	/** ...and only if the deceleration also exceeds this (filters frame hitches), m/s^2. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crash", meta = (ClampMin = "5.0", ClampMax = "500.0"))
+	float ImpactMinAccelMs2 = 30.f;
+
+	/** The vehicle counts as off the road when it is this far below the road surface, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crash", meta = (ClampMin = "0.5", ClampMax = "50.0"))
+	float OffRoadBelowMeters = 2.5f;
+
+	/** The vehicle counts as off the road when it is this far beyond the outer barriers, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crash", meta = (ClampMin = "0.0", ClampMax = "100.0"))
+	float OffRoadLateralMarginMeters = 3.f;
+
+	/**
+	 * Visual car body, static mesh attached to the physics skeleton. When set, the skeletal mesh is only the physics
+	 * and animation rig and is hidden (this is how the Epic vehicle template is built).
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	FSoftObjectPath BodyMesh;
+
+	/** Windows, static mesh attached like the body. Optional. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	FSoftObjectPath GlassMesh;
+
+	/** One wheel, static mesh attached to each wheel bone of FrontWheels and RearWheels. Optional. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	FSoftObjectPath WheelMesh;
+
+	/** Rotates the wheel mesh 180 degrees on the wheels of the left side, so its outer face points outwards. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	bool bFlipLeftWheels = true;
 
 	/** Time constant of the smoothed local acceleration exposed to cameras, seconds. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Feedback", meta = (ClampMin = "0.0", ClampMax = "2.0"))
