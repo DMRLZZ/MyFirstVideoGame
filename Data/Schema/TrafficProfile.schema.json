@@ -281,6 +281,28 @@
 					"type": "number",
 					"minimum": 0.2,
 					"maximum": 1
+				},
+				"ModelMesh": {
+					"type": "string"
+				},
+				"ModelWheelMesh": {
+					"type": "string"
+				},
+				"ModelWheelOffsetCm": {
+					"type": "object"
+				},
+				"ModelWheelbaseCm": {
+					"type": "number",
+					"minimum": 0
+				},
+				"ModelYawDeg": {
+					"type": "number"
+				},
+				"PaintMaterialHint": {
+					"type": "string"
+				},
+				"PaintParameter": {
+					"type": "string"
 				}
 			},
 			"required": [

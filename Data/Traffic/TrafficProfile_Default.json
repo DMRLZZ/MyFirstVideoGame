@@ -9,93 +9,261 @@
 				"LengthMeters": 4.85,
 				"WidthMeters": 1.85,
 				"HeightMeters": 1.45,
-				"Weight": 30,
+				"Weight": 45,
 				"SpeedFactorMin": 0.95,
 				"SpeedFactorMax": 1.03,
 				"bPreferRightLanes": false,
 				"DriverProfile": "",
 				"MassKg": 1550,
 				"Colors": [
-					{ "R": 0.75, "G": 0.75, "B": 0.75, "A": 1.0 },
-					{ "R": 0.02, "G": 0.02, "B": 0.025, "A": 1.0 },
-					{ "R": 0.9, "G": 0.9, "B": 0.92, "A": 1.0 },
-					{ "R": 0.35, "G": 0.36, "B": 0.38, "A": 1.0 },
-					{ "R": 0.45, "G": 0.02, "B": 0.02, "A": 1.0 },
-					{ "R": 0.03, "G": 0.08, "B": 0.3, "A": 1.0 },
-					{ "R": 0.12, "G": 0.16, "B": 0.12, "A": 1.0 },
-					{ "R": 0.5, "G": 0.42, "B": 0.3, "A": 1.0 }
+					{
+						"R": 0.75,
+						"G": 0.75,
+						"B": 0.75,
+						"A": 1.0
+					},
+					{
+						"R": 0.02,
+						"G": 0.02,
+						"B": 0.025,
+						"A": 1.0
+					},
+					{
+						"R": 0.9,
+						"G": 0.9,
+						"B": 0.92,
+						"A": 1.0
+					},
+					{
+						"R": 0.35,
+						"G": 0.36,
+						"B": 0.38,
+						"A": 1.0
+					},
+					{
+						"R": 0.45,
+						"G": 0.02,
+						"B": 0.02,
+						"A": 1.0
+					},
+					{
+						"R": 0.03,
+						"G": 0.08,
+						"B": 0.3,
+						"A": 1.0
+					},
+					{
+						"R": 0.12,
+						"G": 0.16,
+						"B": 0.12,
+						"A": 1.0
+					},
+					{
+						"R": 0.5,
+						"G": 0.42,
+						"B": 0.3,
+						"A": 1.0
+					}
 				],
 				"CabinLengthFraction": 0.5,
 				"CabinOffsetFraction": -0.05,
-				"LowerBodyHeightFraction": 0.55
+				"LowerBodyHeightFraction": 0.55,
+				"ModelMesh": "/Game/ConceptCar/Car/SM_AutomotiveTP_Car.SM_AutomotiveTP_Car",
+				"PaintMaterialHint": "Paint",
+				"PaintParameter": "PaintColor"
 			},
 			{
 				"Name": "hatchback",
-				"LengthMeters": 4.15,
+				"LengthMeters": 4.5,
 				"WidthMeters": 1.78,
 				"HeightMeters": 1.48,
-				"Weight": 20,
+				"Weight": 25,
 				"SpeedFactorMin": 0.94,
 				"SpeedFactorMax": 1.02,
 				"bPreferRightLanes": false,
 				"DriverProfile": "",
 				"MassKg": 1250,
 				"Colors": [
-					{ "R": 0.75, "G": 0.75, "B": 0.75, "A": 1.0 },
-					{ "R": 0.02, "G": 0.02, "B": 0.025, "A": 1.0 },
-					{ "R": 0.9, "G": 0.9, "B": 0.92, "A": 1.0 },
-					{ "R": 0.35, "G": 0.36, "B": 0.38, "A": 1.0 },
-					{ "R": 0.45, "G": 0.02, "B": 0.02, "A": 1.0 },
-					{ "R": 0.03, "G": 0.08, "B": 0.3, "A": 1.0 },
-					{ "R": 0.12, "G": 0.16, "B": 0.12, "A": 1.0 },
-					{ "R": 0.5, "G": 0.42, "B": 0.3, "A": 1.0 }
+					{
+						"R": 0.75,
+						"G": 0.75,
+						"B": 0.75,
+						"A": 1.0
+					},
+					{
+						"R": 0.02,
+						"G": 0.02,
+						"B": 0.025,
+						"A": 1.0
+					},
+					{
+						"R": 0.9,
+						"G": 0.9,
+						"B": 0.92,
+						"A": 1.0
+					},
+					{
+						"R": 0.35,
+						"G": 0.36,
+						"B": 0.38,
+						"A": 1.0
+					},
+					{
+						"R": 0.45,
+						"G": 0.02,
+						"B": 0.02,
+						"A": 1.0
+					},
+					{
+						"R": 0.03,
+						"G": 0.08,
+						"B": 0.3,
+						"A": 1.0
+					},
+					{
+						"R": 0.12,
+						"G": 0.16,
+						"B": 0.12,
+						"A": 1.0
+					},
+					{
+						"R": 0.5,
+						"G": 0.42,
+						"B": 0.3,
+						"A": 1.0
+					}
 				],
 				"CabinLengthFraction": 0.55,
 				"CabinOffsetFraction": -0.08,
-				"LowerBodyHeightFraction": 0.55
+				"LowerBodyHeightFraction": 0.55,
+				"ModelMesh": "/Game/Vehicles/SportsCar/SM_SportsCar.SM_SportsCar",
+				"ModelWheelMesh": "/Game/Vehicles/SportsCar/SM_SportsCar_Wheel.SM_SportsCar_Wheel",
+				"PaintMaterialHint": "Body",
+				"PaintParameter": "Paint Tint",
+				"ModelWheelOffsetCm": {
+					"X": 135,
+					"Y": 80,
+					"Z": 35
+				},
+				"ModelWheelbaseCm": 270
 			},
 			{
 				"Name": "suv",
 				"LengthMeters": 4.8,
 				"WidthMeters": 1.95,
 				"HeightMeters": 1.75,
-				"Weight": 22,
+				"Weight": 30,
 				"SpeedFactorMin": 0.94,
 				"SpeedFactorMax": 1.02,
 				"bPreferRightLanes": false,
 				"DriverProfile": "",
 				"MassKg": 2050,
 				"Colors": [
-					{ "R": 0.75, "G": 0.75, "B": 0.75, "A": 1.0 },
-					{ "R": 0.02, "G": 0.02, "B": 0.025, "A": 1.0 },
-					{ "R": 0.9, "G": 0.9, "B": 0.92, "A": 1.0 },
-					{ "R": 0.35, "G": 0.36, "B": 0.38, "A": 1.0 },
-					{ "R": 0.45, "G": 0.02, "B": 0.02, "A": 1.0 },
-					{ "R": 0.03, "G": 0.08, "B": 0.3, "A": 1.0 },
-					{ "R": 0.12, "G": 0.16, "B": 0.12, "A": 1.0 },
-					{ "R": 0.5, "G": 0.42, "B": 0.3, "A": 1.0 }
+					{
+						"R": 0.75,
+						"G": 0.75,
+						"B": 0.75,
+						"A": 1.0
+					},
+					{
+						"R": 0.02,
+						"G": 0.02,
+						"B": 0.025,
+						"A": 1.0
+					},
+					{
+						"R": 0.9,
+						"G": 0.9,
+						"B": 0.92,
+						"A": 1.0
+					},
+					{
+						"R": 0.35,
+						"G": 0.36,
+						"B": 0.38,
+						"A": 1.0
+					},
+					{
+						"R": 0.45,
+						"G": 0.02,
+						"B": 0.02,
+						"A": 1.0
+					},
+					{
+						"R": 0.03,
+						"G": 0.08,
+						"B": 0.3,
+						"A": 1.0
+					},
+					{
+						"R": 0.12,
+						"G": 0.16,
+						"B": 0.12,
+						"A": 1.0
+					},
+					{
+						"R": 0.5,
+						"G": 0.42,
+						"B": 0.3,
+						"A": 1.0
+					}
 				],
 				"CabinLengthFraction": 0.6,
 				"CabinOffsetFraction": -0.08,
-				"LowerBodyHeightFraction": 0.55
+				"LowerBodyHeightFraction": 0.55,
+				"ModelMesh": "/Game/Vehicles/OffroadCar/SM_Offroad_Body.SM_Offroad_Body",
+				"ModelWheelMesh": "/Game/Vehicles/OffroadCar/SM_Offroad_Tire.SM_Offroad_Tire",
+				"PaintMaterialHint": "Body",
+				"PaintParameter": "Paint Tint",
+				"ModelWheelOffsetCm": {
+					"X": 135,
+					"Y": 85,
+					"Z": 40
+				},
+				"ModelWheelbaseCm": 270
 			},
 			{
 				"Name": "pickup",
 				"LengthMeters": 5.6,
 				"WidthMeters": 2.0,
 				"HeightMeters": 1.85,
-				"Weight": 10,
+				"Weight": 0,
 				"SpeedFactorMin": 0.92,
 				"SpeedFactorMax": 1.0,
 				"bPreferRightLanes": false,
 				"DriverProfile": "",
 				"MassKg": 2300,
 				"Colors": [
-					{ "R": 0.75, "G": 0.75, "B": 0.75, "A": 1.0 },
-					{ "R": 0.02, "G": 0.02, "B": 0.025, "A": 1.0 },
-					{ "R": 0.9, "G": 0.9, "B": 0.92, "A": 1.0 },
-					{ "R": 0.35, "G": 0.36, "B": 0.38, "A": 1.0 },
-					{ "R": 0.45, "G": 0.02, "B": 0.02, "A": 1.0 }
+					{
+						"R": 0.75,
+						"G": 0.75,
+						"B": 0.75,
+						"A": 1.0
+					},
+					{
+						"R": 0.02,
+						"G": 0.02,
+						"B": 0.025,
+						"A": 1.0
+					},
+					{
+						"R": 0.9,
+						"G": 0.9,
+						"B": 0.92,
+						"A": 1.0
+					},
+					{
+						"R": 0.35,
+						"G": 0.36,
+						"B": 0.38,
+						"A": 1.0
+					},
+					{
+						"R": 0.45,
+						"G": 0.02,
+						"B": 0.02,
+						"A": 1.0
+					}
 				],
 				"CabinLengthFraction": 0.32,
 				"CabinOffsetFraction": 0.05,
@@ -106,16 +274,31 @@
 				"LengthMeters": 5.3,
 				"WidthMeters": 2.0,
 				"HeightMeters": 2.3,
-				"Weight": 7,
+				"Weight": 0,
 				"SpeedFactorMin": 0.88,
 				"SpeedFactorMax": 0.96,
 				"bPreferRightLanes": false,
 				"DriverProfile": "",
 				"MassKg": 2600,
 				"Colors": [
-					{ "R": 0.9, "G": 0.9, "B": 0.92, "A": 1.0 },
-					{ "R": 0.75, "G": 0.75, "B": 0.75, "A": 1.0 },
-					{ "R": 0.03, "G": 0.08, "B": 0.3, "A": 1.0 }
+					{
+						"R": 0.9,
+						"G": 0.9,
+						"B": 0.92,
+						"A": 1.0
+					},
+					{
+						"R": 0.75,
+						"G": 0.75,
+						"B": 0.75,
+						"A": 1.0
+					},
+					{
+						"R": 0.03,
+						"G": 0.08,
+						"B": 0.3,
+						"A": 1.0
+					}
 				],
 				"CabinLengthFraction": 0.75,
 				"CabinOffsetFraction": 0.08,
@@ -126,17 +309,37 @@
 				"LengthMeters": 16.5,
 				"WidthMeters": 2.55,
 				"HeightMeters": 4.0,
-				"Weight": 6,
+				"Weight": 0,
 				"SpeedFactorMin": 0.68,
 				"SpeedFactorMax": 0.76,
 				"bPreferRightLanes": true,
 				"DriverProfile": "heavy",
 				"MassKg": 30000,
 				"Colors": [
-					{ "R": 0.9, "G": 0.9, "B": 0.92, "A": 1.0 },
-					{ "R": 0.45, "G": 0.02, "B": 0.02, "A": 1.0 },
-					{ "R": 0.03, "G": 0.08, "B": 0.3, "A": 1.0 },
-					{ "R": 0.35, "G": 0.36, "B": 0.38, "A": 1.0 }
+					{
+						"R": 0.9,
+						"G": 0.9,
+						"B": 0.92,
+						"A": 1.0
+					},
+					{
+						"R": 0.45,
+						"G": 0.02,
+						"B": 0.02,
+						"A": 1.0
+					},
+					{
+						"R": 0.03,
+						"G": 0.08,
+						"B": 0.3,
+						"A": 1.0
+					},
+					{
+						"R": 0.35,
+						"G": 0.36,
+						"B": 0.38,
+						"A": 1.0
+					}
 				],
 				"CabinLengthFraction": 0.15,
 				"CabinOffsetFraction": 0.42,
@@ -147,15 +350,25 @@
 				"LengthMeters": 13.0,
 				"WidthMeters": 2.55,
 				"HeightMeters": 3.6,
-				"Weight": 3,
+				"Weight": 0,
 				"SpeedFactorMin": 0.72,
 				"SpeedFactorMax": 0.8,
 				"bPreferRightLanes": true,
 				"DriverProfile": "heavy",
 				"MassKg": 15000,
 				"Colors": [
-					{ "R": 0.9, "G": 0.9, "B": 0.92, "A": 1.0 },
-					{ "R": 0.8, "G": 0.55, "B": 0.05, "A": 1.0 }
+					{
+						"R": 0.9,
+						"G": 0.9,
+						"B": 0.92,
+						"A": 1.0
+					},
+					{
+						"R": 0.8,
+						"G": 0.55,
+						"B": 0.05,
+						"A": 1.0
+					}
 				],
 				"CabinLengthFraction": 0.95,
 				"CabinOffsetFraction": 0.0,
@@ -230,10 +443,22 @@
 		],
 		"PlayerDriverProfile": "normal",
 		"DensityCurve": [
-			{ "X": 0.0, "Y": 8.0 },
-			{ "X": 60.0, "Y": 12.0 },
-			{ "X": 180.0, "Y": 18.0 },
-			{ "X": 420.0, "Y": 26.0 }
+			{
+				"X": 0.0,
+				"Y": 8.0
+			},
+			{
+				"X": 60.0,
+				"Y": 12.0
+			},
+			{
+				"X": 180.0,
+				"Y": 18.0
+			},
+			{
+				"X": 420.0,
+				"Y": 26.0
+			}
 		],
 		"OncomingDensityFactor": 0.8,
 		"MaxVehicles": 200,
@@ -244,7 +469,7 @@
 		"SpawnMinGapM": 30.0,
 		"WreckLifetimeSeconds": 10.0,
 		"WreckImpulseScale": 0.5,
-		"bDrawFarVehicles": true,
+		"bDrawFarVehicles": false,
 		"BrakeLightDecelMs2": 0.8,
 		"BlinkerFrequencyHz": 1.5,
 		"DefaultSpeedLimitKmh": 130.0,
