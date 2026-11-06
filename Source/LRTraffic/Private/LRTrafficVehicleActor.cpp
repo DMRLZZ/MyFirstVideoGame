@@ -51,6 +51,7 @@ ALRTrafficVehicleActor::ALRTrafficVehicleActor()
 	CollisionBox->SetSimulatePhysics(false);
 	CollisionBox->SetBoxExtent(FVector(235.f, 92.5f, 72.5f), false);
 	CollisionBox->SetHiddenInGame(true);
+	CollisionBox->SetCanEverAffectNavigation(false); // Nothing navigates here, and moving it would refresh the nav octree.
 	SetRootComponent(CollisionBox);
 
 	BodyMesh = CreateVisualPart(TEXT("Body"), CubeMesh);
