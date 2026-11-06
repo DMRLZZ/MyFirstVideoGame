@@ -1,0 +1,106 @@
+{
+	"type": "EngineAudioProfile",
+	"id": "EngineAudio_Default",
+	"version": 1,
+	"data": {
+		"Id": "EngineAudio_Default",
+		"CylinderCount": 6,
+		"Harmonics": [
+			{
+				"Order": 0.5,
+				"OffLoadGain": 0.08,
+				"OnLoadGain": 0.12
+			},
+			{
+				"Order": 1,
+				"OffLoadGain": 0.5,
+				"OnLoadGain": 0.6
+			},
+			{
+				"Order": 1.5,
+				"OffLoadGain": 0.06,
+				"OnLoadGain": 0.1
+			},
+			{
+				"Order": 2,
+				"OffLoadGain": 0.25,
+				"OnLoadGain": 0.4
+			},
+			{
+				"Order": 3,
+				"OffLoadGain": 0.12,
+				"OnLoadGain": 0.25
+			},
+			{
+				"Order": 4,
+				"OffLoadGain": 0.06,
+				"OnLoadGain": 0.15
+			},
+			{
+				"Order": 6,
+				"OffLoadGain": 0.03,
+				"OnLoadGain": 0.08
+			}
+		],
+		"EngineGain": 0.5,
+		"OffLoadLevel": 0.55,
+		"IdleLevel": 0.45,
+		"OffLoadCutoffHz": 1200.0,
+		"OnLoadCutoffHz": 4500.0,
+		"CutoffRpmTracking": 0.5,
+		"Drive": 1.6,
+		"CycleJitter": 0.004,
+		"AmplitudeJitter": 0.06,
+		"IntakeNoiseGain": 0.12,
+		"IntakeNoiseOrder": 3.0,
+		"IntakeNoiseQ": 1.2,
+		"ExhaustNoiseGain": 0.08,
+		"ExhaustNoiseCutoffHz": 500.0,
+		"OverrunCrackleProbability": 0.02,
+		"OverrunCrackleGain": 0.3,
+		"OverrunMinRpmFraction": 0.45,
+		"LimiterRpmFraction": 0.985,
+		"LimiterCutHz": 18.0,
+		"RpmSmoothingSeconds": 0.025,
+		"LoadSmoothingSeconds": 0.06,
+		"EngineCutFadeSeconds": 0.15,
+		"FallbackMaxRpm": 7000.0,
+		"WindGain": 0.28,
+		"WindReferenceSpeedKmh": 250.0,
+		"WindMaxScale": 1.6,
+		"WindLowHz": 300.0,
+		"WindHighHz": 1800.0,
+		"WindQ": 0.7,
+		"WindGustDepth": 0.25,
+		"WindGustRateHz": 0.3,
+		"TyreGain": 0.16,
+		"TyreReferenceSpeedKmh": 200.0,
+		"TyreSpeedExponent": 1.0,
+		"TyreCutoffHz": 180.0,
+		"JointSpacingMeters": 12.0,
+		"JointGain": 0.45,
+		"JointToneHz": 55.0,
+		"JointDecaySeconds": 0.05,
+		"WhooshGain": 0.8,
+		"WhooshDurationSeconds": 0.45,
+		"WhooshStartHz": 2400.0,
+		"WhooshEndHz": 450.0,
+		"WhooshQ": 1.4,
+		"WhooshReferenceRelativeKmh": 120.0,
+		"WhooshClearanceFalloffMeters": 1.5,
+		"WhooshMaxPan": 0.8,
+		"WhooshSideProbeRadiusMeters": 25.0,
+		"CrashGain": 1.0,
+		"CrashDurationSeconds": 1.2,
+		"CrashCutoffHz": 2500.0,
+		"CrashThumpHz": 45.0,
+		"CrashReferenceKmh": 80.0,
+		"MasterGain": 0.8,
+		"InteriorEngineCutoffHz": 1400.0,
+		"InteriorEngineGain": 0.9,
+		"InteriorWindGain": 0.35,
+		"InteriorTyreGain": 1.2,
+		"InteriorWhooshGain": 0.6,
+		"MixSmoothingSeconds": 0.25
+	}
+}

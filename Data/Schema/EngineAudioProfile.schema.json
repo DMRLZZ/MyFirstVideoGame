@@ -1,0 +1,416 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/EngineAudioProfile.schema.json",
+	"title": "EngineAudioProfile",
+	"description": "The 'data' object of Data/Audio/*.json. Mirrors FLREngineAudioProfile (Source/LRAudio/Public/LRAudioTypes.h). Gains are linear, frequencies in Hz, times in seconds, speeds in km/h. Missing fields keep the C++ defaults.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"Id": {
+			"description": "Unique id, equal to the file name without extension (e.g. \"engine_i6_turbo\").",
+			"type": "string",
+			"minLength": 1
+		},
+		"CylinderCount": {
+			"description": "Number of cylinders of the four-stroke engine (firing frequency = rpm / 60 * cylinders / 2).",
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 16
+		},
+		"Harmonics": {
+			"description": "Partials of the engine tone (at most MaxHarmonics are used). Empty = built-in default set.",
+			"type": "array",
+			"maxItems": 12,
+			"items": {
+				"$ref": "#/$defs/Harmonic"
+			}
+		},
+		"EngineGain": {
+			"description": "Overall engine level, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"OffLoadLevel": {
+			"description": "Engine level multiplier with the throttle closed (overrun is quieter than full load), 0..1.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"IdleLevel": {
+			"description": "Engine level multiplier at idle rpm relative to the rev limiter, 0..1 (level rises linearly with rpm).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"OffLoadCutoffHz": {
+			"description": "Low-pass cutoff of the engine tone with the throttle closed, Hz.",
+			"type": "number",
+			"minimum": 100,
+			"maximum": 16000
+		},
+		"OnLoadCutoffHz": {
+			"description": "Low-pass cutoff of the engine tone at full throttle, Hz.",
+			"type": "number",
+			"minimum": 100,
+			"maximum": 16000
+		},
+		"CutoffRpmTracking": {
+			"description": "How much the tone cutoff follows rpm (0 = fixed, 1 = proportional to rpm / max rpm).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"Drive": {
+			"description": "Pre-gain of the soft clipper that adds grit at high load, 0.5..8 (1 = almost clean).",
+			"type": "number",
+			"minimum": 0.5,
+			"maximum": 8
+		},
+		"CycleJitter": {
+			"description": "Random frequency deviation applied per engine cycle, fraction of the firing frequency, 0..0.05.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 0.05
+		},
+		"AmplitudeJitter": {
+			"description": "Random amplitude deviation applied per engine cycle, 0..0.5 (combustion roughness).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 0.5
+		},
+		"IntakeNoiseGain": {
+			"description": "Level of the intake roar (band-passed noise), 0..1.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"IntakeNoiseOrder": {
+			"description": "Center of the intake noise band, as a multiple of the firing frequency, 0.5..16.",
+			"type": "number",
+			"minimum": 0.5,
+			"maximum": 16
+		},
+		"IntakeNoiseQ": {
+			"description": "Quality factor of the intake noise band-pass, 0.3..10.",
+			"type": "number",
+			"minimum": 0.3,
+			"maximum": 10
+		},
+		"ExhaustNoiseGain": {
+			"description": "Level of the exhaust pulse noise (low-passed noise gated by every firing), 0..1.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"ExhaustNoiseCutoffHz": {
+			"description": "Low-pass cutoff of the exhaust pulse noise, Hz.",
+			"type": "number",
+			"minimum": 50,
+			"maximum": 8000
+		},
+		"OverrunCrackleProbability": {
+			"description": "Probability per firing of an overrun crackle (throttle closed, high rpm), 0..0.5.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 0.5
+		},
+		"OverrunCrackleGain": {
+			"description": "Level of the overrun crackles, 0..1.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"OverrunMinRpmFraction": {
+			"description": "Crackles only above this fraction of the max rpm, 0..1.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"LimiterRpmFraction": {
+			"description": "The rev limiter stutter starts at this fraction of the max rpm, 0.8..1.",
+			"type": "number",
+			"minimum": 0.8,
+			"maximum": 1
+		},
+		"LimiterCutHz": {
+			"description": "Rate of the rev limiter fuel cut, Hz.",
+			"type": "number",
+			"minimum": 2,
+			"maximum": 60
+		},
+		"RpmSmoothingSeconds": {
+			"description": "Time constant of the rpm smoothing inside the audio thread, seconds (keep short so gear shifts snap).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"LoadSmoothingSeconds": {
+			"description": "Time constant of the throttle / load smoothing, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"EngineCutFadeSeconds": {
+			"description": "Fade time of the engine when it is cut (crash) or restarted, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"FallbackMaxRpm": {
+			"description": "Max rpm used when the vehicle reports none, rpm.",
+			"type": "number",
+			"minimum": 1000,
+			"maximum": 20000
+		},
+		"WindGain": {
+			"description": "Wind level at WindReferenceSpeedKmh, 0..2 (scales with speed squared).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"WindReferenceSpeedKmh": {
+			"description": "Speed at which the wind reaches WindGain, km/h.",
+			"type": "number",
+			"minimum": 20,
+			"maximum": 500
+		},
+		"WindMaxScale": {
+			"description": "Upper bound of the wind level scale (v / vref)^2, 0..4.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 4
+		},
+		"WindLowHz": {
+			"description": "Center of the wind noise band at standstill, Hz.",
+			"type": "number",
+			"minimum": 50,
+			"maximum": 8000
+		},
+		"WindHighHz": {
+			"description": "Center of the wind noise band at the reference speed, Hz.",
+			"type": "number",
+			"minimum": 50,
+			"maximum": 12000
+		},
+		"WindQ": {
+			"description": "Quality factor of the wind band-pass, 0.3..10.",
+			"type": "number",
+			"minimum": 0.3,
+			"maximum": 10
+		},
+		"WindGustDepth": {
+			"description": "Depth of the slow gust modulation, 0..1.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"WindGustRateHz": {
+			"description": "Rate of the gust modulation, Hz.",
+			"type": "number",
+			"minimum": 0.01,
+			"maximum": 5
+		},
+		"TyreGain": {
+			"description": "Tyre / road rumble level at TyreReferenceSpeedKmh, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"TyreReferenceSpeedKmh": {
+			"description": "Speed at which the rumble reaches TyreGain, km/h.",
+			"type": "number",
+			"minimum": 10,
+			"maximum": 500
+		},
+		"TyreSpeedExponent": {
+			"description": "Exponent of the rumble level vs speed curve, 0.3..3.",
+			"type": "number",
+			"minimum": 0.3,
+			"maximum": 3
+		},
+		"TyreCutoffHz": {
+			"description": "Low-pass cutoff of the rumble noise, Hz.",
+			"type": "number",
+			"minimum": 30,
+			"maximum": 4000
+		},
+		"JointSpacingMeters": {
+			"description": "Distance between expansion joints along S, meters (0 disables the thumps).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 200
+		},
+		"JointGain": {
+			"description": "Level of each expansion joint thump at the tyre reference speed, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"JointToneHz": {
+			"description": "Pitch of the joint thump, Hz.",
+			"type": "number",
+			"minimum": 20,
+			"maximum": 400
+		},
+		"JointDecaySeconds": {
+			"description": "Decay time constant of each joint thump, seconds.",
+			"type": "number",
+			"minimum": 0.005,
+			"maximum": 0.5
+		},
+		"WhooshGain": {
+			"description": "Peak level of a full-intensity whoosh, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"WhooshDurationSeconds": {
+			"description": "Duration of a whoosh, seconds.",
+			"type": "number",
+			"minimum": 0.05,
+			"maximum": 3
+		},
+		"WhooshStartHz": {
+			"description": "Band center at the start of the sweep, Hz.",
+			"type": "number",
+			"minimum": 100,
+			"maximum": 12000
+		},
+		"WhooshEndHz": {
+			"description": "Band center at the end of the sweep, Hz (lower than the start: Doppler-like fall).",
+			"type": "number",
+			"minimum": 50,
+			"maximum": 12000
+		},
+		"WhooshQ": {
+			"description": "Quality factor of the whoosh band-pass, 0.3..10.",
+			"type": "number",
+			"minimum": 0.3,
+			"maximum": 10
+		},
+		"WhooshReferenceRelativeKmh": {
+			"description": "Relative speed that produces a full-intensity whoosh, km/h.",
+			"type": "number",
+			"minimum": 10,
+			"maximum": 500
+		},
+		"WhooshClearanceFalloffMeters": {
+			"description": "Intensity falls as exp(-clearance / falloff), meters.",
+			"type": "number",
+			"minimum": 0.1,
+			"maximum": 10
+		},
+		"WhooshMaxPan": {
+			"description": "Maximum stereo pan of the whoosh toward the passed side, 0..1.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1
+		},
+		"WhooshSideProbeRadiusMeters": {
+			"description": "Distance along the road, ahead and behind the player, searched for the passed vehicle to find its side, meters.",
+			"type": "number",
+			"minimum": 1,
+			"maximum": 50
+		},
+		"CrashGain": {
+			"description": "Peak level of the crash burst, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"CrashDurationSeconds": {
+			"description": "Decay time of the crash burst, seconds.",
+			"type": "number",
+			"minimum": 0.05,
+			"maximum": 5
+		},
+		"CrashCutoffHz": {
+			"description": "Low-pass cutoff of the crash noise, Hz.",
+			"type": "number",
+			"minimum": 100,
+			"maximum": 16000
+		},
+		"CrashThumpHz": {
+			"description": "Pitch of the low body thump of the crash, Hz.",
+			"type": "number",
+			"minimum": 20,
+			"maximum": 300
+		},
+		"CrashReferenceKmh": {
+			"description": "Impact speed that produces a full-intensity crash, km/h.",
+			"type": "number",
+			"minimum": 5,
+			"maximum": 400
+		},
+		"MasterGain": {
+			"description": "Output level before the final soft clipper, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"InteriorEngineCutoffHz": {
+			"description": "Cabin camera: low-pass cutoff applied to the engine, Hz.",
+			"type": "number",
+			"minimum": 100,
+			"maximum": 20000
+		},
+		"InteriorEngineGain": {
+			"description": "Cabin camera: engine level multiplier, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"InteriorWindGain": {
+			"description": "Cabin camera: wind level multiplier, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"InteriorTyreGain": {
+			"description": "Cabin camera: tyre and joint level multiplier (structure-borne boom), 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"InteriorWhooshGain": {
+			"description": "Cabin camera: whoosh level multiplier, 0..2.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"MixSmoothingSeconds": {
+			"description": "Crossfade time between the exterior and cabin mixes, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		}
+	},
+	"$defs": {
+		"Harmonic": {
+			"description": "One partial of the engine tone. Mirrors FLREngineHarmonic.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"Order": {
+					"description": "Multiple of the firing frequency (rounded to the nearest 0.5 at runtime).",
+					"type": "number",
+					"minimum": 0.5,
+					"maximum": 16
+				},
+				"OffLoadGain": {
+					"description": "Linear amplitude with the throttle closed.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"OnLoadGain": {
+					"description": "Linear amplitude at full throttle.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		}
+	}
+}
