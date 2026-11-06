@@ -180,6 +180,17 @@
 			"type": "number",
 			"minimum": 0,
 			"maximum": 100
+		},
+		"VisualOffsetCm": {
+			"type": "object"
+		},
+		"VisualWheelInsetCm": {
+			"type": "number",
+			"minimum": 0,
+			"maximum": 50
+		},
+		"PaintColor": {
+			"type": "object"
 		}
 	},
 	"additionalProperties": false,

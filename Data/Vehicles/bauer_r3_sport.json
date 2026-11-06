@@ -210,8 +210,14 @@
 			"bTractionControlEnabled": true,
 			"bABSEnabled": true
 		},
-		"BodyMesh": "/Game/Vehicles/SportsCar/SM_SportsCar.SM_SportsCar",
-		"GlassMesh": "/Game/Vehicles/SportsCar/SM_SportsCar_Glass.SM_SportsCar_Glass",
-		"WheelMesh": "/Game/Vehicles/SportsCar/SM_SportsCar_Wheel.SM_SportsCar_Wheel"
+		"BodyMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Body/SM_ardent_vireo_Body/StaticMeshes/SM_ardent_vireo_Body.SM_ardent_vireo_Body",
+		"GlassMesh": "",
+		"WheelMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Wheel/SM_ardent_vireo_Wheel/StaticMeshes/SM_ardent_vireo_Wheel.SM_ardent_vireo_Wheel",
+		"VisualOffsetCm": {
+			"X": 0,
+			"Y": 0,
+			"Z": -11
+		},
+		"VisualWheelInsetCm": 7.0
 	}
 }
