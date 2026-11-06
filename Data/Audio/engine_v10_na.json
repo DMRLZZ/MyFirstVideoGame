@@ -1,0 +1,64 @@
+{
+	"type": "EngineAudioProfile",
+	"id": "engine_v10_na",
+	"version": 1,
+	"data": {
+		"Id": "engine_v10_na",
+		"CylinderCount": 10,
+		"Harmonics": [
+			{
+				"Order": 0.5,
+				"OffLoadGain": 0.1,
+				"OnLoadGain": 0.16
+			},
+			{
+				"Order": 1,
+				"OffLoadGain": 0.55,
+				"OnLoadGain": 0.62
+			},
+			{
+				"Order": 1.5,
+				"OffLoadGain": 0.08,
+				"OnLoadGain": 0.14
+			},
+			{
+				"Order": 2,
+				"OffLoadGain": 0.3,
+				"OnLoadGain": 0.46
+			},
+			{
+				"Order": 3,
+				"OffLoadGain": 0.16,
+				"OnLoadGain": 0.3
+			},
+			{
+				"Order": 4,
+				"OffLoadGain": 0.08,
+				"OnLoadGain": 0.2
+			},
+			{
+				"Order": 5,
+				"OffLoadGain": 0.04,
+				"OnLoadGain": 0.1
+			}
+		],
+		"EngineGain": 0.52,
+		"OffLoadLevel": 0.48,
+		"IdleLevel": 0.4,
+		"OffLoadCutoffHz": 1500,
+		"OnLoadCutoffHz": 7000,
+		"CutoffRpmTracking": 0.55,
+		"Drive": 2.0,
+		"CycleJitter": 0.004,
+		"AmplitudeJitter": 0.05,
+		"IntakeNoiseGain": 0.2,
+		"IntakeNoiseOrder": 2,
+		"IntakeNoiseQ": 1.4,
+		"ExhaustNoiseGain": 0.08,
+		"ExhaustNoiseCutoffHz": 800,
+		"OverrunCrackleProbability": 0.03,
+		"OverrunCrackleGain": 0.3,
+		"FallbackMaxRpm": 8700,
+		"LimiterCutHz": 26
+	}
+}
