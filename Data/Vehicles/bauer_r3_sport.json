@@ -158,21 +158,18 @@
 		},
 		"LaneAssist": {
 			"bEnabled": true,
-			"LateralGain": 3.0,
-			"MaxLateralSpeedMs": 7.0,
-			"HeadingGain": 2.2,
-			"YawRateDamping": 0.1,
-			"ReferenceSpeedMs": 30.0,
-			"SpeedGainExponent": 1.0,
-			"MinGainScale": 0.1,
-			"MaxGainScale": 2.0,
+			"LateralGain": 2.2,
+			"MaxLateralSpeedMs": 6.0,
+			"YawRateDamping": 0.3,
 			"MinSpeedMs": 5.0,
 			"MinActiveSpeedMs": 2.0,
-			"CurvatureFeedForward": 4.15,
-			"MaxLateralAccelMs2": 18.0,
-			"LateralDecelFraction": 0.3,
+			"MaxLateralAccelMs2": 11.0,
+			"LateralDecelFraction": 0.25,
 			"MaxSteering": 1.0,
-			"LaneChangeHysteresisMeters": 0.2
+			"LaneChangeHysteresisMeters": 0.2,
+			"LateralSpeedGain": 6.0,
+			"SteeringToLateralAccelMs2": 15.0,
+			"KinematicCurvaturePerSteering": 0.284
 		},
 		"StabilityAssist": {
 			"bSteeringScaleEnabled": true,
@@ -212,6 +209,9 @@
 			"MinSpeedMs": 3.0,
 			"bTractionControlEnabled": true,
 			"bABSEnabled": true
-		}
+		},
+		"BodyMesh": "/Game/Vehicles/SportsCar/SM_SportsCar.SM_SportsCar",
+		"GlassMesh": "/Game/Vehicles/SportsCar/SM_SportsCar_Glass.SM_SportsCar_Glass",
+		"WheelMesh": "/Game/Vehicles/SportsCar/SM_SportsCar_Wheel.SM_SportsCar_Wheel"
 	}
 }

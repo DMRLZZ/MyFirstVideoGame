@@ -148,6 +148,38 @@
 		},
 		"StabilityAssist": {
 			"$ref": "#/$defs/StabilityAssist"
+		},
+		"BodyMesh": {
+			"type": "string"
+		},
+		"GlassMesh": {
+			"type": "string"
+		},
+		"WheelMesh": {
+			"type": "string"
+		},
+		"bFlipLeftWheels": {
+			"type": "boolean"
+		},
+		"ImpactMinDeltaKmh": {
+			"type": "number",
+			"minimum": 1,
+			"maximum": 100
+		},
+		"ImpactMinAccelMs2": {
+			"type": "number",
+			"minimum": 5,
+			"maximum": 500
+		},
+		"OffRoadBelowMeters": {
+			"type": "number",
+			"minimum": 0.5,
+			"maximum": 50
+		},
+		"OffRoadLateralMarginMeters": {
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
 		}
 	},
 	"additionalProperties": false,
@@ -585,41 +617,11 @@
 					"minimum": 0.5,
 					"maximum": 15
 				},
-				"HeadingGain": {
-					"type": "number",
-					"description": "Steering per radian of heading error at the reference speed.",
-					"minimum": 0,
-					"maximum": 20
-				},
 				"YawRateDamping": {
 					"type": "number",
 					"description": "Steering per rad/s of relative yaw rate at the reference speed.",
 					"minimum": 0,
 					"maximum": 5
-				},
-				"ReferenceSpeedMs": {
-					"type": "number",
-					"description": "Speed where the heading gains apply unscaled, m/s.",
-					"minimum": 1,
-					"maximum": 100
-				},
-				"SpeedGainExponent": {
-					"type": "number",
-					"description": "Exponent of the (Vref / v) gain scheduling.",
-					"minimum": 0,
-					"maximum": 2
-				},
-				"MinGainScale": {
-					"type": "number",
-					"description": "Lower clamp of the gain scale.",
-					"minimum": 0.01,
-					"maximum": 1
-				},
-				"MaxGainScale": {
-					"type": "number",
-					"description": "Upper clamp of the gain scale.",
-					"minimum": 1,
-					"maximum": 10
 				},
 				"MinSpeedMs": {
 					"type": "number",
@@ -632,12 +634,6 @@
 					"description": "Below this speed the raw steering passes through, m/s.",
 					"minimum": 0,
 					"maximum": 20
-				},
-				"CurvatureFeedForward": {
-					"type": "number",
-					"description": "Steering per unit of path curvature (~ wheelbase / max steer angle in rad).",
-					"minimum": 0,
-					"maximum": 50
 				},
 				"MaxLateralAccelMs2": {
 					"type": "number",
@@ -662,6 +658,21 @@
 					"description": "Hysteresis of the reported current lane, meters.",
 					"minimum": 0,
 					"maximum": 1.5
+				},
+				"LateralSpeedGain": {
+					"type": "number",
+					"minimum": 0.1,
+					"maximum": 20
+				},
+				"SteeringToLateralAccelMs2": {
+					"type": "number",
+					"minimum": 1,
+					"maximum": 100
+				},
+				"KinematicCurvaturePerSteering": {
+					"type": "number",
+					"minimum": 0.01,
+					"maximum": 2
 				}
 			},
 			"additionalProperties": false
