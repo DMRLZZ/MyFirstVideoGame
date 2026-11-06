@@ -617,9 +617,9 @@ def build_interior(mesh, cab, roof):
     # Dash: soft top with an instrument binnacle and a center screen.
     add_mirrored(mesh, "Interior", ellipsoid((dash, 0.36, z + 0.5), (0.33, 0.4, 0.11)))
     add_mirrored(mesh, "Trim", box((dash + 0.02, 0.28, z + 0.34), (0.42, 0.56, 0.22), pitch_deg=10))
-    mesh.add("Trim", *box((dash - 0.24, -sy, z + 0.565), (0.12, 0.3, 0.075), pitch_deg=-12))
-    mesh.add("Screen", *box((dash - 0.3, -sy, z + 0.565), (0.012, 0.25, 0.058), pitch_deg=-12))
-    mesh.add("Screen", *box((dash - 0.23, 0.0, z + 0.5), (0.012, 0.2, 0.13), pitch_deg=-20))
+    mesh.add("Trim", *box((dash - 0.24, -sy, z + 0.63), (0.12, 0.3, 0.075), pitch_deg=-12))
+    mesh.add("Screen", *box((dash - 0.3, -sy, z + 0.63), (0.012, 0.25, 0.058), pitch_deg=-12))
+    mesh.add("Screen", *box((dash - 0.23, 0.0, z + 0.58), (0.012, 0.2, 0.13), pitch_deg=-20))
     # Tub, center console, door cards and rear bulkhead.
     add_mirrored(mesh, "Interior", box((cab["TubX"], 0.36, z + 0.04), (cab["TubLength"], 0.72, 0.08)))
     mesh.add("Trim", *box((sx + 0.1, 0.0, z + 0.2), (0.95, 0.2, 0.26)))
@@ -631,7 +631,7 @@ def build_interior(mesh, cab, roof):
     axis = np.array([-math.cos(tilt), 0.0, math.sin(tilt)])
     across = np.array([1.0, 0.0, 0.0]) * math.sin(tilt) + np.array([0.0, 0.0, 1.0]) * math.cos(tilt)
     R = np.stack([across, axis, np.cross(across, axis)], 1)  # Lathe axis (+Y) goes to the wheel axis.
-    center = (dash - 0.42, -sy, z + 0.46)
+    center = (dash - 0.35, -sy, z + 0.58)  # High enough for the rim to show from the cockpit camera.
     rim = [(-0.016, 0.165), (0.0, 0.181), (0.016, 0.165), (0.0, 0.149), (-0.016, 0.165)]
     mesh.add("Trim", *transform(lathe(rim, 36), R, center))
     mesh.add("Trim", *transform(lathe([(0.03, 0.0), (0.03, 0.05), (-0.02, 0.06), (-0.02, 0.0)], 18), R, center))
