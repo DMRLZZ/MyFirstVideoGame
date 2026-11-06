@@ -1,0 +1,223 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/CameraConfig.schema.json",
+	"title": "CameraConfig",
+	"description": "The 'data' object of Data/Camera/*.json. Mirrors FLRCameraConfig (Source/LRCamera/Public/LRCameraTypes.h). Distances in centimeters, angles in degrees, speeds in km/h, times in seconds.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"DefaultMode": {
+			"description": "Camera mode used when the camera manager starts.",
+			"enum": ["ChaseFar", "ChaseNear", "Hood", "Bumper", "Cockpit", "Viral"]
+		},
+		"RoadRoughness": {
+			"description": "Shake multiplier on the lanes.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 10
+		},
+		"ShoulderRoughness": {
+			"description": "Shake multiplier outside the lanes (shoulder, rumble strips).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 10
+		},
+		"RoughnessLagSeconds": {
+			"description": "Smoothing time of the roughness between lane and shoulder, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"GlobalShakeScale": {
+			"description": "Accessibility multiplier of every procedural shake (0 = no shake).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 3
+		},
+		"InteriorNearClipCm": {
+			"description": "Near clip plane of the interior cameras, cm.",
+			"type": "number",
+			"minimum": 0.5,
+			"maximum": 50
+		},
+		"TeleportSnapDistanceCm": {
+			"description": "Car movement in one camera update treated as a teleport (snaps the smoothing), cm.",
+			"type": "number",
+			"minimum": 100,
+			"maximum": 100000
+		},
+		"ChaseFar": { "$ref": "#/$defs/Chase" },
+		"ChaseNear": { "$ref": "#/$defs/Chase" },
+		"Hood": { "$ref": "#/$defs/Mounted" },
+		"Bumper": { "$ref": "#/$defs/Mounted" },
+		"Cockpit": { "$ref": "#/$defs/Cockpit" },
+		"Viral": { "$ref": "#/$defs/Viral" }
+	},
+	"$defs": {
+		"Vector": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["X", "Y", "Z"],
+			"properties": {
+				"X": { "type": "number" },
+				"Y": { "type": "number" },
+				"Z": { "type": "number" }
+			}
+		},
+		"SpeedFovCurve": {
+			"description": "FLRSpeedFovCurve: FOV that widens with speed (monotonic).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"MinFovDeg": { "description": "Horizontal FOV at low speed, degrees.", "type": "number", "minimum": 20, "maximum": 170 },
+				"MaxFovDeg": { "description": "Horizontal FOV at full speed, degrees.", "type": "number", "minimum": 20, "maximum": 170 },
+				"StartSpeedKmh": { "description": "Speed where the widening starts, km/h.", "type": "number", "minimum": 0, "maximum": 500 },
+				"FullSpeedKmh": { "description": "Speed where MaxFovDeg is reached, km/h.", "type": "number", "minimum": 1, "maximum": 600 },
+				"Exponent": { "description": "Curve shape (1 = linear).", "type": "number", "minimum": 0.2, "maximum": 5 }
+			}
+		},
+		"Shake": {
+			"description": "FLRCameraShakeParams: deterministic two-band Perlin shake.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"HighFrequencyHz": { "description": "High band frequency, Hz.", "type": "number", "minimum": 0, "maximum": 60 },
+				"HighLocationAmplitudeCm": { "description": "High band location amplitude, cm.", "type": "number", "minimum": 0, "maximum": 20 },
+				"HighRotationAmplitudeDeg": { "description": "High band rotation amplitude, degrees.", "type": "number", "minimum": 0, "maximum": 5 },
+				"LowFrequencyHz": { "description": "Low band frequency, Hz.", "type": "number", "minimum": 0, "maximum": 10 },
+				"LowLocationAmplitudeCm": { "description": "Low band location amplitude, cm.", "type": "number", "minimum": 0, "maximum": 50 },
+				"LowRotationAmplitudeDeg": { "description": "Low band rotation amplitude, degrees.", "type": "number", "minimum": 0, "maximum": 10 },
+				"ReferenceSpeedKmh": { "description": "Speed at which the amplitudes apply unscaled, km/h.", "type": "number", "minimum": 1, "maximum": 600 },
+				"SpeedExponent": { "description": "Exponent of the speed scaling.", "type": "number", "minimum": 0, "maximum": 4 },
+				"IdleScale": { "description": "Scale at standstill.", "type": "number", "minimum": 0, "maximum": 2 },
+				"MaxScale": { "description": "Upper clamp of the speed scale.", "type": "number", "minimum": 0, "maximum": 10 }
+			}
+		},
+		"LookAhead": {
+			"description": "FLRLookAheadParams: yaw toward the target lane and into the curve.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"LookAheadSeconds": { "description": "Time horizon of the look-ahead point, seconds.", "type": "number", "minimum": 0, "maximum": 5 },
+				"MinDistanceMeters": { "description": "Minimum distance of the look-ahead point, meters.", "type": "number", "minimum": 1, "maximum": 500 },
+				"MaxYawDeg": { "description": "Maximum look-ahead yaw, degrees (0 disables it).", "type": "number", "minimum": 0, "maximum": 45 },
+				"LagSeconds": { "description": "Smoothing time of the yaw, seconds.", "type": "number", "minimum": 0, "maximum": 3 },
+				"CurvatureScale": { "description": "Weight of the road curvature term.", "type": "number", "minimum": 0, "maximum": 3 }
+			}
+		},
+		"HeadModel": {
+			"description": "FLRHeadModelParams: spring-damper head driven by G forces.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"NaturalFrequencyHz": { "description": "Natural frequency of the neck spring, Hz.", "type": "number", "minimum": 0.2, "maximum": 10 },
+				"DampingRatio": { "description": "Damping ratio (1 = critical).", "type": "number", "minimum": 0.3, "maximum": 3 },
+				"LongitudinalCmPerG": { "description": "Head travel per longitudinal G, cm.", "type": "number", "minimum": 0, "maximum": 30 },
+				"LateralCmPerG": { "description": "Head travel per lateral G, cm.", "type": "number", "minimum": 0, "maximum": 30 },
+				"VerticalCmPerG": { "description": "Head travel per vertical G, cm.", "type": "number", "minimum": 0, "maximum": 30 },
+				"RollDegPerG": { "description": "Head roll per lateral G, degrees.", "type": "number", "minimum": 0, "maximum": 15 },
+				"PitchDegPerG": { "description": "Head pitch per longitudinal G, degrees.", "type": "number", "minimum": 0, "maximum": 15 },
+				"MaxOffsetCm": { "description": "Clamp of the head offset per axis, cm.", "type": "number", "minimum": 0, "maximum": 40 },
+				"MaxRollDeg": { "description": "Clamp of the head roll, degrees.", "type": "number", "minimum": 0, "maximum": 30 },
+				"MaxPitchDeg": { "description": "Clamp of the head pitch, degrees.", "type": "number", "minimum": 0, "maximum": 30 },
+				"MaxInputG": { "description": "Input acceleration clamp, G.", "type": "number", "minimum": 0.1, "maximum": 20 },
+				"Intensity": { "description": "Global intensity (0 = rigid, accessibility).", "type": "number", "minimum": 0, "maximum": 3 }
+			}
+		},
+		"Chase": {
+			"description": "FLRChaseCameraParams. Distance and height come from the vehicle definition.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"DistanceScale": { "description": "Multiplier of the vehicle's chase distance.", "type": "number", "minimum": 0.2, "maximum": 5 },
+				"HeightScale": { "description": "Multiplier of the vehicle's chase height.", "type": "number", "minimum": 0, "maximum": 5 },
+				"YawLagSeconds": { "description": "Smoothing time of the arm yaw, seconds.", "type": "number", "minimum": 0, "maximum": 3 },
+				"HeightLagSeconds": { "description": "Smoothing time of the pivot height, seconds.", "type": "number", "minimum": 0, "maximum": 3 },
+				"DistanceLagSeconds": { "description": "Smoothing time of the arm length, seconds.", "type": "number", "minimum": 0, "maximum": 5 },
+				"AccelDistanceCmPerMs2": { "description": "Arm stretch per m/s^2 of longitudinal acceleration, cm.", "type": "number", "minimum": -50, "maximum": 50 },
+				"MaxAccelDistanceCm": { "description": "Clamp of the acceleration stretch, cm.", "type": "number", "minimum": 0, "maximum": 500 },
+				"SpeedDistanceCmPer100Kmh": { "description": "Extra arm length per 100 km/h, cm.", "type": "number", "minimum": 0, "maximum": 300 },
+				"LookAtAheadCm": { "description": "Distance of the look-at point ahead of the car, cm.", "type": "number", "minimum": 0, "maximum": 10000 },
+				"LookAtHeightScale": { "description": "Multiplier of the vehicle's ChaseLookAtHeightCm.", "type": "number", "minimum": 0, "maximum": 5 },
+				"MinGroundClearanceCm": { "description": "Minimum camera height above the road surface, cm.", "type": "number", "minimum": 0, "maximum": 500 },
+				"Fov": { "$ref": "#/$defs/SpeedFovCurve" },
+				"Shake": { "$ref": "#/$defs/Shake" },
+				"LookAhead": { "$ref": "#/$defs/LookAhead" }
+			}
+		},
+		"Mounted": {
+			"description": "FLRMountedCameraParams: rigid body-mounted camera (hood, bumper).",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"PitchOffsetDeg": { "description": "Extra pitch of the mount, degrees.", "type": "number", "minimum": -45, "maximum": 45 },
+				"Fov": { "$ref": "#/$defs/SpeedFovCurve" },
+				"Shake": { "$ref": "#/$defs/Shake" }
+			}
+		},
+		"Cockpit": {
+			"description": "FLRCockpitCameraParams: driver's eye camera.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"FovDeg": { "description": "Base horizontal FOV, degrees.", "type": "number", "minimum": 30, "maximum": 120 },
+				"MinFovDeg": { "description": "Lowest FOV the setting accepts, degrees.", "type": "number", "minimum": 30, "maximum": 120 },
+				"MaxFovDeg": { "description": "Highest FOV the setting accepts, degrees.", "type": "number", "minimum": 30, "maximum": 120 },
+				"SpeedFovExtraDeg": { "description": "FOV added at high speed, degrees.", "type": "number", "minimum": 0, "maximum": 30 },
+				"SpeedFovStartKmh": { "description": "Speed where the extra FOV starts, km/h.", "type": "number", "minimum": 0, "maximum": 500 },
+				"SpeedFovFullKmh": { "description": "Speed where the full extra FOV is reached, km/h.", "type": "number", "minimum": 1, "maximum": 600 },
+				"HorizonStabilization": { "description": "Fraction of the body roll and pitch removed from the view.", "type": "number", "minimum": 0, "maximum": 1 },
+				"HeadModel": { "$ref": "#/$defs/HeadModel" },
+				"Shake": { "$ref": "#/$defs/Shake" },
+				"LookAhead": { "$ref": "#/$defs/LookAhead" }
+			}
+		},
+		"ViralPostProcess": {
+			"description": "FLRViralPostProcessParams: FPostProcessSettings overrides. A negative value leaves the engine / volume setting untouched.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"VignetteIntensity": { "type": "number", "minimum": -1, "maximum": 1 },
+				"FilmGrainIntensity": { "type": "number", "minimum": -1, "maximum": 1 },
+				"SceneFringeIntensity": { "type": "number", "minimum": -1, "maximum": 5 },
+				"ChromaticAberrationStartOffset": { "type": "number", "minimum": -1, "maximum": 1 },
+				"AutoExposureSpeedUp": { "type": "number", "minimum": -1, "maximum": 20 },
+				"AutoExposureSpeedDown": { "type": "number", "minimum": -1, "maximum": 20 },
+				"MotionBlurAmount": { "type": "number", "minimum": -1, "maximum": 1 },
+				"MotionBlurMax": { "type": "number", "minimum": -1, "maximum": 100 },
+				"BloomIntensity": { "type": "number", "minimum": -1, "maximum": 8 },
+				"Sharpen": { "type": "number", "minimum": -1, "maximum": 10 },
+				"Saturation": { "type": "number", "minimum": -1, "maximum": 2 },
+				"Contrast": { "type": "number", "minimum": -1, "maximum": 2 }
+			}
+		},
+		"ViralPreset": {
+			"description": "FLRViralPresetParams: one preset of the Viral camera.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"DisplayName": { "description": "Name shown in menus and the HUD.", "type": "string" },
+				"MountAnchor": { "description": "Vehicle anchor the mount starts from.", "enum": ["Hood", "Bumper", "Cockpit", "ViralMount"] },
+				"MountOffsetCm": { "$ref": "#/$defs/Vector", "description": "Offset from the anchor in actor space, cm." },
+				"MountPitchDeg": { "description": "Extra pitch of the mount, degrees.", "type": "number", "minimum": -45, "maximum": 45 },
+				"FovDeg": { "description": "Horizontal FOV, degrees.", "type": "number", "minimum": 30, "maximum": 170 },
+				"bInterior": { "description": "The camera is inside the cabin (cabin audio mix).", "type": "boolean" },
+				"HorizonStabilization": { "description": "Fraction of the body roll and pitch removed from the view.", "type": "number", "minimum": 0, "maximum": 1 },
+				"Shake": { "$ref": "#/$defs/Shake" },
+				"PostProcess": { "$ref": "#/$defs/ViralPostProcess" }
+			}
+		},
+		"Viral": {
+			"description": "FLRViralCameraParams: Viral camera mode.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"DefaultPreset": { "description": "Preset active when the game starts.", "enum": ["GoPro", "Dashcam", "Phone"] },
+				"bViralArtifactsEnabled": { "description": "Accessibility: false disables every post-process artifact.", "type": "boolean" },
+				"GoPro": { "$ref": "#/$defs/ViralPreset" },
+				"Dashcam": { "$ref": "#/$defs/ViralPreset" },
+				"Phone": { "$ref": "#/$defs/ViralPreset" }
+			}
+		}
+	}
+}
