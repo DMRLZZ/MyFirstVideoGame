@@ -9,27 +9,28 @@
  * Lane-keeping / lane-change steering controller of the Arcade scheme (pure logic, no world).
  *
  * The car keeps real Chaos physics: this controller only produces the steering input a skilled driver would apply.
- * Control law (all angles in radians, + = right):
+ * Control law (angles in radians, + = right; v = forward speed, k = road curvature):
  *
  *   e        = TargetD - CurrentD
  *   vLatDes  = sign(e) * min(LateralGain * |e|, sqrt(2 * LateralDecelFraction * MaxLateralAccelMs2 * |e|), MaxLateralSpeedMs)
- *   psiDes   = atan2(vLatDes, max(v, MinSpeedMs))
- *   g(v)     = clamp((ReferenceSpeedMs / max(v, MinSpeedMs))^SpeedGainExponent, MinGainScale, MaxGainScale)
- *   fb       = g(v) * (HeadingGain * (psiDes - HeadingError) - YawRateDamping * (YawRate - v * k))
- *   fb       = clamp(fb, +-CurvatureFeedForward * MaxLateralAccelMs2 / v^2)          (tire grip limit)
- *   steer    = clamp(fb + CurvatureFeedForward * k, +-MaxSteering)
+ *   vLat     = v * sin(HeadingError)
+ *   aFb      = clamp(LateralSpeedGain * (vLatDes - vLat) - YawRateDamping * v * (YawRate - v * k), +-MaxLateralAccelMs2)
+ *   steer    = clamp((aFb + v^2 * k) / authority(v), +-MaxSteering)
+ *   authority(v) = min(SteeringToLateralAccelMs2, v^2 * KinematicCurvaturePerSteering)
  *
- * The kinematic yaw gain of a car grows linearly with speed, so g(v) ~ 1/v makes the heading loop speed-independent
- * and the lateral response identical at 100, 200 or 300 km/h. The braking-distance profile on vLatDes guarantees the
- * lateral motion can always be stopped at the target within the grip budget, so lane changes do not overshoot.
+ * The law is built on the plant measured in the running game: at road speeds Chaos produces a lateral acceleration
+ * proportional to the steering input and independent of speed (tire-limited understeer, about 15 m/s^2 per unit of
+ * input), so working in lateral acceleration gives the same response at 100, 200 and 300 km/h. Only at very low speed
+ * does the kinematic limit v^2 * k_max take over. The square-root profile on vLatDes keeps the lateral motion stoppable
+ * at the target within the grip budget, so lane changes do not overshoot.
  */
 struct LRVEHICLE_API FLRLaneAssist
 {
 	/**
-	 * Speed scheduling factor g(v) applied to the heading gains.
+	 * Lateral acceleration produced by one unit of steering input at this speed, m/s^2.
 	 * @param SpeedMs  Forward speed, m/s.
 	 */
-	static float ComputeGainScale(const FLRLaneAssistParams& Params, float SpeedMs);
+	static float ComputeSteeringAuthority(const FLRLaneAssistParams& Params, float SpeedMs);
 
 	/**
 	 * Steering input that drives the car towards TargetD and aligns it with the road.

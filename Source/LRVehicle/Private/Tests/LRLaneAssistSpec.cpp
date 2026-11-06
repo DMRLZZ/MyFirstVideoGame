@@ -9,20 +9,23 @@
 
 namespace LRLaneAssistSpecPrivate
 {
-	/** Kinematic bicycle model of a generic sports car (matches the default lane assist tuning). */
+	/**
+	 * Plant measured in the running game: lateral acceleration proportional to the steering input, independent of speed,
+	 * with a kinematic limit at low speed, a steering input slew and a first-order tire lag.
+	 */
 	struct FBicycleModel
 	{
-		/** Axle distance, meters. */
-		float WheelbaseM = 2.7f;
+		/** Lateral acceleration per unit of steering input, m/s^2. */
+		float AccelPerSteering = 15.f;
 
-		/** Front road-wheel angle at full steering input, radians (38 degrees). */
-		float MaxSteerAngleRad = FMath::DegreesToRadians(38.f);
+		/** Path curvature per unit of steering input, 1/m. */
+		float CurvaturePerSteering = 0.25f;
 
 		/** Steering input slew rate, 1/s (Chaos SteeringInputRate). 0 = instantaneous. */
 		float SteeringRatePerS = 0.f;
 
-		/** First-order lag of the yaw rate behind the kinematic value, seconds (tire relaxation). 0 = none. */
-		float YawLagSeconds = 0.f;
+		/** First-order lag of the lateral acceleration, seconds (tire relaxation). */
+		float LagSeconds = 0.15f;
 	};
 
 	/** Result of one closed-loop simulation. */
@@ -58,6 +61,7 @@ namespace LRLaneAssistSpecPrivate
 		float Heading = 0.f;
 		float YawRate = SpeedMs * RoadCurvaturePerM;
 		float Steering = 0.f;
+		float Accel = SpeedMs * YawRate;
 
 		FSimResult Result;
 		Result.OvershootM = -TNumericLimits<float>::Max();
@@ -77,10 +81,9 @@ namespace LRLaneAssistSpecPrivate
 				Steering = Command;
 			}
 
-			const float KinematicYawRate = SpeedMs / Car.WheelbaseM * FMath::Tan(Steering * Car.MaxSteerAngleRad);
-			YawRate = Car.YawLagSeconds > 0.f
-				? YawRate + (KinematicYawRate - YawRate) * (1.f - FMath::Exp(-DeltaSeconds / Car.YawLagSeconds))
-				: KinematicYawRate;
+			const float Authority = FMath::Min(Car.AccelPerSteering, SpeedMs * SpeedMs * Car.CurvaturePerSteering);
+			Accel += (Authority * Steering - Accel) * (1.f - FMath::Exp(-DeltaSeconds / Car.LagSeconds));
+			YawRate = Accel / SpeedMs;
 
 			Heading += (YawRate - SpeedMs * RoadCurvaturePerM) * DeltaSeconds;
 			D += SpeedMs * FMath::Sin(Heading) * DeltaSeconds;
@@ -169,28 +172,22 @@ void FLRLaneAssistSpec::Define()
 			const float Curvature = 1.f / 1500.f;
 			const float SpeedMs = 60.f;
 			const float Steering = FLRLaneAssist::ComputeSteering(Params, 0.f, 0.f, 0.f, SpeedMs * Curvature, SpeedMs, Curvature);
-			TestNearlyEqual(TEXT("Feed-forward only"), Steering, Params.CurvatureFeedForward * Curvature, 1.e-5f);
+			TestNearlyEqual(TEXT("Feed-forward only"), Steering, SpeedMs * SpeedMs * Curvature / Params.SteeringToLateralAccelMs2, 1.e-5f);
 		});
 	});
 
-	Describe("ComputeGainScale", [this]()
+	Describe("ComputeSteeringAuthority", [this]()
 	{
-		It("is non-increasing with speed and clamped", [this]()
+		It("is limited by the kinematic curvature at low speed and constant at road speed", [this]()
 		{
 			const FLRLaneAssistParams Params;
-			float Previous = TNumericLimits<float>::Max();
-			for (float Speed = 0.f; Speed <= 120.f; Speed += 2.5f)
-			{
-				const float Scale = FLRLaneAssist::ComputeGainScale(Params, Speed);
-				TestTrue(FString::Printf(TEXT("Monotonic at %.1f m/s"), Speed), Scale <= Previous + KINDA_SMALL_NUMBER);
-				TestTrue(TEXT("Within clamps"), Scale >= Params.MinGainScale - KINDA_SMALL_NUMBER && Scale <= Params.MaxGainScale + KINDA_SMALL_NUMBER);
-				Previous = Scale;
-			}
-			TestNearlyEqual(TEXT("Unscaled at the reference speed"), FLRLaneAssist::ComputeGainScale(Params, Params.ReferenceSpeedMs), 1.f, 1.e-5f);
+			TestNearlyEqual(TEXT("Kinematic at low speed"), FLRLaneAssist::ComputeSteeringAuthority(Params, 5.f), 25.f * Params.KinematicCurvaturePerSteering, 1.e-3f);
+			TestNearlyEqual(TEXT("Measured value at 100 km/h"), FLRLaneAssist::ComputeSteeringAuthority(Params, 27.8f), Params.SteeringToLateralAccelMs2, 1.e-3f);
+			TestNearlyEqual(TEXT("Same at 300 km/h"), FLRLaneAssist::ComputeSteeringAuthority(Params, 83.3f), Params.SteeringToLateralAccelMs2, 1.e-3f);
 		});
 	});
 
-	Describe("Closed loop on a kinematic bicycle model", [this]()
+	Describe("Closed loop on the measured plant", [this]()
 	{
 		for (const float SpeedKmh : TestSpeedsKmh)
 		{
@@ -221,7 +218,7 @@ void FLRLaneAssistSpec::Define()
 			{
 				FBicycleModel Car;
 				Car.SteeringRatePerS = 8.f;
-				Car.YawLagSeconds = 0.08f;
+				Car.LagSeconds = 0.3f;
 				const FSimResult Result = SimulateLaneChange(FLRLaneAssistParams(), Car, SpeedKmh, 0.f, LaneWidthM);
 				TestTrue(FString::Printf(TEXT("Overshoot %.3f m < %.2f m"), Result.OvershootM, MaxOvershootM), Result.OvershootM < MaxOvershootM);
 				TestTrue(FString::Printf(TEXT("Final error %.3f m"), Result.FinalErrorM), FMath::Abs(Result.FinalErrorM) < 0.05f);
@@ -238,7 +235,7 @@ void FLRLaneAssistSpec::Define()
 			});
 		}
 
-		It("settles in the same time at 100, 200 and 300 km/h (speed scheduling)", [this]()
+		It("settles in the same time at 100, 200 and 300 km/h (speed independent)", [this]()
 		{
 			float MinTime = TNumericLimits<float>::Max();
 			float MaxTime = 0.f;
