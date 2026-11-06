@@ -82,19 +82,7 @@ for source in sorted(glob.glob(os.path.join(SOURCE_DIR, "*.glb"))):
         nanite.set_editor_property("enabled", False)
         asset.set_editor_property("nanite_settings", nanite)
 
-        # The traffic shows many cars at once, most of them far away.
-        if name.endswith("_Traffic"):
-            options = unreal.EditorScriptingMeshReductionOptions()
-            settings = []
-            for percent, screen in ((1.0, 1.0), (0.4, 0.35), (0.12, 0.14), (0.03, 0.05)):
-                level = unreal.EditorScriptingMeshReductionSettings()
-                level.set_editor_property("percent_triangles", percent)
-                level.set_editor_property("screen_size", screen)
-                settings.append(level)
-            options.set_editor_property("reduction_settings", settings)
-            options.set_editor_property("auto_compute_lod_screen_size", False)
-            count = unreal.EditorStaticMeshLibrary.set_lods(asset, options)
-            unreal.log(f"LRCars: {name} LODs: {count}")
+        # Levels of detail need the full editor: run build_traffic_lods.py after this script.
         bounds = asset.get_bounding_box()
         names = [str(s.get_editor_property("material_slot_name")) for s in slots]
         unreal.log(f"LRCars: {path} slots={names} min={bounds.min} max={bounds.max}")
