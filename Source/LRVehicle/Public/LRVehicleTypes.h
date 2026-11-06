@@ -506,6 +506,18 @@ struct LRVEHICLE_API FLRVehicleDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
 	FSoftObjectPath WheelMesh;
 
+	/** Paint color of the visual body (material slot "Paint", parameter "PaintColor"). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	FLinearColor PaintColor = FLinearColor(0.55f, 0.03f, 0.02f, 1.f);
+
+	/** Offset of the visual body from the actor origin, cm (generated cars have Z = 0 at the ground, the rig rides higher). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	FVector VisualOffsetCm = FVector::ZeroVector;
+
+	/** Moves the visual wheels inwards along the axle, cm, when the rig track is wider than the body. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	float VisualWheelInsetCm = 0.f;
+
 	/** Rotates the wheel mesh 180 degrees on the wheels of the left side, so its outer face points outwards. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
 	bool bFlipLeftWheels = true;

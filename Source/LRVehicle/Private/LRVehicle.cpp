@@ -3,6 +3,7 @@
 #include "LRVehicle.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Components/StaticMeshComponent.h"
 
 #include "Animation/AnimInstance.h"
@@ -345,7 +346,20 @@ void ALRVehicle::ApplyVisualMeshes()
 		UE_LOG(LogLRVehicle, Error, TEXT("Vehicle '%s': cannot load body mesh '%s'"), *Definition.Id.ToString(), *Definition.BodyMesh.ToString());
 	}
 	BodyVisual->SetStaticMesh(Body);
+	BodyVisual->SetRelativeLocation(Definition.VisualOffsetCm);
+	if (Body != nullptr)
+	{
+		const int32 PaintSlot = BodyVisual->GetMaterialIndex(TEXT("Paint"));
+		if (PaintSlot != INDEX_NONE)
+		{
+			if (UMaterialInstanceDynamic* Paint = BodyVisual->CreateDynamicMaterialInstance(PaintSlot))
+			{
+				Paint->SetVectorParameterValue(TEXT("PaintColor"), Definition.PaintColor);
+			}
+		}
+	}
 	GlassVisual->SetStaticMesh(LoadMesh(Definition.GlassMesh));
+	GlassVisual->SetRelativeLocation(Definition.VisualOffsetCm);
 
 	// With a visual body the skeleton is only the rig: hide it but keep it animating, the wheel bones drive the wheels.
 	MeshComp->SetVisibility(Body == nullptr, /*bPropagateToChildren*/ false);
@@ -380,10 +394,12 @@ void ALRVehicle::ApplyVisualMeshes()
 			WheelVisuals.Add(Wheel);
 
 			// Bone names end in L / R (Phys_Wheel_FL). The mesh is modeled for the right side.
-			if (Definition.bFlipLeftWheels && Bone.ToString().EndsWith(TEXT("L")))
+			const bool bLeft = Bone.ToString().EndsWith(TEXT("L"));
+			if (Definition.bFlipLeftWheels && bLeft)
 			{
 				Wheel->SetRelativeRotation(FRotator(0.0, 180.0, 0.0));
 			}
+			Wheel->SetRelativeLocation(FVector(0.0, bLeft ? Definition.VisualWheelInsetCm : -Definition.VisualWheelInsetCm, 0.0));
 		}
 	};
 	AddWheels(Definition.FrontWheels.BoneNames);
