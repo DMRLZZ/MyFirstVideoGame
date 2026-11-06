@@ -1,0 +1,598 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/HUDTuning.schema.json",
+	"title": "HUDTuning",
+	"description": "The 'data' object of Data/UI/HUD.json. Mirrors FLRHUDTuning (Source/LRUI/Public/LRHUDTypes.h). Sizes are expressed at the reference height.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"ReferenceHeight": {
+			"description": "Canvas height (pixels) where the UI scale is 1.",
+			"type": "number",
+			"minimum": 240,
+			"maximum": 4320
+		},
+		"MinUIScale": {
+			"description": "Lower clamp of the UI scale.",
+			"type": "number",
+			"minimum": 0.1,
+			"maximum": 2
+		},
+		"MaxUIScale": {
+			"description": "Upper clamp of the UI scale.",
+			"type": "number",
+			"minimum": 0.5,
+			"maximum": 8
+		},
+		"SafeMarginFraction": {
+			"description": "Safe margin around the screen edges, fraction of the canvas height.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 0.2
+		},
+		"SpeedFontSize": {
+			"description": "Speedometer number, points at the reference height.",
+			"type": "number",
+			"minimum": 6,
+			"maximum": 300
+		},
+		"ScoreFontSize": {
+			"description": "Score, points at the reference height.",
+			"type": "number",
+			"minimum": 6,
+			"maximum": 300
+		},
+		"BannerFontSize": {
+			"description": "Countdown numbers and banners, points at the reference height.",
+			"type": "number",
+			"minimum": 6,
+			"maximum": 400
+		},
+		"LargeFontSize": {
+			"description": "Panel titles, gear and near-miss labels, points at the reference height.",
+			"type": "number",
+			"minimum": 6,
+			"maximum": 200
+		},
+		"MediumFontSize": {
+			"description": "Values and secondary labels, points at the reference height.",
+			"type": "number",
+			"minimum": 6,
+			"maximum": 200
+		},
+		"SmallFontSize": {
+			"description": "Small captions and hints, points at the reference height.",
+			"type": "number",
+			"minimum": 6,
+			"maximum": 200
+		},
+		"PopupLifetimeSeconds": {
+			"description": "Lifetime of a near-miss popup, seconds.",
+			"type": "number",
+			"minimum": 0.1,
+			"maximum": 10
+		},
+		"PopupFadeInSeconds": {
+			"description": "Fade-in of a popup, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"PopupFadeOutSeconds": {
+			"description": "Fade-out at the end of a popup's life, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 5
+		},
+		"PopupRisePixels": {
+			"description": "Upward drift of a popup over its lifetime, pixels at the reference height.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 500
+		},
+		"PopupSlidePixels": {
+			"description": "Horizontal slide-in distance of a popup, pixels at the reference height.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 500
+		},
+		"PointsAttachWindowSeconds": {
+			"description": "Max delay between a near-miss event and its score event to show the points, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 2
+		},
+		"ControlsHintSeconds": {
+			"description": "Controls hint duration at the start of the first run, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 60
+		},
+		"ControlsHintFadeSeconds": {
+			"description": "Fade-out of the controls hint, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 10
+		},
+		"GoDisplaySeconds": {
+			"description": "How long the go banner stays after the countdown, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 5
+		},
+		"ComboBrokenDisplaySeconds": {
+			"description": "How long the broken combo text stays visible, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 5
+		},
+		"ScoreRollRate": {
+			"description": "Convergence rate of the rolling score counter, 1/s (0 = no rolling).",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"RedlineFraction": {
+			"description": "Start of the red zone of the RPM bar, fraction of the rev limiter.",
+			"type": "number",
+			"minimum": 0.3,
+			"maximum": 1
+		},
+		"MaxPopups": {
+			"description": "Maximum popups on screen (the oldest is recycled).",
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 32
+		},
+		"BoldTypeface": {
+			"description": "Typeface of the engine font used for numbers and banners.",
+			"type": "string",
+			"minLength": 1
+		},
+		"RegularTypeface": {
+			"description": "Typeface of the engine font used for labels and body text.",
+			"type": "string",
+			"minLength": 1
+		},
+		"ThousandsSeparator": {
+			"description": "Thousands separator of scores and credits (may be empty).",
+			"type": "string",
+			"maxLength": 4
+		},
+		"DecimalSeparator": {
+			"description": "Decimal separator (first character used).",
+			"type": "string",
+			"minLength": 1,
+			"maxLength": 1
+		},
+		"PrimaryColor": {
+			"description": "Main text. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"SecondaryColor": {
+			"description": "Secondary labels and captions. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"AccentColor": {
+			"description": "Highlights: combo, multipliers, active prompts. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"DangerColor": {
+			"description": "Crash banner, redline, broken combo. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"PanelColor": {
+			"description": "Panel background (use alpha for transparency). Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"DimColor": {
+			"description": "Full-screen dimming behind the results panel. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"RpmColor": {
+			"description": "Filled part of the RPM bar. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"CloseColor": {
+			"description": "Near-miss tier CERCA. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"VeryCloseColor": {
+			"description": "Near-miss tier MUY CERCA. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"RazorColor": {
+			"description": "Near-miss tier AL MILIMETRO. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"OncomingColor": {
+			"description": "CONTRAMANO tag. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"ThreadColor": {
+			"description": "ENTRE DOS tag. Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		},
+		"ShadowColor": {
+			"description": "Text shadow color (its alpha is ignored: shadows use the alpha of their text). Linear color.",
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"R",
+				"G",
+				"B",
+				"A"
+			],
+			"properties": {
+				"R": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"G": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"B": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"A": {
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				}
+			}
+		}
+	}
+}
