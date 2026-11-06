@@ -141,6 +141,10 @@ struct LRWORLD_API FLREnvironmentPreset
 {
 	GENERATED_BODY()
 
+	/** Base color of the flat ground around the road. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Environment")
+	FLinearColor GroundColor = FLinearColor(0.06f, 0.08f, 0.035f, 1.f);
+
 	/** Pitch of the sun light direction, degrees. Negative = light points down (sun above the horizon). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Environment", meta = (ClampMin = "-90.0", ClampMax = "90.0"))
 	float SunPitchDeg = -50.f;

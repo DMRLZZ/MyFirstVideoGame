@@ -6,6 +6,11 @@
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Components/SkyAtmosphereComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "LRDataLoader.h"
@@ -18,6 +23,16 @@ ALREnvironmentActor::ALREnvironmentActor()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	Root->SetMobility(EComponentMobility::Movable);
 	SetRootComponent(Root);
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneFinder(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	GroundPlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GroundPlane"));
+	GroundPlane->SetupAttachment(Root);
+	GroundPlane->SetMobility(EComponentMobility::Movable);
+	GroundPlane->SetStaticMesh(PlaneFinder.Object);
+	GroundPlane->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GroundPlane->SetGenerateOverlapEvents(false);
+	GroundPlane->SetCanEverAffectNavigation(false);
+	GroundPlane->SetRelativeScale3D(FVector(6000.0, 6000.0, 1.0)); // The engine plane is 1 m wide: 6 km.
 
 	SunLight = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("SunLight"));
 	SunLight->SetupAttachment(Root);
@@ -69,8 +84,22 @@ bool ALREnvironmentActor::LoadAndApplyPreset(const FString& RelativePath)
 	return true;
 }
 
+void ALREnvironmentActor::UpdateGround(const FVector& FocusLocationCm)
+{
+	// Below the road so that grade changes never make it poke through the asphalt.
+	constexpr double GroundDepthCm = 250.0;
+	GroundPlane->SetWorldLocation(FVector(FocusLocationCm.X, FocusLocationCm.Y, FocusLocationCm.Z - GroundDepthCm));
+}
+
 void ALREnvironmentActor::ApplyPreset(const FLREnvironmentPreset& Preset)
 {
+	if (UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial")))
+	{
+		UMaterialInstanceDynamic* GroundMaterial = UMaterialInstanceDynamic::Create(Base, this);
+		GroundMaterial->SetVectorParameterValue(TEXT("Color"), Preset.GroundColor);
+		GroundPlane->SetMaterial(0, GroundMaterial);
+	}
+
 	CurrentPreset = Preset;
 	bPresetApplied = true;
 

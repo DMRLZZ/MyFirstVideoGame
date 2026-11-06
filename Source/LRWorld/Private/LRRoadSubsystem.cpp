@@ -244,6 +244,11 @@ void ULRRoadSubsystem::Tick(float DeltaTime)
 	const double TrimDistance = FMath::Max<double>(Streaming.KeepBehindM, Streaming.VisibleBehindM + Streaming.ChunkLengthM);
 	Path.TrimBefore(FocusS - TrimDistance);
 
+	if (EnvironmentActor)
+	{
+		EnvironmentActor->UpdateGround(Path.RoadToWorldLocation(FocusS, 0.f));
+	}
+
 	if (RoadStreamer)
 	{
 		RoadStreamer->UpdateWindow(Path, FocusS);

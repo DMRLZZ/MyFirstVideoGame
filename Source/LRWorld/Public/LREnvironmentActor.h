@@ -40,6 +40,9 @@ public:
 	/** True when the current preset is a night preset (headlights, street lamps). */
 	bool IsNight() const { return CurrentPreset.bNight; }
 
+	/** Keeps the ground plane under the player, so the world never ends below the horizon. */
+	void UpdateGround(const FVector& FocusLocationCm);
+
 	/** Sun / moon directional light. */
 	UDirectionalLightComponent* GetSunLight() const { return SunLight; }
 
@@ -50,6 +53,10 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Environment")
 	TObjectPtr<USceneComponent> Root;
+
+	/** Large flat ground around the road, no collision (leaving the road ends the run). */
+	UPROPERTY(VisibleAnywhere, Category = "Environment")
+	TObjectPtr<class UStaticMeshComponent> GroundPlane;
 
 	UPROPERTY(VisibleAnywhere, Category = "Environment")
 	TObjectPtr<UDirectionalLightComponent> SunLight;
