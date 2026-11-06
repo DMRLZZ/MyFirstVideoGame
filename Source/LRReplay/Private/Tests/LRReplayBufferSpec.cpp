@@ -1,10 +1,10 @@
 // Copyright LEFTRIGHT. All Rights Reserved.
 
-#if WITH_DEV_AUTOMATION_TESTS
-
 #include "LRReplayBuffer.h"
 #include "LRReplayTypes.h"
 #include "Misc/AutomationTest.h"
+
+#if WITH_DEV_AUTOMATION_TESTS
 
 namespace LRReplayBufferSpecPrivate
 {
@@ -53,6 +53,18 @@ void FLRReplayBufferSpec::Define()
 			TestEqual(TEXT("Capacity"), Settings.GetFrameCapacity(), 1800);
 			TestEqual(TEXT("Max traffic"), Settings.MaxTrafficVehicles, 64);
 			TestNearlyEqual(TEXT("Radius"), Settings.TrafficRadiusMeters, 250.f);
+		});
+
+		It("bounds the frame capacity when the data is out of range", [this]()
+		{
+			FLRReplaySettings Settings;
+			Settings.DurationSeconds = 100000.f;
+			Settings.SampleRateHz = 1000.f;
+			TestEqual(TEXT("Upper bound"), Settings.GetFrameCapacity(), 72000);
+
+			Settings.DurationSeconds = 0.f;
+			Settings.SampleRateHz = -5.f;
+			TestEqual(TEXT("Lower bound"), Settings.GetFrameCapacity(), 2);
 		});
 	});
 
@@ -191,6 +203,26 @@ void FLRReplayBufferSpec::Define()
 			TestNearlyEqual(TEXT("Exact frame location"), Out.PlayerTransform.GetLocation().X, 12000.0, 1.e-2);
 			Buffer.EvaluateAt(2.25f, Out);
 			TestNearlyEqual(TEXT("Quarter location"), Out.PlayerTransform.GetLocation().X, 12250.0, 1.e-1);
+		});
+
+		It("measures time from the oldest frame and interpolates across the ring seam after wrapping", [this]()
+		{
+			FLRReplayBuffer Buffer;
+			Buffer.Configure(5, 0);
+			for (int32 Index = 0; Index < 8; ++Index)
+			{
+				Buffer.Add(MakeFrame(static_cast<float>(Index)));
+			}
+
+			// Chronological times 3..7 are stored as [5, 6, 7, 3, 4]: the storage seam lies between times 4 and 5.
+			FLRReplayFrame Out;
+			TestTrue(TEXT("Start"), Buffer.EvaluateAt(0.f, Out));
+			TestNearlyEqual(TEXT("Start is the oldest frame"), Out.Time, 3.f, 1.e-5f);
+			TestTrue(TEXT("Seam"), Buffer.EvaluateAt(1.5f, Out));
+			TestNearlyEqual(TEXT("Seam time"), Out.Time, 4.5f, 1.e-5f);
+			TestNearlyEqual(TEXT("Seam location"), Out.PlayerTransform.GetLocation().X, 4500.0, 1.e-1);
+			TestTrue(TEXT("End"), Buffer.EvaluateAt(Buffer.Duration(), Out));
+			TestNearlyEqual(TEXT("End is the newest frame"), Out.Time, 7.f, 1.e-5f);
 		});
 
 		It("fails on an empty buffer and copies a single frame", [this]()
