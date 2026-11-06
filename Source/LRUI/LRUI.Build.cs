@@ -9,7 +9,10 @@ public class LRUI : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "LRCore", "LRVehicle" });
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		// SlateCore is public because LRHUD.h stores FSlateFontInfo.
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "SlateCore", "LRCore", "LRVehicle" });
+
+		// Slate + InputCore + LRInput: input pre-processor that detects the last device used (FLRInputDeviceTracker).
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "InputCore", "LRInput" });
 	}
 }
