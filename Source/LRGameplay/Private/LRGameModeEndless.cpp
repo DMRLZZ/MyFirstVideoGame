@@ -1,6 +1,7 @@
 // Copyright LEFTRIGHT. All Rights Reserved.
 
 #include "LRGameModeEndless.h"
+#include "Misc/Paths.h"
 
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
@@ -303,6 +304,27 @@ bool ALRGameModeEndless::SetPlayerVehicle(FName VehicleId)
 
 	StartRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()));
 	return true;
+}
+
+void ALRGameModeEndless::CycleVehicle()
+{
+	if (!PlayerVehicle)
+	{
+		return;
+	}
+
+	TArray<FString> Files = FLRDataLoader::ListFiles(TEXT("Vehicles"));
+	if (Files.Num() == 0)
+	{
+		return;
+	}
+	for (FString& File : Files)
+	{
+		File = FPaths::GetBaseFilename(File);
+	}
+
+	const int32 Current = Files.IndexOfByKey(PlayerVehicle->GetDefinition().Id.ToString());
+	SetPlayerVehicle(FName(*Files[(Current + 1) % Files.Num()]));
 }
 
 bool ALRGameModeEndless::TransitionTo(ELRRunState NewState)

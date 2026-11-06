@@ -93,6 +93,7 @@ void ALRPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(Actions->Restart, ETriggerEvent::Triggered, this, &ALRPlayerController::HandleRestart);
 	EnhancedInput->BindAction(Actions->Pause, ETriggerEvent::Triggered, this, &ALRPlayerController::HandlePause);
 	EnhancedInput->BindAction(Actions->ToggleControlScheme, ETriggerEvent::Triggered, this, &ALRPlayerController::HandleToggleControlScheme);
+	EnhancedInput->BindAction(Actions->CycleVehicle, ETriggerEvent::Triggered, this, &ALRPlayerController::HandleCycleVehicle);
 }
 
 void ALRPlayerController::BeginPlay()
@@ -291,6 +292,14 @@ void ALRPlayerController::HandleRestart()
 void ALRPlayerController::HandlePause()
 {
 	SetPause(!IsPaused());
+}
+
+void ALRPlayerController::HandleCycleVehicle()
+{
+	if (ALRGameModeEndless* GameMode = GetWorld()->GetAuthGameMode<ALRGameModeEndless>())
+	{
+		GameMode->CycleVehicle();
+	}
 }
 
 void ALRPlayerController::HandleToggleControlScheme()

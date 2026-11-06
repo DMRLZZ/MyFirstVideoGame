@@ -73,6 +73,7 @@ private:
 	void HandleRestart();
 	void HandlePause();
 	void HandleToggleControlScheme();
+	void HandleCycleVehicle();
 
 	/** Bus callback: rumble scaled by the near-miss tier. */
 	void HandleNearMiss(const FLRNearMissEvent& Event);

@@ -59,6 +59,9 @@ public:
 	 */
 	bool SetPlayerVehicle(FName VehicleId);
 
+	/** Switches to the next car in Data/Vehicles and restarts the run (there is no garage screen yet). */
+	void CycleVehicle();
+
 	/** Re-reads Data/Gameplay/GameRules.json. Keeps the current rules on failure. */
 	void ReloadRules();
 
