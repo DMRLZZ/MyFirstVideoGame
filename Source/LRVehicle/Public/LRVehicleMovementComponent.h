@@ -45,6 +45,9 @@ public:
 	/** True when the Chaos physics vehicle exists (skeletal mesh with physics asset, game world). */
 	bool HasPhysicsVehicle() const { return PVehicleOutput.IsValid(); }
 
+	/** Offsets of the physics wheels from the rig bones, cm, one per wheel (front first). Call before ApplyDefinition. */
+	void SetWheelOffsets(const TArray<FVector>& InOffsets) { WheelOffsets = InOffsets; }
+
 	/** Number of wheels on the front axle (they come first in WheelSetups). */
 	int32 GetNumFrontWheels() const { return NumFrontWheels; }
 
@@ -56,6 +59,10 @@ public:
 
 	/** Re-pushes the per-wheel runtime values of the current definition (no-op without a definition or vehicle). */
 	void ApplyRuntimeWheelOverrides();
+
+private:
+	/** See SetWheelOffsets. */
+	TArray<FVector> WheelOffsets;
 
 protected:
 	//~ UActorComponent

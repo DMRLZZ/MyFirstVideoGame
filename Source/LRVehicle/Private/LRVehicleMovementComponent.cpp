@@ -159,6 +159,10 @@ void ULRVehicleMovementComponent::WriteSetupProperties(const FLRVehicleDefinitio
 		Setup.WheelClass = ULRWheelRear::StaticClass();
 		Setup.BoneName = Bone;
 	}
+	for (int32 Index = 0; Index < WheelSetups.Num() && Index < WheelOffsets.Num(); ++Index)
+	{
+		WheelSetups[Index].AdditionalOffset = WheelOffsets[Index];
+	}
 }
 
 void ULRVehicleMovementComponent::WriteWheelClassDefaults(const FLRVehicleDefinition& Definition)
