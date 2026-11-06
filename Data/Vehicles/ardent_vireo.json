@@ -6,9 +6,8 @@
 		"Id": "ardent_vireo",
 		"DisplayName": "Ardent Vireo",
 		"SkeletalMesh": "/Game/Vehicles/SportsCar/SKM_SportsCar.SKM_SportsCar",
-		"AnimClass": "/Game/Vehicles/SportsCar/ABP_SportsCar.ABP_SportsCar_C",
 		"AudioProfile": "engine_v10_na",
-		"LengthMeters": 4.55,
+		"LengthMeters": 4.58,
 		"WidthMeters": 1.99,
 		"WheelbaseMeters": 2.65,
 		"MassKg": 1420,
@@ -132,9 +131,9 @@
 		},
 		"Cameras": {
 			"CockpitEyeCm": {
-				"X": -45,
-				"Y": -34,
-				"Z": 98
+				"X": -42,
+				"Y": -38,
+				"Z": 94
 			},
 			"HoodCm": {
 				"X": 30,
@@ -212,13 +211,29 @@
 			"bABSEnabled": true
 		},
 		"BodyMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Body/SM_ardent_vireo_Body/StaticMeshes/SM_ardent_vireo_Body.SM_ardent_vireo_Body",
-		"GlassMesh": "",
+		"GlassMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Glass/SM_ardent_vireo_Glass/StaticMeshes/SM_ardent_vireo_Glass.SM_ardent_vireo_Glass",
 		"WheelMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Wheel/SM_ardent_vireo_Wheel/StaticMeshes/SM_ardent_vireo_Wheel.SM_ardent_vireo_Wheel",
 		"VisualOffsetCm": {
 			"X": 0,
 			"Y": 0,
 			"Z": -11
 		},
-		"VisualWheelInsetCm": 7.0
+		"FrontWheelCm": {
+			"X": 135.0,
+			"Y": 82.5,
+			"Z": 33.5
+		},
+		"RearWheelCm": {
+			"X": -129.20000000000002,
+			"Y": 82.0,
+			"Z": 35.0
+		},
+		"WheelMeshRadiusCm": 35.0,
+		"PaintColor": {
+			"R": 0.55,
+			"G": 0.03,
+			"B": 0.02,
+			"A": 1.0
+		}
 	}
 }

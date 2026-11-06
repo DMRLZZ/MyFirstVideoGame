@@ -6,9 +6,8 @@
 		"Id": "bauer_r3_sport",
 		"DisplayName": "Bauer R3 Sport",
 		"SkeletalMesh": "/Game/Vehicles/SportsCar/SKM_SportsCar.SKM_SportsCar",
-		"AnimClass": "/Game/Vehicles/SportsCar/ABP_SportsCar.ABP_SportsCar_C",
 		"AudioProfile": "engine_i6_turbo",
-		"LengthMeters": 4.55,
+		"LengthMeters": 4.72,
 		"WidthMeters": 1.87,
 		"WheelbaseMeters": 2.75,
 		"MassKg": 1480,
@@ -131,9 +130,9 @@
 		},
 		"Cameras": {
 			"CockpitEyeCm": {
-				"X": -20,
-				"Y": -36,
-				"Z": 108
+				"X": -24,
+				"Y": -40,
+				"Z": 103
 			},
 			"HoodCm": {
 				"X": 40,
@@ -210,14 +209,30 @@
 			"bTractionControlEnabled": true,
 			"bABSEnabled": true
 		},
-		"BodyMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Body/SM_ardent_vireo_Body/StaticMeshes/SM_ardent_vireo_Body.SM_ardent_vireo_Body",
-		"GlassMesh": "",
-		"WheelMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Wheel/SM_ardent_vireo_Wheel/StaticMeshes/SM_ardent_vireo_Wheel.SM_ardent_vireo_Wheel",
+		"BodyMesh": "/Game/LeftRight/Vehicles/Generated/SM_bauer_r3_sport_Body/SM_bauer_r3_sport_Body/StaticMeshes/SM_bauer_r3_sport_Body.SM_bauer_r3_sport_Body",
+		"GlassMesh": "/Game/LeftRight/Vehicles/Generated/SM_bauer_r3_sport_Glass/SM_bauer_r3_sport_Glass/StaticMeshes/SM_bauer_r3_sport_Glass.SM_bauer_r3_sport_Glass",
+		"WheelMesh": "/Game/LeftRight/Vehicles/Generated/SM_bauer_r3_sport_Wheel/SM_bauer_r3_sport_Wheel/StaticMeshes/SM_bauer_r3_sport_Wheel.SM_bauer_r3_sport_Wheel",
 		"VisualOffsetCm": {
 			"X": 0,
 			"Y": 0,
 			"Z": -11
 		},
-		"VisualWheelInsetCm": 7.0
+		"FrontWheelCm": {
+			"X": 142.0,
+			"Y": 79.5,
+			"Z": 33.0
+		},
+		"RearWheelCm": {
+			"X": -143.0,
+			"Y": 79.5,
+			"Z": 33.0
+		},
+		"WheelMeshRadiusCm": 33.0,
+		"PaintColor": {
+			"R": 0.02,
+			"G": 0.06,
+			"B": 0.28,
+			"A": 1.0
+		}
 	}
 }

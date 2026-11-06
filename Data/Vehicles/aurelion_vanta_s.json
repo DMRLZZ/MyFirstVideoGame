@@ -6,9 +6,8 @@
 		"Id": "aurelion_vanta_s",
 		"DisplayName": "Aurelion Vanta S",
 		"SkeletalMesh": "/Game/Vehicles/SportsCar/SKM_SportsCar.SKM_SportsCar",
-		"AnimClass": "/Game/Vehicles/SportsCar/ABP_SportsCar.ABP_SportsCar_C",
 		"AudioProfile": "engine_v8_biturbo",
-		"LengthMeters": 5.0,
+		"LengthMeters": 4.72,
 		"WidthMeters": 1.95,
 		"WheelbaseMeters": 2.98,
 		"MassKg": 1950,
@@ -133,9 +132,9 @@
 		},
 		"Cameras": {
 			"CockpitEyeCm": {
-				"X": -30,
+				"X": -56,
 				"Y": -38,
-				"Z": 112
+				"Z": 88
 			},
 			"HoodCm": {
 				"X": 50,
@@ -212,14 +211,30 @@
 			"bTractionControlEnabled": true,
 			"bABSEnabled": true
 		},
-		"BodyMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Body/SM_ardent_vireo_Body/StaticMeshes/SM_ardent_vireo_Body.SM_ardent_vireo_Body",
-		"GlassMesh": "",
-		"WheelMesh": "/Game/LeftRight/Vehicles/Generated/SM_ardent_vireo_Wheel/SM_ardent_vireo_Wheel/StaticMeshes/SM_ardent_vireo_Wheel.SM_ardent_vireo_Wheel",
+		"BodyMesh": "/Game/LeftRight/Vehicles/Generated/SM_aurelion_kaiser_gt_Body/SM_aurelion_kaiser_gt_Body/StaticMeshes/SM_aurelion_kaiser_gt_Body.SM_aurelion_kaiser_gt_Body",
+		"GlassMesh": "/Game/LeftRight/Vehicles/Generated/SM_aurelion_kaiser_gt_Glass/SM_aurelion_kaiser_gt_Glass/StaticMeshes/SM_aurelion_kaiser_gt_Glass.SM_aurelion_kaiser_gt_Glass",
+		"WheelMesh": "/Game/LeftRight/Vehicles/Generated/SM_aurelion_kaiser_gt_Wheel/SM_aurelion_kaiser_gt_Wheel/StaticMeshes/SM_aurelion_kaiser_gt_Wheel.SM_aurelion_kaiser_gt_Wheel",
 		"VisualOffsetCm": {
 			"X": 0,
 			"Y": 0,
 			"Z": -11
 		},
-		"VisualWheelInsetCm": 7.0
+		"FrontWheelCm": {
+			"X": 147.0,
+			"Y": 82.0,
+			"Z": 34.5
+		},
+		"RearWheelCm": {
+			"X": -120.0,
+			"Y": 82.5,
+			"Z": 35.5
+		},
+		"WheelMeshRadiusCm": 35.5,
+		"PaintColor": {
+			"R": 0.42,
+			"G": 0.43,
+			"B": 0.45,
+			"A": 1.0
+		}
 	}
 }
