@@ -53,7 +53,8 @@ void FLREngineAudioProfileSpec::Define()
 			Harmonic.OffLoadGain = -1.f;
 			Harmonic.OnLoadGain = 5.f;
 
-			const FLREngineHarmonic& Safe = Profile.Sanitized().Harmonics[0];
+			// Copied: Sanitized() returns a temporary, a reference into it would dangle.
+			const FLREngineHarmonic Safe = Profile.Sanitized().Harmonics[0];
 			TestEqual(TEXT("Order"), Safe.Order, 16.f);
 			TestEqual(TEXT("Off load"), Safe.OffLoadGain, 0.f);
 			TestEqual(TEXT("On load"), Safe.OnLoadGain, 1.f);
@@ -72,8 +73,9 @@ void FLREngineAudioProfileSpec::Define()
 
 		It("an unknown or empty id falls back to the default profile", [this]()
 		{
-			AddExpectedError(TEXT("Data file not found"), EAutomationExpectedErrorFlags::Contains, 0);
-			AddExpectedError(TEXT("not loaded"), EAutomationExpectedErrorFlags::Contains, 0);
+			// Exactly two messages for the unknown id: the loader's and the fallback warning, which quotes the loader's error.
+			// A log line only counts for the first expectation it matches, so a second "not loaded" pattern would never be met.
+			AddExpectedError(TEXT("Data file not found"), EAutomationExpectedErrorFlags::Contains, 2);
 
 			FLREngineAudioProfile Unknown;
 			TestFalse(TEXT("Unknown id reports false"), FLREngineAudioProfile::LoadById(FName(TEXT("no_such_audio_profile")), Unknown));
