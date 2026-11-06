@@ -1,0 +1,63 @@
+{
+	"type": "EngineAudioProfile",
+	"id": "engine_i6_turbo",
+	"version": 1,
+	"data": {
+		"Id": "engine_i6_turbo",
+		"CylinderCount": 6,
+		"Harmonics": [
+			{
+				"Order": 0.5,
+				"OffLoadGain": 0.05,
+				"OnLoadGain": 0.07
+			},
+			{
+				"Order": 1,
+				"OffLoadGain": 0.55,
+				"OnLoadGain": 0.65
+			},
+			{
+				"Order": 1.5,
+				"OffLoadGain": 0.04,
+				"OnLoadGain": 0.07
+			},
+			{
+				"Order": 2,
+				"OffLoadGain": 0.28,
+				"OnLoadGain": 0.45
+			},
+			{
+				"Order": 3,
+				"OffLoadGain": 0.14,
+				"OnLoadGain": 0.28
+			},
+			{
+				"Order": 4,
+				"OffLoadGain": 0.07,
+				"OnLoadGain": 0.16
+			},
+			{
+				"Order": 6,
+				"OffLoadGain": 0.03,
+				"OnLoadGain": 0.09
+			}
+		],
+		"EngineGain": 0.5,
+		"OffLoadLevel": 0.5,
+		"IdleLevel": 0.42,
+		"OffLoadCutoffHz": 1300,
+		"OnLoadCutoffHz": 5000,
+		"CutoffRpmTracking": 0.5,
+		"Drive": 1.5,
+		"CycleJitter": 0.003,
+		"AmplitudeJitter": 0.04,
+		"IntakeNoiseGain": 0.16,
+		"IntakeNoiseOrder": 5,
+		"IntakeNoiseQ": 2.5,
+		"ExhaustNoiseGain": 0.07,
+		"ExhaustNoiseCutoffHz": 600,
+		"OverrunCrackleProbability": 0.015,
+		"OverrunCrackleGain": 0.22,
+		"FallbackMaxRpm": 7200
+	}
+}
