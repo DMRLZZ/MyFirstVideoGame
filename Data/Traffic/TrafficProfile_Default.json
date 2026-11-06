@@ -145,7 +145,7 @@
 				"LengthMeters": 4.8,
 				"WidthMeters": 1.95,
 				"HeightMeters": 1.75,
-				"Weight": 30,
+				"Weight": 0,
 				"SpeedFactorMin": 0.94,
 				"SpeedFactorMax": 1.02,
 				"bPreferRightLanes": false,
@@ -204,16 +204,8 @@
 				"CabinLengthFraction": 0.6,
 				"CabinOffsetFraction": -0.08,
 				"LowerBodyHeightFraction": 0.55,
-				"ModelMesh": "/Game/Vehicles/OffroadCar/SM_Offroad_Body.SM_Offroad_Body",
-				"ModelWheelMesh": "/Game/Vehicles/OffroadCar/SM_Offroad_Tire.SM_Offroad_Tire",
-				"PaintMaterialHint": "Body",
-				"PaintParameter": "Paint Tint",
-				"ModelWheelOffsetCm": {
-					"X": 135,
-					"Y": 85,
-					"Z": 40
-				},
-				"ModelWheelbaseCm": 270
+				"PaintMaterialHint": "Paint",
+				"PaintParameter": "PaintColor"
 			},
 			{
 				"Name": "pickup",
