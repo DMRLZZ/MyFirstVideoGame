@@ -30,9 +30,13 @@
 		},
 		"SpeedLimitKmh": 100.0,
 		"SpawnS": 400.0,
-		"EnvironmentPresetFile": "World/Environment_Day.json",
+		"EnvironmentPresetFile": "World/Environment_Sunset.json",
 		"DefaultPlayerLane": 3,
-		"OriginCm": { "X": 0.0, "Y": 0.0, "Z": 0.0 },
+		"OriginCm": {
+			"X": 0.0,
+			"Y": 0.0,
+			"Z": 0.0
+		},
 		"StartYawDeg": 0.0,
 		"Streaming": {
 			"GenerateAheadM": 3000.0,
@@ -63,11 +67,36 @@
 			"ReflectorSpacingM": 25.0,
 			"ReflectorHeightM": 0.25,
 			"ReflectorRadiusM": 0.05,
-			"AsphaltColor": { "R": 0.035, "G": 0.035, "B": 0.038, "A": 1.0 },
-			"WhitePaintColor": { "R": 0.8, "G": 0.8, "B": 0.78, "A": 1.0 },
-			"YellowPaintColor": { "R": 0.85, "G": 0.55, "B": 0.05, "A": 1.0 },
-			"ConcreteColor": { "R": 0.45, "G": 0.44, "B": 0.42, "A": 1.0 },
-			"MetalColor": { "R": 0.25, "G": 0.26, "B": 0.27, "A": 1.0 }
+			"AsphaltColor": {
+				"R": 0.035,
+				"G": 0.035,
+				"B": 0.038,
+				"A": 1.0
+			},
+			"WhitePaintColor": {
+				"R": 0.8,
+				"G": 0.8,
+				"B": 0.78,
+				"A": 1.0
+			},
+			"YellowPaintColor": {
+				"R": 0.85,
+				"G": 0.55,
+				"B": 0.05,
+				"A": 1.0
+			},
+			"ConcreteColor": {
+				"R": 0.45,
+				"G": 0.44,
+				"B": 0.42,
+				"A": 1.0
+			},
+			"MetalColor": {
+				"R": 0.25,
+				"G": 0.26,
+				"B": 0.27,
+				"A": 1.0
+			}
 		}
 	}
 }

@@ -132,6 +132,9 @@
 		"bNight": {
 			"type": "boolean",
 			"description": "Night preset (headlights, street lamps)."
+		},
+		"GroundColor": {
+			"type": "object"
 		}
 	},
 	"additionalProperties": false
