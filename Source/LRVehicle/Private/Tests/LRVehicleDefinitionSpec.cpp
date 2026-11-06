@@ -117,7 +117,7 @@ void FLRVehicleDefinitionSpec::Define()
 				TestTrue(FString::Printf(TEXT("%s has 2 front and 2 rear wheels"), *File),
 					Definition.FrontWheels.BoneNames.Num() == 2 && Definition.RearWheels.BoneNames.Num() == 2);
 				TestTrue(FString::Printf(TEXT("%s has an audio profile"), *File), !Definition.AudioProfile.IsNone());
-				TestTrue(FString::Printf(TEXT("%s has an animation class"), *File), !Definition.AnimClass.IsNull());
+				TestTrue(FString::Printf(TEXT("%s has a visual body"), *File), !Definition.BodyMesh.IsNull());
 				TestTrue(FString::Printf(TEXT("%s crash threshold in [10, 60] km/h"), *File), Definition.CrashImpactKmh >= 10.f && Definition.CrashImpactKmh <= 60.f);
 
 				// Simcade steering scale must never grow with speed.
