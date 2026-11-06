@@ -113,6 +113,12 @@ Tools/Scripts/run-python.ps1 -Script Tools/Editor/x.py -ExtraArgs "-NoSound"
 - Requiere que el plugin **Python Editor Script Plugin** esté activado en el proyecto.
 - Log: `Saved/Logs/run-python.log`. Devuelve el código de salida del editor.
 
+`Tools/Editor/build_traffic_lods.py` es la excepción: `set_lods` no funciona en un commandlet, así que necesita el editor completo. Hay que ejecutarlo después de `import_generated_cars.py`, porque al reimportar se pierden los LODs:
+
+```powershell
+& "$env:UE_ROOT\Engine\Binaries\Win64\UnrealEditor.exe" LeftRight.uproject -ExecutePythonScript="$PWD\Tools\Editor\build_traffic_lods.py" -unattended -nosplash -nullrhi
+```
+
 ### `package.ps1`
 
 Compila, cocina, prepara, empaqueta en `.pak` y archiva una build Win64 con `RunUAT.bat BuildCookRun`.
