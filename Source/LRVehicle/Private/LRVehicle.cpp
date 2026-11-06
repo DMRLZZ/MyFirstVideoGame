@@ -2,6 +2,7 @@
 
 #include "LRVehicle.h"
 #include "Engine/OverlapResult.h"
+#include "ChaosVehicleWheel.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Components/StaticMeshComponent.h"
@@ -321,6 +322,23 @@ void ALRVehicle::ApplyDefinition(const FLRVehicleDefinition& InDefinition)
 
 	if (ULRVehicleMovementComponent* Movement = GetLRMovement())
 	{
+		// Each car has its own wheelbase and track: move the physics wheels from the rig bones to where the design has them.
+		TArray<FVector> Offsets;
+		if (MeshComp != nullptr && MeshComp->GetSkeletalMeshAsset() != nullptr)
+		{
+			const auto AddOffsets = [&Offsets, MeshComp](const TArray<FName>& Bones, const FVector& Axle)
+			{
+				for (const FName& Bone : Bones)
+				{
+					const FVector Rig = MeshComp->GetSocketTransform(Bone, RTS_Component).GetLocation();
+					const double Side = Bone.ToString().EndsWith(TEXT("L")) ? -1.0 : 1.0;
+					Offsets.Add(FVector(Axle.X - Rig.X, Side * Axle.Y - Rig.Y, 0.0));
+				}
+			};
+			AddOffsets(Definition.FrontWheels.BoneNames, Definition.FrontWheelCm);
+			AddOffsets(Definition.RearWheels.BoneNames, Definition.RearWheelCm);
+		}
+		Movement->SetWheelOffsets(Offsets);
 		Movement->ApplyDefinition(Definition);
 	}
 
@@ -361,9 +379,8 @@ void ALRVehicle::ApplyVisualMeshes()
 	GlassVisual->SetStaticMesh(LoadMesh(Definition.GlassMesh));
 	GlassVisual->SetRelativeLocation(Definition.VisualOffsetCm);
 
-	// With a visual body the skeleton is only the rig: hide it but keep it animating, the wheel bones drive the wheels.
+	// With a visual body the skeleton is only the physics rig. The visual wheels are placed from the simulation.
 	MeshComp->SetVisibility(Body == nullptr, /*bPropagateToChildren*/ false);
-	MeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 
 	for (UStaticMeshComponent* Wheel : WheelVisuals)
 	{
@@ -380,30 +397,54 @@ void ALRVehicle::ApplyVisualMeshes()
 		return;
 	}
 
-	const auto AddWheels = [this, MeshComp, WheelMesh](const TArray<FName>& Bones)
+	const int32 NumWheels = Definition.FrontWheels.BoneNames.Num() + Definition.RearWheels.BoneNames.Num();
+	for (int32 Index = 0; Index < NumWheels; ++Index)
 	{
-		for (const FName& Bone : Bones)
-		{
-			UStaticMeshComponent* Wheel = NewObject<UStaticMeshComponent>(this);
-			Wheel->SetStaticMesh(WheelMesh);
-			Wheel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			Wheel->SetGenerateOverlapEvents(false);
-			Wheel->SetCanEverAffectNavigation(false);
-			Wheel->SetupAttachment(MeshComp, Bone);
-			Wheel->RegisterComponent();
-			WheelVisuals.Add(Wheel);
+		UStaticMeshComponent* Wheel = NewObject<UStaticMeshComponent>(this);
+		Wheel->SetStaticMesh(WheelMesh);
+		Wheel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Wheel->SetGenerateOverlapEvents(false);
+		Wheel->SetCanEverAffectNavigation(false);
+		Wheel->SetupAttachment(MeshComp);
+		Wheel->RegisterComponent();
+		WheelVisuals.Add(Wheel);
+	}
+	UpdateVisualWheels();
+}
 
-			// Bone names end in L / R (Phys_Wheel_FL). The mesh is modeled for the right side.
-			const bool bLeft = Bone.ToString().EndsWith(TEXT("L"));
-			if (Definition.bFlipLeftWheels && bLeft)
-			{
-				Wheel->SetRelativeRotation(FRotator(0.0, 180.0, 0.0));
-			}
-			Wheel->SetRelativeLocation(FVector(0.0, bLeft ? Definition.VisualWheelInsetCm : -Definition.VisualWheelInsetCm, 0.0));
+void ALRVehicle::UpdateVisualWheels()
+{
+	const ULRVehicleMovementComponent* Movement = GetLRMovement();
+	const int32 NumFront = Definition.FrontWheels.BoneNames.Num();
+	for (int32 Index = 0; Index < WheelVisuals.Num(); ++Index)
+	{
+		UStaticMeshComponent* Wheel = WheelVisuals[Index];
+		const bool bFront = Index < NumFront;
+		const TArray<FName>& Bones = bFront ? Definition.FrontWheels.BoneNames : Definition.RearWheels.BoneNames;
+		const FName Bone = Bones[bFront ? Index : Index - NumFront];
+		// Bone names end in L / R (Phys_Wheel_FL). The mesh has its outer face on +Y, as a right wheel.
+		const bool bLeft = Bone.ToString().EndsWith(TEXT("L"));
+		const FVector Axle = bFront ? Definition.FrontWheelCm : Definition.RearWheelCm;
+
+		float SteerDeg = 0.f;
+		float SpinDeg = 0.f;
+		float SuspensionCm = 0.f;
+		if (Movement != nullptr && Movement->Wheels.IsValidIndex(Index) && Movement->Wheels[Index] != nullptr && Movement->HasPhysicsVehicle())
+		{
+			const UChaosVehicleWheel* Sim = Movement->Wheels[Index];
+			SteerDeg = Sim->GetSteerAngle();
+			SpinDeg = Sim->GetRotationAngle();
+			SuspensionCm = Sim->GetSuspensionOffset();
 		}
-	};
-	AddWheels(Definition.FrontWheels.BoneNames);
-	AddWheels(Definition.RearWheels.BoneNames);
+
+		const FVector Location(Axle.X, bLeft ? -Axle.Y : Axle.Y, Definition.VisualOffsetCm.Z + Axle.Z + SuspensionCm);
+		// Spin around the axle, flip the left wheels so the rim faces out, then steer.
+		const FQuat Spin(FVector::RightVector, FMath::DegreesToRadians(-SpinDeg));
+		const FQuat Flip = bLeft ? FQuat(FVector::UpVector, UE_PI) : FQuat::Identity;
+		const FQuat Steer(FVector::UpVector, FMath::DegreesToRadians(SteerDeg));
+		Wheel->SetRelativeLocationAndRotation(Location, Steer * Spin * Flip);
+		Wheel->SetRelativeScale3D(FVector(Axle.Z / FMath::Max(Definition.WheelMeshRadiusCm, 1.f)));
+	}
 }
 
 void ALRVehicle::SetFallbackBodyVisible(bool bVisible)
@@ -528,6 +569,7 @@ void ALRVehicle::Tick(float DeltaSeconds)
 	}
 
 	UpdateDriving();
+	UpdateVisualWheels();
 }
 
 void ALRVehicle::UpdateKinematics(float DeltaSeconds)

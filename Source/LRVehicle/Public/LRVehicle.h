@@ -195,6 +195,9 @@ private:
 	/** Loads the visual static meshes of the definition and attaches them to the physics skeleton. */
 	void ApplyVisualMeshes();
 
+	/** Places the visual wheels from the simulation: steering, spin and suspension travel. */
+	void UpdateVisualWheels();
+
 	/** Detects impacts from the horizontal velocity change of this frame (independent of physics hit events). */
 	void DetectImpact(const FVector& PreviousVelocityCms, const FVector& VelocityCms, float DeltaSeconds);
 
@@ -218,7 +221,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Vehicle")
 	TObjectPtr<UStaticMeshComponent> GlassVisual;
 
-	/** One visual wheel per wheel bone, created when the definition is applied. */
+	/** One visual wheel per physics wheel (front ones first), created when the definition is applied. */
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UStaticMeshComponent>> WheelVisuals;
 

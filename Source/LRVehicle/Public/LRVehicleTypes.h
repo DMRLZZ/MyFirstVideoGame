@@ -514,13 +514,17 @@ struct LRVEHICLE_API FLRVehicleDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
 	FVector VisualOffsetCm = FVector::ZeroVector;
 
-	/** Moves the visual wheels inwards along the axle, cm, when the rig track is wider than the body. */
+	/** Front axle of the car design: X from the origin, half track Y, wheel radius Z, cm. The physics wheels move there. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
-	float VisualWheelInsetCm = 0.f;
+	FVector FrontWheelCm = FVector(135.0, 80.0, 33.0);
 
-	/** Rotates the wheel mesh 180 degrees on the wheels of the left side, so its outer face points outwards. */
+	/** Rear axle of the car design: X from the origin, half track Y, wheel radius Z, cm. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
-	bool bFlipLeftWheels = true;
+	FVector RearWheelCm = FVector(-129.0, 80.0, 34.0);
+
+	/** Radius of the wheel mesh, cm: the visual wheels are scaled from it to each axle radius. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	float WheelMeshRadiusCm = 35.f;
 
 	/** Time constant of the smoothed local acceleration exposed to cameras, seconds. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Feedback", meta = (ClampMin = "0.0", ClampMax = "2.0"))
