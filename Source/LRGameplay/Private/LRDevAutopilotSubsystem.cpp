@@ -270,15 +270,18 @@ void ULRDevAutopilotSubsystem::LogTelemetry(const ALRVehicle& Vehicle)
 	const ULRRunContextSubsystem* Context = ULRRunContextSubsystem::Get(this);
 	const ULRTrafficSubsystem* Traffic = ULRTrafficSubsystem::Get(this);
 	const FLRRoadCoord Coord = Vehicle.GetRoadCoord();
+	const APlayerController* Player = GetWorld()->GetFirstPlayerController();
+	const ALRPlayerCameraManager* Camera = Player ? Cast<ALRPlayerCameraManager>(Player->PlayerCameraManager) : nullptr;
 	const double AverageFrameMs = AccumulatedFrames > 0 ? 1000.0 * AccumulatedFrameSeconds / AccumulatedFrames : 0.0;
 
 	UE_LOG(LogLRGameplay, Log,
-		TEXT("DevTelemetry t=%.1f state=%s speed=%.0f km/h gear=%d rpm=%.0f S=%.1f D=%.2f lane=%d target=%d wrecked=%d traffic=%d frame=%.1f ms (%.0f fps) game=%.1f render=%.1f gpu=%.1f"),
+		TEXT("DevTelemetry t=%.1f state=%s speed=%.0f km/h gear=%d rpm=%.0f S=%.1f D=%.2f lane=%d target=%d wrecked=%d traffic=%d cam=%s frame=%.1f ms (%.0f fps) game=%.1f render=%.1f gpu=%.1f"),
 		ElapsedSeconds,
 		Context ? *UEnum::GetValueAsString(Context->GetRunState()) : TEXT("?"),
 		Vehicle.GetSpeedKmh(), Vehicle.GetCurrentGear(), Vehicle.GetEngineRpm(),
 		Coord.S, Coord.D, Vehicle.GetCurrentLane(), Vehicle.GetTargetLane(), Vehicle.IsWrecked() ? 1 : 0,
 		Traffic ? Traffic->GetNumVehicles() : -1,
+		Camera ? *UEnum::GetValueAsString(Camera->GetCameraMode()) : TEXT("?"),
 		AverageFrameMs, AverageFrameMs > 0.0 ? 1000.0 / AverageFrameMs : 0.0,
 		FPlatformTime::ToMilliseconds(GGameThreadTime), FPlatformTime::ToMilliseconds(GRenderThreadTime),
 		FPlatformTime::ToMilliseconds(RHIGetGPUFrameCycles()));
