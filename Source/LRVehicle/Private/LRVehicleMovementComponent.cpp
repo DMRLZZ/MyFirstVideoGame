@@ -195,6 +195,11 @@ void ULRVehicleMovementComponent::ApplyDefinition(const FLRVehicleDefinition& De
 		*Definition.Id.ToString(), HasPhysicsVehicle() ? TEXT("yes") : TEXT("no"));
 }
 
+bool ULRVehicleMovementComponent::CanCreateVehicle() const
+{
+	return bHasDefinition && Super::CanCreateVehicle();
+}
+
 void ULRVehicleMovementComponent::OnCreatePhysicsState()
 {
 	Super::OnCreatePhysicsState();

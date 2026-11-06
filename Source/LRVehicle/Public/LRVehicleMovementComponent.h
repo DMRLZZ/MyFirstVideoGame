@@ -61,6 +61,9 @@ protected:
 	//~ UActorComponent
 	virtual void OnCreatePhysicsState() override;
 
+	/** No Chaos vehicle until a definition is applied: at spawn the mesh is still empty and wheel bones cannot be located. */
+	virtual bool CanCreateVehicle() const override;
+
 private:
 	/** Writes every setup UPROPERTY from Definition (no physics calls). */
 	void WriteSetupProperties(const FLRVehicleDefinition& Definition);
