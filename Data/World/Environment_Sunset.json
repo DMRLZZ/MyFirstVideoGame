@@ -5,7 +5,7 @@
 	"comment": "Low warm sun close to the horizon, long shadows, volumetric haze.",
 	"data": {
 		"SunPitchDeg": -18.0,
-		"SunYawDeg": 215.0,
+		"SunYawDeg": 35.0,
 		"SunIntensityLux": 10000.0,
 		"SunColor": {
 			"R": 1.0,
