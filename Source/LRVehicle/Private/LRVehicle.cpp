@@ -1,6 +1,9 @@
 // Copyright LEFTRIGHT. All Rights Reserved.
 
 #include "LRVehicle.h"
+#include "Engine/OverlapResult.h"
+#include "Engine/StaticMesh.h"
+#include "Components/StaticMeshComponent.h"
 
 #include "Animation/AnimInstance.h"
 #include "Assist/LRLaneAssist.h"
@@ -53,6 +56,18 @@ ALRVehicle::ALRVehicle(const FObjectInitializer& ObjectInitializer)
 	FallbackBody->SetGenerateOverlapEvents(false);
 	FallbackBody->SetCanEverAffectNavigation(false);
 	FallbackBody->SetVisibility(false);
+
+	const auto CreateVisual = [this](const FName Name)
+	{
+		UStaticMeshComponent* Visual = CreateDefaultSubobject<UStaticMeshComponent>(Name);
+		Visual->SetupAttachment(GetMesh());
+		Visual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Visual->SetGenerateOverlapEvents(false);
+		Visual->SetCanEverAffectNavigation(false);
+		return Visual;
+	};
+	BodyVisual = CreateVisual(TEXT("BodyVisual"));
+	GlassVisual = CreateVisual(TEXT("GlassVisual"));
 }
 
 ULRVehicleMovementComponent* ALRVehicle::GetLRMovement() const
@@ -70,11 +85,8 @@ void ALRVehicle::BeginPlay()
 		MeshComp->OnComponentHit.AddDynamic(this, &ALRVehicle::HandleMeshHit);
 	}
 
-	// Inputs are written in this actor's tick: make the movement component consume them in the same frame.
-	if (UChaosVehicleMovementComponent* Movement = GetVehicleMovementComponent())
-	{
-		Movement->PrimaryComponentTick.AddPrerequisite(this, PrimaryActorTick);
-	}
+	// Note: the engine makes a pawn tick AFTER its movement component, so inputs written in this actor's tick
+	// are consumed on the next frame. Do not add the reverse prerequisite: it forms a tick cycle.
 
 	if (!bHasDefinition && !DefaultVehicleId.IsNone())
 	{
@@ -275,6 +287,10 @@ void ALRVehicle::ApplyDefinition(const FLRVehicleDefinition& InDefinition)
 				MeshComp->SetSkeletalMeshAsset(LoadedMesh);
 			}
 			SetFallbackBodyVisible(false);
+
+			// AWheeledVehiclePawn creates the mesh with physics off (the engine template enables it in its Blueprint).
+			// The Chaos vehicle only drives a simulating body.
+			MeshComp->SetSimulatePhysics(true);
 		}
 		else
 		{
@@ -300,12 +316,78 @@ void ALRVehicle::ApplyDefinition(const FLRVehicleDefinition& InDefinition)
 		MeshComp->SetNotifyRigidBodyCollision(true);
 	}
 
+	ApplyVisualMeshes();
+
 	if (ULRVehicleMovementComponent* Movement = GetLRMovement())
 	{
 		Movement->ApplyDefinition(Definition);
 	}
 
 	UE_LOG(LogLRVehicle, Log, TEXT("Vehicle definition '%s' (%s) applied"), *Definition.Id.ToString(), *Definition.DisplayName);
+}
+
+void ALRVehicle::ApplyVisualMeshes()
+{
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	if (MeshComp == nullptr)
+	{
+		return;
+	}
+
+	const auto LoadMesh = [](const FSoftObjectPath& Path) -> UStaticMesh*
+	{
+		return Path.IsNull() ? nullptr : Cast<UStaticMesh>(Path.TryLoad());
+	};
+
+	UStaticMesh* Body = LoadMesh(Definition.BodyMesh);
+	if (!Definition.BodyMesh.IsNull() && Body == nullptr)
+	{
+		UE_LOG(LogLRVehicle, Error, TEXT("Vehicle '%s': cannot load body mesh '%s'"), *Definition.Id.ToString(), *Definition.BodyMesh.ToString());
+	}
+	BodyVisual->SetStaticMesh(Body);
+	GlassVisual->SetStaticMesh(LoadMesh(Definition.GlassMesh));
+
+	// With a visual body the skeleton is only the rig: hide it but keep it animating, the wheel bones drive the wheels.
+	MeshComp->SetVisibility(Body == nullptr, /*bPropagateToChildren*/ false);
+	MeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+
+	for (UStaticMeshComponent* Wheel : WheelVisuals)
+	{
+		if (Wheel != nullptr)
+		{
+			Wheel->DestroyComponent();
+		}
+	}
+	WheelVisuals.Reset();
+
+	UStaticMesh* WheelMesh = LoadMesh(Definition.WheelMesh);
+	if (WheelMesh == nullptr)
+	{
+		return;
+	}
+
+	const auto AddWheels = [this, MeshComp, WheelMesh](const TArray<FName>& Bones)
+	{
+		for (const FName& Bone : Bones)
+		{
+			UStaticMeshComponent* Wheel = NewObject<UStaticMeshComponent>(this);
+			Wheel->SetStaticMesh(WheelMesh);
+			Wheel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Wheel->SetGenerateOverlapEvents(false);
+			Wheel->SetCanEverAffectNavigation(false);
+			Wheel->SetupAttachment(MeshComp, Bone);
+			Wheel->RegisterComponent();
+			WheelVisuals.Add(Wheel);
+
+			// Bone names end in L / R (Phys_Wheel_FL). The mesh is modeled for the right side.
+			if (Definition.bFlipLeftWheels && Bone.ToString().EndsWith(TEXT("L")))
+			{
+				Wheel->SetRelativeRotation(FRotator(0.0, 180.0, 0.0));
+			}
+		}
+	};
+	AddWheels(Definition.FrontWheels.BoneNames);
+	AddWheels(Definition.RearWheels.BoneNames);
 }
 
 void ALRVehicle::SetFallbackBodyVisible(bool bVisible)
@@ -365,6 +447,7 @@ void ALRVehicle::ResetForRun(double S, float D, float InitialSpeedKmh)
 	SetActorLocationAndRotation(Location, Rotation, false, nullptr, ETeleportType::ResetPhysics);
 
 	bWrecked = false;
+	bOffRoadReported = false;
 	bReverseEngaged = false;
 	ClearInputs();
 
@@ -443,6 +526,8 @@ void ALRVehicle::UpdateKinematics(float DeltaSeconds)
 
 	if (bHasPreviousVelocity && DeltaSeconds > UE_KINDA_SMALL_NUMBER)
 	{
+		DetectImpact(LastVelocityCms, VelocityCms, DeltaSeconds);
+
 		const FVector WorldAccelerationMs2 = (VelocityCms - LastVelocityCms) * (LRUnits::MetersPerCm / DeltaSeconds);
 		const FVector LocalAccelerationMs2 = ActorTransform.InverseTransformVectorNoScale(WorldAccelerationMs2);
 		const float Alpha = LRVehicleMath::ComputeSmoothingAlpha(DeltaSeconds, Definition.AccelerationSmoothingSeconds);
@@ -457,6 +542,81 @@ void ALRVehicle::UpdateKinematics(float DeltaSeconds)
 	SideSlipRad = FMath::Abs(LocalVelocityCms.X) > LRVehiclePrivate::SideSlipMinSpeedCms
 		? static_cast<float>(FMath::Atan2(LocalVelocityCms.Y, FMath::Abs(LocalVelocityCms.X)))
 		: 0.f;
+}
+
+void ALRVehicle::DetectImpact(const FVector& PreviousVelocityCms, const FVector& VelocityCms, float DeltaSeconds)
+{
+	// Horizontal only: a bump or a landing is not a crash.
+	const float DeltaKmh = static_cast<float>(LRUnits::CmsToKmh((VelocityCms - PreviousVelocityCms).Size2D()));
+	if (bWrecked || !LRVehicleMath::IsImpactSpike(DeltaKmh, DeltaSeconds, Definition.ImpactMinDeltaKmh, Definition.ImpactMinAccelMs2))
+	{
+		return;
+	}
+
+	const UWorld* World = GetWorld();
+	const double Now = World ? World->GetTimeSeconds() : 0.0;
+	if (Now - LastCrashTimeSeconds < Definition.CrashDebounceSeconds)
+	{
+		return;
+	}
+	LastCrashTimeSeconds = Now;
+
+	AActor* Other = FindActorInContact();
+	LastCrashActor = Other;
+
+	FLRCrashEvent Event;
+	Event.ImpactSpeedKmh = DeltaKmh;
+	Event.PlayerSpeedKmh = static_cast<float>(LRUnits::CmsToKmh(PreviousVelocityCms.Size()));
+	Event.Location = GetActorLocation();
+	Event.OtherActor = Other;
+	Event.bSevere = DeltaKmh >= Definition.CrashImpactKmh;
+
+	UE_LOG(LogLRVehicle, Log, TEXT("Impact with %s: delta %.1f km/h at %.1f km/h, severe=%d"),
+		*GetNameSafe(Other), Event.ImpactSpeedKmh, Event.PlayerSpeedKmh, Event.bSevere ? 1 : 0);
+
+	if (const ULRGameEventSubsystem* Events = ULRGameEventSubsystem::Get(this))
+	{
+		Events->BroadcastCrash(Event);
+	}
+}
+
+AActor* ALRVehicle::FindActorInContact() const
+{
+	const UWorld* World = GetWorld();
+	if (World == nullptr)
+	{
+		return nullptr;
+	}
+
+	FCollisionObjectQueryParams ObjectTypes;
+	ObjectTypes.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjectTypes.AddObjectTypesToQuery(ECC_PhysicsBody);
+	ObjectTypes.AddObjectTypesToQuery(ECC_Vehicle);
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(LRVehicleContact), false, this);
+
+	// A sphere reaching just past the footprint: the car has already been pushed back when the spike is seen.
+	const float RadiusCm = 100.f * (0.5f * Definition.LengthMeters + 1.5f);
+	TArray<FOverlapResult> Overlaps;
+	World->OverlapMultiByObjectType(Overlaps, GetActorLocation(), FQuat::Identity, ObjectTypes, FCollisionShape::MakeSphere(RadiusCm), Params);
+
+	AActor* Nearest = nullptr;
+	double NearestDistSq = TNumericLimits<double>::Max();
+	for (const FOverlapResult& Overlap : Overlaps)
+	{
+		AActor* Candidate = Overlap.GetActor();
+		if (Candidate == nullptr)
+		{
+			continue;
+		}
+		const double DistSq = FVector::DistSquared(Candidate->GetActorLocation(), GetActorLocation());
+		if (DistSq < NearestDistSq)
+		{
+			NearestDistSq = DistSq;
+			Nearest = Candidate;
+		}
+	}
+	return Nearest;
 }
 
 void ALRVehicle::UpdateRoadState(const ULRRoadSubsystem& Road)
@@ -476,6 +636,29 @@ void ALRVehicle::UpdateRoadState(const ULRRoadSubsystem& Road)
 	const float RoadYawRad = FMath::DegreesToRadians(Path.GetHeadingYawDegrees(Coord.S));
 	HeadingErrorRad = LRVehicleMath::WrapAngleRad(FMath::DegreesToRadians(static_cast<float>(GetActorRotation().Yaw)) - RoadYawRad);
 	RoadCurvaturePerM = Path.GetCurvature(Coord.S);
+
+	// Leaving the corridor (past a barrier or through the surface) must end the run: there is no ground out there.
+	if (!bOffRoadReported && !bWrecked)
+	{
+		const FLRRoadCrossSection& Section = Road.GetCrossSection();
+		const double HeightAboveRoadM = LRUnits::CmToMeters(GetActorLocation().Z - Road.RoadToWorld(Coord.S, Coord.D).GetLocation().Z);
+		if (LRVehicleMath::IsOffRoad(Coord.D, HeightAboveRoadM, Section.LeftBarrierD, Section.RightBarrierD,
+			Definition.OffRoadBelowMeters, Definition.OffRoadLateralMarginMeters))
+		{
+			bOffRoadReported = true;
+			UE_LOG(LogLRVehicle, Log, TEXT("Off road at S=%.1f D=%.2f height=%.2f m"), Coord.S, Coord.D, HeightAboveRoadM);
+
+			if (const ULRGameEventSubsystem* Events = ULRGameEventSubsystem::Get(this))
+			{
+				FLRCrashEvent Event;
+				Event.PlayerSpeedKmh = GetSpeedKmh();
+				Event.ImpactSpeedKmh = Event.PlayerSpeedKmh;
+				Event.Location = GetActorLocation();
+				Event.bSevere = true;
+				Events->BroadcastCrash(Event);
+			}
+		}
+	}
 
 	const TArray<FLRLaneDesc>& Lanes = Path.GetLanes();
 	const int32 NewLane = LRVehicleMath::UpdateCurrentLane(Lanes, CurrentLane, Coord.D, Definition.LaneAssist.LaneChangeHysteresisMeters);
@@ -601,6 +784,8 @@ void ALRVehicle::UpdateDriving()
 void ALRVehicle::HandleMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
+	UE_LOG(LogLRVehicle, VeryVerbose, TEXT("Hit %s normal %s"), *GetNameSafe(OtherActor), *Hit.ImpactNormal.ToString());
+
 	if (OtherActor == this)
 	{
 		return;
@@ -609,6 +794,7 @@ void ALRVehicle::HandleMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherA
 	// Contacts with a mostly vertical normal are the ground (landing, bottoming out), not crashes.
 	if (FMath::Abs(Hit.ImpactNormal.Z) > Definition.CrashFloorNormalZ)
 	{
+		UE_LOG(LogLRVehicle, VeryVerbose, TEXT("Hit %s ignored as ground (normal Z %.2f)"), *GetNameSafe(OtherActor), Hit.ImpactNormal.Z);
 		return;
 	}
 
@@ -648,7 +834,7 @@ void ALRVehicle::HandleMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherA
 	Event.OtherActor = OtherActor;
 	Event.bSevere = ImpactSpeedKmh >= Definition.CrashImpactKmh;
 
-	UE_LOG(LogLRVehicle, Verbose, TEXT("Crash with %s: impact %.1f km/h, speed %.1f km/h, severe=%d"),
+	UE_LOG(LogLRVehicle, Log, TEXT("Crash with %s: impact %.1f km/h, speed %.1f km/h, severe=%d"),
 		*GetNameSafe(OtherActor), Event.ImpactSpeedKmh, Event.PlayerSpeedKmh, Event.bSevere ? 1 : 0);
 
 	if (const ULRGameEventSubsystem* Events = ULRGameEventSubsystem::Get(this))

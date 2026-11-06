@@ -110,6 +110,12 @@ public:
 	/** Vehicle yaw minus road yaw this tick, radians (+ = pointing right). */
 	float GetHeadingErrorRad() const { return HeadingErrorRad; }
 
+	/** Yaw rate around the vehicle up axis, rad/s (+ = turning right). */
+	float GetYawRateRadS() const { return YawRateRadS; }
+
+	/** Lateral road position the lane assist is steering to, meters. */
+	float GetTargetLaneCenterD() const { return TargetLaneCenterD; }
+
 	/** True after SetWrecked(true): input disabled, physics coasting. */
 	virtual bool IsWrecked() const override { return bWrecked; }
 
@@ -186,6 +192,15 @@ private:
 	/** Shows / hides the fallback box used when the skeletal mesh is missing. */
 	void SetFallbackBodyVisible(bool bVisible);
 
+	/** Loads the visual static meshes of the definition and attaches them to the physics skeleton. */
+	void ApplyVisualMeshes();
+
+	/** Detects impacts from the horizontal velocity change of this frame (independent of physics hit events). */
+	void DetectImpact(const FVector& PreviousVelocityCms, const FVector& VelocityCms, float DeltaSeconds);
+
+	/** Nearest dynamic object touching the car, used to tell the traffic system which vehicle was hit. May be null. */
+	AActor* FindActorInContact() const;
+
 	/** Releases every driver input (also on Chaos). */
 	void ClearInputs();
 
@@ -195,6 +210,17 @@ private:
 	/** Visible stand-in when the skeletal mesh cannot be loaded (no collision). */
 	UPROPERTY(VisibleAnywhere, Category = "Vehicle")
 	TObjectPtr<UStaticMeshComponent> FallbackBody;
+
+	/** Visual car body and windows (see FLRVehicleDefinition::BodyMesh). */
+	UPROPERTY(VisibleAnywhere, Category = "Vehicle")
+	TObjectPtr<UStaticMeshComponent> BodyVisual;
+
+	UPROPERTY(VisibleAnywhere, Category = "Vehicle")
+	TObjectPtr<UStaticMeshComponent> GlassVisual;
+
+	/** One visual wheel per wheel bone, created when the definition is applied. */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UStaticMeshComponent>> WheelVisuals;
 
 	/**
 	 * Vehicle loaded at BeginPlay when nothing applied a definition before (cars placed in a level, quick tests).
@@ -227,6 +253,9 @@ private:
 	// Road state.
 	FLRRoadCoord CachedRoadCoord;
 	bool bHasRoadCoord = false;
+
+	/** The off-road crash was already reported for this run. */
+	bool bOffRoadReported = false;
 	int32 RoadSegmentHint = INDEX_NONE;
 	float HeadingErrorRad = 0.f;
 	float RoadCurvaturePerM = 0.f;
