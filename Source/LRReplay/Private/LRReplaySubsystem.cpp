@@ -152,6 +152,13 @@ bool ULRReplaySubsystem::EvaluateAt(float TimeFromStart, FLRReplayFrame& OutFram
 void ULRReplaySubsystem::HandleRunReset(const FLRRunResetEvent& Event)
 {
 	ClearRecording();
+
+	// BeginNewRun does not change the run state: restarting from Running fires no state event, so resume here.
+	const ULRRunContextSubsystem* RunContext = ULRRunContextSubsystem::Get(this);
+	if (RunContext && RunContext->IsRunning())
+	{
+		StartRecording();
+	}
 }
 
 void ULRReplaySubsystem::HandleRunStateChanged(const FLRRunStateChangedEvent& Event)

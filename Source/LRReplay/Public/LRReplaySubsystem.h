@@ -16,7 +16,8 @@ struct FLRRunStateChangedEvent;
  * Records the last seconds of the run into a ring buffer (one per game world).
  *
  * Automatic behavior (driven by the LRCore event bus):
- * - OnRunReset: stops and clears the recording.
+ * - OnRunReset: clears the recording; sampling restarts at once if the run state is still Running (a restart
+ *   does not change the state, so no state event would follow), otherwise it stops until the state becomes Running.
  * - Run state becomes Running: recording starts (or resumes on the same buffer).
  * - Run state becomes Crashed (or any other non-Running state): recording stops; the buffer is kept so the
  *   Replay state can play it back through EvaluateAt.
