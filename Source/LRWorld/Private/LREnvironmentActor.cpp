@@ -93,10 +93,18 @@ void ALREnvironmentActor::UpdateGround(const FVector& FocusLocationCm)
 
 void ALREnvironmentActor::ApplyPreset(const FLREnvironmentPreset& Preset)
 {
-	if (UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial")))
+	UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/LeftRight/Materials/M_LRSurface.M_LRSurface"));
+	if (Base == nullptr)
+	{
+		Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	}
+	if (Base != nullptr)
 	{
 		UMaterialInstanceDynamic* GroundMaterial = UMaterialInstanceDynamic::Create(Base, this);
 		GroundMaterial->SetVectorParameterValue(TEXT("Color"), Preset.GroundColor);
+		GroundMaterial->SetScalarParameterValue(TEXT("Roughness"), 0.95f);
+		GroundMaterial->SetScalarParameterValue(TEXT("GrainAmount"), 0.8f);
+		GroundMaterial->SetScalarParameterValue(TEXT("GrainScale"), 1500.f); // The plane has one UV tile over 6 km.
 		GroundPlane->SetMaterial(0, GroundMaterial);
 	}
 
