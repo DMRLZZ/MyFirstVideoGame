@@ -46,7 +46,7 @@ SLOTS = {
     "Tire": surface_instance("MI_Car_Tire", (0.01, 0.01, 0.011), 0.82, specular=0.25, grain=0.2),
     "Trim": surface_instance("MI_Car_Trim", (0.006, 0.006, 0.007), 0.55, specular=0.3, grain=0.15),
     "Gap": surface_instance("MI_Car_Gap", (0.002, 0.002, 0.002), 0.9),
-    "Interior": surface_instance("MI_Car_Interior", (0.02, 0.016, 0.014), 0.7, grain=0.3),
+    "Interior": surface_instance("MI_Car_Interior", (0.04, 0.034, 0.03), 0.7, grain=0.3),
     "Rim": surface_instance("MI_Car_Rim", (0.2, 0.205, 0.22), 0.32, metallic=1.0),
     "Brake": surface_instance("MI_Car_Brake", (0.25, 0.25, 0.26), 0.4, metallic=1.0),
     "HeadLight": surface_instance("MI_Car_HeadLight", (0.02, 0.022, 0.026), 0.06, specular=0.8, emissive=(0.02, 0.02, 0.025)),
