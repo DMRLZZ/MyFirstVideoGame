@@ -9,6 +9,8 @@ Parameters used from C++ through dynamic instances:
   Specular (scalar)   dielectric specular
   GrainAmount (scalar) strength of the procedural aggregate noise
   GrainScale (scalar) noise frequency, repetitions per meter
+  Metallic (scalar)   0 = dielectric, 1 = metal
+  Emissive (vector)   self illumination (lamps), linear color * intensity
 UVs are world meters (see ALRRoadStreamer), so the grain has the same size everywhere.
 """
 import unreal
@@ -79,6 +81,12 @@ lib.connect_material_expressions(blend, "", base, "B")
 lib.connect_material_property(base, "", unreal.MaterialProperty.MP_BASE_COLOR)
 lib.connect_material_property(roughness, "", unreal.MaterialProperty.MP_ROUGHNESS)
 lib.connect_material_property(specular, "", unreal.MaterialProperty.MP_SPECULAR)
+
+metallic = scalar_param("Metallic", 0.0, -500, 440)
+lib.connect_material_property(metallic, "", unreal.MaterialProperty.MP_METALLIC)
+
+emissive = vector_param("Emissive", unreal.LinearColor(0.0, 0.0, 0.0, 1.0), -500, 560)
+lib.connect_material_property(emissive, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 
 lib.recompile_material(material)
 unreal.EditorAssetLibrary.save_loaded_asset(material)
