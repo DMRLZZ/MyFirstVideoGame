@@ -553,7 +553,7 @@ def build_details(mesh, design, c, arches, P, seg):
 
     cab = design.get("Cabin")
     if cab and quality >= 1:
-        build_interior(mesh, cab)
+        build_interior(mesh, cab, c["Top"])
         close_cabin(mesh, design, c, cab)
 
 
@@ -582,15 +582,19 @@ def close_cabin(mesh, design, c, cab):
     add_mirrored(mesh, "Interior", box((rear, half / 2, (z + belt) / 2), (0.03, half, belt - z)))
 
 
-def build_interior(mesh, cab):
+def build_interior(mesh, cab, roof):
     """Seats, dash, console, door cards and steering wheel. Seen through the glass and from the cockpit camera."""
     z, sx, sy, dash = cab["FloorZ"], cab["SeatX"], cab["SeatY"], cab["DashX"]
     pitch = math.radians(-16)
     Rback = np.array([[math.cos(pitch), 0, math.sin(pitch)], [0, 1, 0], [-math.sin(pitch), 0, math.cos(pitch)]])
     # Sport seats: cushion, bolsters, back and integrated headrest.
     add_mirrored(mesh, "Interior", ellipsoid((sx, sy, z + 0.2), (0.27, 0.235, 0.075)))
-    add_mirrored(mesh, "Interior", ellipsoid((sx - 0.32, sy, z + 0.5), (0.085, 0.235, 0.33), R=Rback))
-    add_mirrored(mesh, "Interior", ellipsoid((sx - 0.42, sy, z + 0.86), (0.07, 0.125, 0.115), R=Rback))
+    # Low roofs get lower seats: the headrest always stays clear of the roof line behind it.
+    head_top = float(roof(sx - 0.5)) - 0.05
+    head_z = min(z + 0.86, head_top - 0.115)
+    back_z = min(z + 0.5, head_z - 0.36)
+    add_mirrored(mesh, "Interior", ellipsoid((sx - 0.32, sy, back_z), (0.085, 0.235, 0.33), R=Rback))
+    add_mirrored(mesh, "Interior", ellipsoid((sx - 0.42, sy, head_z), (0.07, 0.125, 0.115), R=Rback))
     for side in (-1, 1):
         add_mirrored(mesh, "Trim", ellipsoid((sx - 0.3, sy + side * 0.2, z + 0.48), (0.07, 0.04, 0.24), 8, 12, R=Rback))
         add_mirrored(mesh, "Trim", ellipsoid((sx + 0.04, sy + side * 0.2, z + 0.22), (0.21, 0.04, 0.06), 8, 12))
