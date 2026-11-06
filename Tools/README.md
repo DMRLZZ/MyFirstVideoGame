@@ -147,3 +147,11 @@ Tools/Scripts/play.ps1 -Wait                    # espera a que se cierre y devue
 3. Compatible con PowerShell 5.1: nada de `&&`, `||`, `??` ni `?:`. Entrecomilla siempre las rutas (pueden tener espacios).
 4. Propaga el código de salida con `exit $exitCode` y escribe el log en `Saved/Logs/<nombre>.log`.
 5. Documenta el script en este README.
+
+## Compilar en una máquina nueva
+
+`build.ps1` necesita el **SDK de .NET Framework 4.8** (Visual Studio Installer, componente individual `Microsoft.Net.Component.4.8.SDK`). Sin él, UnrealBuildTool falla con `Could not find NetFxSDK install dir` al evaluar el módulo `SwarmInterface`.
+
+## Probar el juego real
+
+`devdrive.ps1 [-Seconds 120] [-ShotEvery 15] [-CycleCameras]` arranca el juego con el piloto automático de desarrollo: conduce solo, reinicia tras cada choque, registra telemetría en el log y guarda capturas y `trace.csv` en `Saved/DevShots`.
