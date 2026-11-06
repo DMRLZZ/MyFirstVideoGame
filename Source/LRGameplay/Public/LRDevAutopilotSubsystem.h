@@ -26,6 +26,7 @@ class ALRVehicle;
  *   -LRDevNoSteer             hold the lane instead of weaving
  *   -LRDevNoTraffic           empty road (isolates vehicle behavior)
  *   -LRDevLaneSweep           change lane on a fixed schedule instead of avoiding traffic
+ *   -LRDevShowroom=a+b        park each listed vehicle and photograph it from several angles, then quit
  */
 UCLASS()
 class LRGAMEPLAY_API ULRDevAutopilotSubsystem : public UTickableWorldSubsystem
@@ -50,6 +51,9 @@ private:
 	void LogTelemetry(const ALRVehicle& Vehicle);
 
 	void TakeScreenshot();
+
+	/** Advances the showroom mode: one vehicle at a time, a set of fixed camera positions around it. */
+	void TickShowroom(float DeltaTime);
 
 	/** Appends one sample of the lane assist trace (Saved/DevShots/trace.csv). */
 	void SampleTrace(const ALRVehicle& Vehicle);
@@ -79,6 +83,16 @@ private:
 	bool bLaneSweep = false;
 	int32 SweepDirection = 1;
 	double NextTraceTime = 0.0;
+
+	/** Showroom state: vehicles still to photograph, current camera index, time until the next step. */
+	TArray<FString> ShowroomVehicles;
+	int32 ShowroomVehicleIndex = INDEX_NONE;
+	int32 ShowroomCameraIndex = 0;
+	double ShowroomNextStepTime = 0.0;
+	bool bShowroomShotPending = false;
+
+	UPROPERTY(Transient)
+	TObjectPtr<AActor> ShowroomCamera;
 	FString TraceBuffer;
 
 	/** Reused every decision to avoid per-tick allocations. */

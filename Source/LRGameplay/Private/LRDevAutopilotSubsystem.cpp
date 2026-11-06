@@ -2,7 +2,10 @@
 
 #include "LRDevAutopilotSubsystem.h"
 
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 #include "Engine/World.h"
+#include "GameFramework/HUD.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/PlatformTime.h"
 #include "RHI.h"
@@ -67,6 +70,13 @@ void ULRDevAutopilotSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	TraceBuffer = TEXT("t,state,speed_kmh,S,D,target_d,heading_deg,yaw_rate,steering,height_m\n");
 	NextScreenshotTime = ScreenshotPeriodSeconds;
 
+	FString Showroom;
+	if (FParse::Value(CommandLine, TEXT("LRDevShowroom="), Showroom))
+	{
+		Showroom.ParseIntoArray(ShowroomVehicles, TEXT("+"));
+		bNoTraffic = true;
+	}
+
 	UE_LOG(LogLRGameplay, Log, TEXT("DevAutopilot: active, quit after %.0f s, screenshot every %.0f s"), QuitAfterSeconds, ScreenshotPeriodSeconds);
 }
 
@@ -128,6 +138,12 @@ void ULRDevAutopilotSubsystem::Tick(float DeltaTime)
 		{
 			Camera->CycleCameraMode();
 		}
+	}
+
+	if (ShowroomVehicles.Num() > 0)
+	{
+		TickShowroom(DeltaTime);
+		return;
 	}
 
 	const ELRRunState State = Context->GetRunState();
@@ -269,6 +285,104 @@ void ULRDevAutopilotSubsystem::LogTelemetry(const ALRVehicle& Vehicle)
 
 	AccumulatedFrameSeconds = 0.0;
 	AccumulatedFrames = 0;
+}
+
+void ULRDevAutopilotSubsystem::TickShowroom(float DeltaTime)
+{
+	struct FShot
+	{
+		const TCHAR* Name;
+		FVector EyeM;
+		FVector TargetM;
+		float Fov;
+	};
+	// Positions in meters relative to the car: X forward, Y right. The last ones are close-ups.
+	static const FShot Shots[] = {
+		{ TEXT("front34"), FVector(5.2, -4.6, 1.1), FVector(0.1, 0.0, 0.5), 28.f },
+		{ TEXT("rear34"), FVector(-5.2, -4.6, 1.3), FVector(-0.1, 0.0, 0.55), 28.f },
+		{ TEXT("side"), FVector(0.0, -8.5, 0.75), FVector(0.0, 0.0, 0.55), 30.f },
+		{ TEXT("front"), FVector(8.0, 0.0, 0.8), FVector(0.0, 0.0, 0.55), 22.f },
+		{ TEXT("rear"), FVector(-8.0, 0.0, 0.9), FVector(0.0, 0.0, 0.6), 22.f },
+		{ TEXT("nose"), FVector(3.6, -1.9, 0.75), FVector(1.9, -0.55, 0.55), 30.f },
+		{ TEXT("wheel"), FVector(1.5, -2.6, 0.5), FVector(1.35, -0.9, 0.35), 28.f },
+		{ TEXT("cabin"), FVector(0.7, -2.0, 1.5), FVector(-0.2, -0.2, 0.75), 40.f },
+	};
+	constexpr double SettleSeconds = 1.5;
+	constexpr double FirstShotDelaySeconds = 8.0;
+
+	UWorld* World = GetWorld();
+	APlayerController* Player = World->GetFirstPlayerController();
+	ALRGameModeEndless* GameMode = World->GetAuthGameMode<ALRGameModeEndless>();
+	const ULRRunContextSubsystem* Context = ULRRunContextSubsystem::Get(this);
+	ALRVehicle* Vehicle = Context ? Cast<ALRVehicle>(Context->GetPlayerPawn()) : nullptr;
+	const ULRRoadSubsystem* Road = ULRRoadSubsystem::Get(this);
+	if (Player == nullptr || GameMode == nullptr || Vehicle == nullptr || Road == nullptr || !Road->HasRoad() || ElapsedSeconds < ShowroomNextStepTime)
+	{
+		return;
+	}
+
+	if (bShowroomShotPending)
+	{
+		const FShot& Shot = Shots[ShowroomCameraIndex];
+		const FString FileName = FPaths::ProjectSavedDir() / FString::Printf(TEXT("DevShots/%s_%s.png"), *ShowroomVehicles[ShowroomVehicleIndex], Shot.Name);
+		FScreenshotRequest::RequestScreenshot(FileName, /*bInShowUI*/ false, /*bAddFilenameSuffix*/ false);
+		bShowroomShotPending = false;
+		++ShowroomCameraIndex;
+		ShowroomNextStepTime = ElapsedSeconds + 0.5;
+		return;
+	}
+
+	if (ShowroomVehicleIndex == INDEX_NONE || ShowroomCameraIndex >= UE_ARRAY_COUNT(Shots))
+	{
+		++ShowroomVehicleIndex;
+		ShowroomCameraIndex = 0;
+		if (ShowroomVehicleIndex >= ShowroomVehicles.Num())
+		{
+			FPlatformMisc::RequestExit(false, TEXT("LRDevShowroom"));
+			ShowroomNextStepTime = ElapsedSeconds + 1000.0;
+			return;
+		}
+		GameMode->SetPlayerVehicle(FName(*ShowroomVehicles[ShowroomVehicleIndex]));
+		bTrafficCleared = false;
+		ShowroomNextStepTime = ElapsedSeconds + FirstShotDelaySeconds;
+		return;
+	}
+
+	if (!bTrafficCleared)
+	{
+		bTrafficCleared = true;
+		if (ULRTrafficSubsystem* Traffic = ULRTrafficSubsystem::Get(this))
+		{
+			Traffic->SetDensityScale(0.f);
+			Traffic->ResetTraffic(Context->GetRunSeed());
+		}
+		if (AHUD* Hud = Player->GetHUD())
+		{
+			Hud->bShowHUD = false;
+		}
+		// Parked in the middle of the road.
+		Vehicle->ResetForRun(Road->GetSpawnS(), Road->GetLaneCenterD(Road->GetDefaultPlayerLane()), 0.f);
+		Vehicle->SetInputEnabled(true);
+		Vehicle->SetHandbrakeInput(true);
+		ShowroomNextStepTime = ElapsedSeconds + 3.0;
+		return;
+	}
+
+	if (ShowroomCamera == nullptr)
+	{
+		ACameraActor* Camera = World->SpawnActor<ACameraActor>();
+		Camera->GetCameraComponent()->bConstrainAspectRatio = false;
+		ShowroomCamera = Camera;
+	}
+	const FShot& Shot = Shots[ShowroomCameraIndex];
+	const FTransform& CarTransform = Vehicle->GetActorTransform();
+	const FVector Eye = CarTransform.TransformPositionNoScale(Shot.EyeM * 100.0);
+	const FVector Target = CarTransform.TransformPositionNoScale(Shot.TargetM * 100.0);
+	ShowroomCamera->SetActorLocationAndRotation(Eye, (Target - Eye).Rotation());
+	Cast<ACameraActor>(ShowroomCamera)->GetCameraComponent()->SetFieldOfView(Shot.Fov);
+	Player->SetViewTarget(ShowroomCamera);
+	bShowroomShotPending = true;
+	ShowroomNextStepTime = ElapsedSeconds + SettleSeconds;
 }
 
 void ULRDevAutopilotSubsystem::SampleTrace(const ALRVehicle& Vehicle)
