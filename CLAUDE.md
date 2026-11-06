@@ -64,4 +64,6 @@ Los comandos completos del motor están en `docs/02-ARCHITECTURE.md §9`.
 
 ## Estado actual
 
-Fase de planificación terminada. El proyecto Unreal **aún no existe**: el siguiente paso es M0-01 (una persona instala UE 5.8.x y VS 2022) y M0-02 (`build-release-engineer` crea el proyecto).
+Prototipo jugable (hito M1 en curso): autopista procedural, tráfico IDM/MOBIL, física Chaos con asistente de carril, near miss, puntuación, cámaras y HUD, con 400 tests en verde. El aspecto visual usa assets provisionales de las plantillas de Epic; el nivel fotorrealista depende de los assets de M3.
+
+Para comprobar cambios en el juego real sin tocar el teclado: `Tools/Scripts/devdrive.ps1` (piloto automático, telemetría, `Saved/DevShots`). Los tests no sustituyen a esta prueba: varios fallos graves solo se vieron jugando.
