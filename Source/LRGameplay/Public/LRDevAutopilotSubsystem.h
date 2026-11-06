@@ -26,6 +26,8 @@ class ALRVehicle;
  *   -LRDevNoSteer             hold the lane instead of weaving
  *   -LRDevNoTraffic           empty road (isolates vehicle behavior)
  *   -LRDevLaneSweep           change lane on a fixed schedule instead of avoiding traffic
+ *   -LRDevExecAt=<s> -LRDevExec=<cmd>   run a console command at this time; '+' stands for a space,
+ *                             e.g. -LRDevExec=ProfileGPU or -LRDevExec=stat+dumpframe+-ms=0.3
  *   -LRDevShowroom=a+b        park each listed vehicle and photograph it from several angles, then quit
  */
 UCLASS()
@@ -83,6 +85,8 @@ private:
 	bool bLaneSweep = false;
 	int32 SweepDirection = 1;
 	double NextTraceTime = 0.0;
+	double ExecAtSeconds = -1.0;
+	FString ExecCommand;
 
 	/** Showroom state: vehicles still to photograph, current camera index, time until the next step. */
 	TArray<FString> ShowroomVehicles;

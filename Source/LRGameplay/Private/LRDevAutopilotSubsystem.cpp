@@ -4,6 +4,7 @@
 
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/HUD.h"
 #include "GameFramework/PlayerController.h"
@@ -70,6 +71,12 @@ void ULRDevAutopilotSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	TraceBuffer = TEXT("t,state,speed_kmh,S,D,target_d,heading_deg,yaw_rate,steering,height_m\n");
 	NextScreenshotTime = ScreenshotPeriodSeconds;
 
+	FParse::Value(CommandLine, TEXT("LRDevExecAt="), ExecAtSeconds);
+	if (FParse::Value(CommandLine, TEXT("LRDevExec="), ExecCommand))
+	{
+		ExecCommand.ReplaceCharInline(TEXT('+'), TEXT(' '));
+	}
+
 	FString Showroom;
 	if (FParse::Value(CommandLine, TEXT("LRDevShowroom="), Showroom))
 	{
@@ -107,6 +114,12 @@ void ULRDevAutopilotSubsystem::Tick(float DeltaTime)
 	if (Vehicle == nullptr)
 	{
 		return;
+	}
+
+	if (ExecAtSeconds >= 0.0 && ElapsedSeconds >= ExecAtSeconds)
+	{
+		ExecAtSeconds = -1.0;
+		GEngine->Exec(GetWorld(), *ExecCommand);
 	}
 
 	if (ElapsedSeconds >= NextTraceTime)
