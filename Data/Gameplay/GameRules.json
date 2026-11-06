@@ -1,0 +1,26 @@
+{
+	"type": "GameRules",
+	"id": "default",
+	"version": 1,
+	"data": {
+		"CountdownSeconds": 3,
+		"ResultsDelaySeconds": 2.5,
+		"StartSpeedKmh": 90,
+		"DefaultVehicleId": "bauer_r3_sport",
+		"bForgivingArcade": false,
+		"ScrapesAllowed": 2,
+		"ScrapeMaxImpactKmh": 25,
+		"ForgivingFatalImpactKmh": 120,
+		"StartingLaneOffset": 0,
+		"CrashRecoverySeconds": 1.5,
+		"FreeRideResetForwardMeters": 30,
+		"Rumble": {
+			"NearMissIntensity": 0.25,
+			"NearMissDurationSeconds": 0.15,
+			"ScrapeIntensity": 0.4,
+			"ScrapeDurationSeconds": 0.2,
+			"CrashIntensity": 1,
+			"CrashDurationSeconds": 0.6
+		}
+	}
+}

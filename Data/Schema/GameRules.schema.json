@@ -1,0 +1,116 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://leftright.local/schema/GameRules.schema.json",
+	"title": "GameRules",
+	"description": "The 'data' object of Data/Gameplay/GameRules.json. Mirrors FLRGameRules (Source/LRGameplay/Public/LRGameRules.h).",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"CountdownSeconds": {
+			"description": "Length of the countdown before a run, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 10
+		},
+		"ResultsDelaySeconds": {
+			"description": "Time between the crash and the results screen, seconds.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 30
+		},
+		"StartSpeedKmh": {
+			"description": "Rolling start speed of a run, km/h.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 500
+		},
+		"DefaultVehicleId": {
+			"description": "Vehicle used when the selected one cannot be loaded (Data/Vehicles/<id>.json).",
+			"type": "string",
+			"pattern": "^[A-Za-z0-9_.-]+$"
+		},
+		"bForgivingArcade": {
+			"description": "Forgiving arcade: impacts consume scrapes before they end the run.",
+			"type": "boolean"
+		},
+		"ScrapesAllowed": {
+			"description": "Forgiving arcade: impacts above ScrapeMaxImpactKmh that the run survives.",
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 100
+		},
+		"ScrapeMaxImpactKmh": {
+			"description": "Forgiving arcade: impacts up to this speed are harmless and consume nothing, km/h.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 500
+		},
+		"ForgivingFatalImpactKmh": {
+			"description": "Forgiving arcade: impacts from this speed end the run even with scrapes left, km/h. 0 disables the limit.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 1000
+		},
+		"StartingLaneOffset": {
+			"description": "Start lane relative to the default player lane of the route, lanes (+ = right).",
+			"type": "integer",
+			"minimum": -10,
+			"maximum": 10
+		},
+		"CrashRecoverySeconds": {
+			"description": "Time after a severe impact that did not end the run before the car (free ride) and the engine sound recover, seconds.",
+			"type": "number",
+			"minimum": 0.01,
+			"maximum": 30
+		},
+		"FreeRideResetForwardMeters": {
+			"description": "Free ride: how far ahead of the crash the car reappears, meters.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 500
+		},
+		"Rumble": {
+			"description": "Gamepad rumble. Intensities are normalized.",
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"NearMissIntensity": {
+					"description": "Intensity of a Close near miss. VeryClose gets twice this value and Razor three times.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"NearMissDurationSeconds": {
+					"description": "Length of the near-miss rumble, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"ScrapeIntensity": {
+					"description": "Intensity of a contact that is not severe.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"ScrapeDurationSeconds": {
+					"description": "Length of the scrape rumble, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				},
+				"CrashIntensity": {
+					"description": "Intensity of a severe crash.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"CrashDurationSeconds": {
+					"description": "Length of the crash rumble, seconds.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 5
+				}
+			}
+		}
+	}
+}
