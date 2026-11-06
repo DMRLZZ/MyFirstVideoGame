@@ -32,7 +32,10 @@ def surface_instance(name, color, roughness, metallic=0.0, specular=0.5, grain=0
     lib.set_material_instance_scalar_parameter_value(instance, "GrainAmount", grain)
     if emissive:
         lib.set_material_instance_vector_parameter_value(instance, "Emissive", unreal.LinearColor(*emissive, 1.0))
-    assets.save_loaded_asset(instance)
+    # Setting a parameter does not mark the package dirty: without this, an existing instance keeps its old values.
+    # Saving fails on a read-only file, which is what an unlocked lockable asset is: run `git lfs lock` on it first.
+    if not assets.save_loaded_asset(instance, only_if_is_dirty=False):
+        unreal.log_error(f"LRCars: could not save {path}, is it locked with git lfs lock?")
     return instance
 
 
