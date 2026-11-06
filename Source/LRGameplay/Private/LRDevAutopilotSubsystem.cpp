@@ -4,6 +4,7 @@
 
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "DynamicResolutionState.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/HUD.h"
@@ -292,14 +293,18 @@ void ULRDevAutopilotSubsystem::LogTelemetry(const ALRVehicle& Vehicle)
 	const ALRPlayerCameraManager* Camera = Player ? Cast<ALRPlayerCameraManager>(Player->PlayerCameraManager) : nullptr;
 	const double AverageFrameMs = AccumulatedFrames > 0 ? 1000.0 * AccumulatedFrameSeconds / AccumulatedFrames : 0.0;
 
+	FDynamicResolutionStateInfos Resolution;
+	GEngine->GetDynamicResolutionCurrentStateInfos(Resolution);
+
 	UE_LOG(LogLRGameplay, Log,
-		TEXT("DevTelemetry t=%.1f state=%s speed=%.0f km/h gear=%d rpm=%.0f S=%.1f D=%.2f lane=%d target=%d wrecked=%d traffic=%d cam=%s frame=%.1f ms (%.0f fps) worst=%.0f hitches=%d game=%.1f render=%.1f gpu=%.1f"),
+		TEXT("DevTelemetry t=%.1f state=%s speed=%.0f km/h gear=%d rpm=%.0f S=%.1f D=%.2f lane=%d target=%d wrecked=%d traffic=%d cam=%s res=%.0f%% frame=%.1f ms (%.0f fps) worst=%.0f hitches=%d game=%.1f render=%.1f gpu=%.1f"),
 		ElapsedSeconds,
 		Context ? *UEnum::GetValueAsString(Context->GetRunState()) : TEXT("?"),
 		Vehicle.GetSpeedKmh(), Vehicle.GetCurrentGear(), Vehicle.GetEngineRpm(),
 		Coord.S, Coord.D, Vehicle.GetCurrentLane(), Vehicle.GetTargetLane(), Vehicle.IsWrecked() ? 1 : 0,
 		Traffic ? Traffic->GetNumVehicles() : -1,
 		Camera ? *UEnum::GetValueAsString(Camera->GetCameraMode()) : TEXT("?"),
+		100.0f * Resolution.ResolutionFractionApproximations[GDynamicPrimaryResolutionFraction],
 		AverageFrameMs, AverageFrameMs > 0.0 ? 1000.0 / AverageFrameMs : 0.0,
 		1000.0 * WorstFrameSeconds, HitchFrames,
 		FPlatformTime::ToMilliseconds(GGameThreadTime), FPlatformTime::ToMilliseconds(GRenderThreadTime),
