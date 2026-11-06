@@ -366,12 +366,13 @@ void ALRRoadStreamer::AppendQuadRow(const FVector& A0, const FVector& A1, const 
 	UV0.Add(FVector2D(U0, VB));
 	UV0.Add(FVector2D(U1, VB));
 
+	// Unreal renders the counter-clockwise side (seen from above: A0, A1, B0) as the front face.
 	Triangles.Add(Base + 0);
-	Triangles.Add(Base + 2);
-	Triangles.Add(Base + 1);
 	Triangles.Add(Base + 1);
 	Triangles.Add(Base + 2);
+	Triangles.Add(Base + 1);
 	Triangles.Add(Base + 3);
+	Triangles.Add(Base + 2);
 }
 
 void ALRRoadStreamer::AppendStripOverRows(float D0, float H0, float D1, float H1, double UVOffsetS)
