@@ -21,6 +21,7 @@
 	"Plugins": [
 		{ "Name": "ChaosVehiclesPlugin", "Enabled": true },
 		{ "Name": "EnhancedInput", "Enabled": true },
-		{ "Name": "ProceduralMeshComponent", "Enabled": true }
+		{ "Name": "ProceduralMeshComponent", "Enabled": true },
+		{ "Name": "AndroidFileServer", "Enabled": false }
 	]
 }
