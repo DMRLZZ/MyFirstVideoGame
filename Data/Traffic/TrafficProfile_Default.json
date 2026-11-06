@@ -262,7 +262,7 @@
 				"LengthMeters": 4.6,
 				"WidthMeters": 2.0,
 				"HeightMeters": 2.3,
-				"Weight": 12,
+				"Weight": 0,
 				"SpeedFactorMin": 0.88,
 				"SpeedFactorMax": 0.96,
 				"bPreferRightLanes": false,
@@ -291,7 +291,6 @@
 				"CabinLengthFraction": 0.75,
 				"CabinOffsetFraction": 0.08,
 				"LowerBodyHeightFraction": 0.45,
-				"ModelMesh": "/Game/ConceptCar/Car/SM_AutomotiveTP_Car.SM_AutomotiveTP_Car",
 				"PaintMaterialHint": "Paint",
 				"PaintParameter": "PaintColor"
 			},
