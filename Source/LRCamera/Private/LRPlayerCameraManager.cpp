@@ -166,6 +166,9 @@ void ALRPlayerCameraManager::SetCameraMode(ELRCameraMode Mode)
 	CameraMode = Mode;
 	ResetSmoothing();
 
+	// A mode switch teleports the view: tell the renderer so motion blur and temporal history do not smear it.
+	SetGameCameraCutThisFrame();
+
 	// The initial broadcast reports whatever mode is active by then.
 	if (!bPendingInitialBroadcast)
 	{
