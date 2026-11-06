@@ -92,6 +92,25 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Traffic")
 	TArray<TObjectPtr<UStaticMeshComponent>> BlinkerMeshes;
 
+	/** Basic shapes kept to restore the grey-box look. */
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMesh> CubeMeshAsset;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMesh> CylinderMeshAsset;
+
+	/** Paint instance of the current model, reused while the actor keeps showing the same mesh. */
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> ModelPaintMaterial;
+
+	/** Model currently shown (null = grey-box shapes). */
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMesh> CurrentModel;
+
+	/** Wheel mesh currently on the wheel components (null = grey-box cylinders). */
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMesh> CurrentWheelModel;
+
 	/** /Engine/BasicShapes/BasicShapeMaterial. */
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInterface> BaseMaterial;
@@ -112,6 +131,15 @@ protected:
 	TObjectPtr<UMaterialInstanceDynamic> BlinkerMaterial;
 
 private:
+	/** Shows a real car model and fits collision and lights to it. Returns false if the model cannot be loaded. */
+	bool ApplyModel(const FLRTrafficArchetype& InArchetype, const FLinearColor& PaintColor);
+
+	/** Restores the grey-box shapes after a model was shown. */
+	void RestoreGreyBox();
+
+	/** Places brake lights and blinkers at the corners of a box of the given size, in meters. */
+	void PlaceLights(float LengthM, float WidthM, float HeightZM, float HalfHeightM);
+
 	/** Creates the dynamic materials once (needs a live actor, not the CDO). */
 	void EnsureMaterials();
 

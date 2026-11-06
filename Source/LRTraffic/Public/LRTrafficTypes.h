@@ -144,6 +144,37 @@ struct LRTRAFFIC_API FLRTrafficArchetype
 {
 	GENERATED_BODY()
 
+	/**
+	 * Real car model (static mesh). When set it replaces the grey-box shapes: it is scaled uniformly to LengthMeters and
+	 * the collision box follows its bounds. Empty = grey-box shapes built from the dimensions below.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Model")
+	FSoftObjectPath ModelMesh;
+
+	/** Optional wheel mesh, for models whose body comes without wheels. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Model")
+	FSoftObjectPath ModelWheelMesh;
+
+	/** Wheel centers relative to the model origin, left-front side, cm at model scale: X = axle front, Y = half track, Z = height. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Model")
+	FVector ModelWheelOffsetCm = FVector::ZeroVector;
+
+	/** Distance from the front axle back to the rear axle, cm at model scale. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Model")
+	float ModelWheelbaseCm = 0.f;
+
+	/** Yaw that makes the model face +X, degrees. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Model")
+	float ModelYawDeg = 0.f;
+
+	/** The material slot whose slot or material name contains this text gets the paint color. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Model")
+	FString PaintMaterialHint = TEXT("Paint");
+
+	/** Vector parameter of that material receiving the paint color. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Model")
+	FName PaintParameter = FName(TEXT("PaintColor"));
+
 	/** Unique archetype name (reported in near-miss events and snapshots). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Archetype")
 	FName Name = TEXT("sedan");

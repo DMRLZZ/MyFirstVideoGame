@@ -39,6 +39,8 @@ ALRTrafficVehicleActor::ALRTrafficVehicleActor()
 
 	UStaticMesh* CubeMesh = CubeFinder.Object;
 	UStaticMesh* CylinderMesh = CylinderFinder.Object;
+	CubeMeshAsset = CubeMesh;
+	CylinderMeshAsset = CylinderMesh;
 	BaseMaterial = MaterialFinder.Object;
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
@@ -139,6 +141,13 @@ void ALRTrafficVehicleActor::ApplyArchetype(const FLRTrafficArchetype& InArchety
 	using namespace LRTrafficVehicleActorPrivate;
 
 	EnsureMaterials();
+
+	if (!InArchetype.ModelMesh.IsNull() && ApplyModel(InArchetype, PaintColor))
+	{
+		return;
+	}
+	RestoreGreyBox();
+
 	if (PaintMaterial)
 	{
 		PaintMaterial->SetVectorParameterValue(ColorParameter, PaintColor);
@@ -190,19 +199,142 @@ void ALRTrafficVehicleActor::ApplyArchetype(const FLRTrafficArchetype& InArchety
 		Place(WheelMeshes[Index], WheelCenters[Index], WheelSize, WheelRotation);
 	}
 
-	const float LightZ = Clearance + LowerHeight * 0.75f - HalfH;
-	const float RearX = -0.5f * L - 0.02f;
-	const float FrontX = 0.5f * L + 0.02f;
-	const float BrakeY = 0.5f * W - 0.25f;
+	PlaceLights(L, W, Clearance + LowerHeight * 0.75f, HalfH);
+}
+
+void ALRTrafficVehicleActor::PlaceLights(float LengthM, float WidthM, float HeightZM, float HalfHeightM)
+{
+	using namespace LRTrafficVehicleActorPrivate;
+
+	const auto Place = [](UStaticMeshComponent* Part, const FVector& CenterM, const FVector& SizeM)
+	{
+		Part->SetRelativeLocationAndRotation(CenterM * CmPerMeter, FRotator::ZeroRotator);
+		Part->SetRelativeScale3D(SizeM);
+	};
+
+	const float LightZ = HeightZM - HalfHeightM;
+	const float RearX = -0.5f * LengthM - 0.02f;
+	const float FrontX = 0.5f * LengthM + 0.02f;
+	const float BrakeY = 0.5f * WidthM - 0.25f;
 	Place(BrakeLightMeshes[0], FVector(RearX, -BrakeY, LightZ), FVector(0.06f, 0.35f, 0.14f));
 	Place(BrakeLightMeshes[1], FVector(RearX, BrakeY, LightZ), FVector(0.06f, 0.35f, 0.14f));
 
-	const float BlinkY = 0.5f * W - 0.1f;
+	const float BlinkY = 0.5f * WidthM - 0.1f;
 	const FVector BlinkSize(0.07f, 0.16f, 0.1f);
 	Place(BlinkerMeshes[0], FVector(FrontX, -BlinkY, LightZ), BlinkSize);
 	Place(BlinkerMeshes[1], FVector(RearX - 0.01f, -BlinkY, LightZ + 0.12f), BlinkSize);
 	Place(BlinkerMeshes[2], FVector(FrontX, BlinkY, LightZ), BlinkSize);
 	Place(BlinkerMeshes[3], FVector(RearX - 0.01f, BlinkY, LightZ + 0.12f), BlinkSize);
+}
+
+bool ALRTrafficVehicleActor::ApplyModel(const FLRTrafficArchetype& InArchetype, const FLinearColor& PaintColor)
+{
+	using namespace LRTrafficVehicleActorPrivate;
+
+	UStaticMesh* Model = Cast<UStaticMesh>(InArchetype.ModelMesh.TryLoad());
+	if (Model == nullptr)
+	{
+		return false;
+	}
+
+	if (CurrentModel != Model)
+	{
+		CurrentModel = Model;
+		BodyMesh->SetStaticMesh(Model);
+		BodyMesh->EmptyOverrideMaterials();
+		ModelPaintMaterial = nullptr;
+
+		const TArray<FStaticMaterial>& Slots = Model->GetStaticMaterials();
+		for (int32 Slot = 0; Slot < Slots.Num(); ++Slot)
+		{
+			const FStaticMaterial& Candidate = Slots[Slot];
+			if (Candidate.MaterialInterface != nullptr
+				&& (Candidate.MaterialSlotName.ToString().Contains(InArchetype.PaintMaterialHint)
+					|| Candidate.MaterialInterface->GetName().Contains(InArchetype.PaintMaterialHint)))
+			{
+				ModelPaintMaterial = UMaterialInstanceDynamic::Create(Candidate.MaterialInterface, this);
+				BodyMesh->SetMaterial(Slot, ModelPaintMaterial);
+				break;
+			}
+		}
+	}
+	if (ModelPaintMaterial)
+	{
+		ModelPaintMaterial->SetVectorParameterValue(InArchetype.PaintParameter, PaintColor);
+	}
+
+	// Uniform scale from the length, everything else follows the real proportions of the model.
+	const FBox Bounds = Model->GetBoundingBox();
+	const FRotator ModelRotation(0.f, InArchetype.ModelYawDeg, 0.f);
+	const FVector RotatedSize = ModelRotation.RotateVector(Bounds.GetSize()).GetAbs();
+	const float Scale = (InArchetype.LengthMeters * CmPerMeter) / FMath::Max(static_cast<float>(RotatedSize.X), 1.f);
+	const FVector HalfSizeCm = RotatedSize * 0.5f * Scale;
+
+	HalfHeightCm = static_cast<float>(HalfSizeCm.Z);
+	CollisionBox->SetBoxExtent(HalfSizeCm, false);
+	CollisionBox->SetMassOverrideInKg(NAME_None, InArchetype.MassKg, true);
+
+	// The model origin goes where the bounds center lands on the box center.
+	const FVector ModelOffset = -ModelRotation.RotateVector(Bounds.GetCenter()) * Scale;
+	BodyMesh->SetRelativeLocationAndRotation(ModelOffset, ModelRotation);
+	BodyMesh->SetRelativeScale3D(FVector(Scale));
+	CabinMesh->SetVisibility(false);
+
+	UStaticMesh* WheelModel = InArchetype.ModelWheelMesh.IsNull() ? nullptr : Cast<UStaticMesh>(InArchetype.ModelWheelMesh.TryLoad());
+	if (WheelModel != CurrentWheelModel || WheelModel == nullptr)
+	{
+		CurrentWheelModel = WheelModel;
+		for (UStaticMeshComponent* Wheel : WheelMeshes)
+		{
+			Wheel->SetVisibility(WheelModel != nullptr);
+			if (WheelModel != nullptr)
+			{
+				Wheel->SetStaticMesh(WheelModel);
+				Wheel->EmptyOverrideMaterials();
+			}
+		}
+	}
+	if (WheelModel != nullptr)
+	{
+		const FVector O = InArchetype.ModelWheelOffsetCm;
+		const FVector Centers[] = {
+			FVector(O.X, -O.Y, O.Z), FVector(O.X, O.Y, O.Z),
+			FVector(O.X - InArchetype.ModelWheelbaseCm, -O.Y, O.Z), FVector(O.X - InArchetype.ModelWheelbaseCm, O.Y, O.Z) };
+		for (int32 Index = 0; Index < WheelMeshes.Num(); ++Index)
+		{
+			// Left wheels (index 0 and 2) face the other way.
+			const FRotator WheelRotation(0.f, InArchetype.ModelYawDeg + (Index % 2 == 0 ? 180.f : 0.f), 0.f);
+			WheelMeshes[Index]->SetRelativeLocationAndRotation(ModelOffset + ModelRotation.RotateVector(Centers[Index]) * Scale, WheelRotation);
+			WheelMeshes[Index]->SetRelativeScale3D(FVector(Scale));
+		}
+	}
+
+	PlaceLights(static_cast<float>(HalfSizeCm.X * 2.f) / CmPerMeter, static_cast<float>(HalfSizeCm.Y * 2.f) / CmPerMeter,
+		static_cast<float>(HalfSizeCm.Z * 2.f) / CmPerMeter * 0.6f, static_cast<float>(HalfSizeCm.Z) / CmPerMeter);
+	return true;
+}
+
+void ALRTrafficVehicleActor::RestoreGreyBox()
+{
+	if (CurrentModel == nullptr && CurrentWheelModel == nullptr)
+	{
+		return;
+	}
+
+	CurrentModel = nullptr;
+	CurrentWheelModel = nullptr;
+	ModelPaintMaterial = nullptr;
+
+	BodyMesh->SetStaticMesh(CubeMeshAsset);
+	BodyMesh->EmptyOverrideMaterials();
+	BodyMesh->SetMaterial(0, PaintMaterial);
+	for (UStaticMeshComponent* Wheel : WheelMeshes)
+	{
+		Wheel->SetStaticMesh(CylinderMeshAsset);
+		Wheel->EmptyOverrideMaterials();
+		Wheel->SetMaterial(0, TireMaterial);
+		Wheel->SetVisibility(true);
+	}
 }
 
 void ALRTrafficVehicleActor::Activate(int32 InVehicleId)
@@ -266,6 +398,16 @@ void ALRTrafficVehicleActor::ApplyLights(uint8 LightFlags, bool bBlinkOn)
 	{
 		BrakeMaterial->SetVectorParameterValue(ColorParameter, bBrake ? BrakeOnColor : BrakeOffColor);
 		bBrakeOn = bBrake;
+	}
+	if (CurrentModel != nullptr)
+	{
+		BrakeLightMeshes[0]->SetVisibility(bBrake);
+		BrakeLightMeshes[1]->SetVisibility(bBrake);
+	}
+	else if (!BrakeLightMeshes[0]->IsVisible())
+	{
+		BrakeLightMeshes[0]->SetVisibility(true);
+		BrakeLightMeshes[1]->SetVisibility(true);
 	}
 
 	// Bits: 0 = left pair, 1 = right pair.
