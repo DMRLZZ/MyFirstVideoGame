@@ -124,8 +124,9 @@ void FLRHUDLabels::Build()
 	const FHintRow Scheme{ LOCTEXT("HintScheme", "Cambiar esquema"), LOCTEXT("HintSchemeKey", "T"), LOCTEXT("HintSchemePad", "LB") };
 	const FHintRow Restart{ LOCTEXT("HintRestart", "Reiniciar"), LOCTEXT("HintRestartKey", "R"), LOCTEXT("HintRestartPad", "View / Share") };
 
-	ArcadeHints = { Throttle, Brake, LaneChange, Handbrake, Camera, LookBack, Scheme, Restart };
-	SimcadeHints = { Throttle, Brake, Steering, Handbrake, Camera, LookBack, Scheme, Restart };
+	const FHintRow NextCar{ LOCTEXT("HintNextCar", "Cambiar de coche"), LOCTEXT("HintNextCarKey", "V"), LOCTEXT("HintNextCarPad", "Cruceta arriba") };
+	ArcadeHints = { Throttle, Brake, LaneChange, Handbrake, Camera, LookBack, Scheme, NextCar, Restart };
+	SimcadeHints = { Throttle, Brake, Steering, Handbrake, Camera, LookBack, Scheme, NextCar, Restart };
 }
 
 // --- ALRHUD: setup -------------------------------------------------------------------------------
