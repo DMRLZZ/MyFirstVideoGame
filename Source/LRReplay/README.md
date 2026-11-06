@@ -14,7 +14,7 @@ Repetición de la partida: guarda en un búfer circular los últimos segundos (6
 
 ### Comportamiento automático de `ULRReplaySubsystem`
 
-- `OnRunReset`: para la grabación y vacía el búfer.
+- `OnRunReset`: vacía el búfer. Si el estado sigue siendo `Running`, vuelve a grabar enseguida (reiniciar no cambia el estado, así que no llega ningún evento de estado). Si no, espera a que el estado pase a `Running`.
 - Estado `Running`: empieza a grabar (o reanuda sobre el mismo búfer si ya tenía fotogramas).
 - `Crashed` o cualquier otro estado: para la grabación y conserva el búfer para el estado `Replay`.
 
@@ -29,7 +29,7 @@ Cada muestra copia la transformación del jugador (si el peón es un `ALRVehicle
 
 ## Datos
 
-- `Data/Replay/Replay.json` (tipo `ReplaySettings`) es **opcional**: si no existe se usan los valores por defecto de C++ (`DurationSeconds` 60, `SampleRateHz` 30, `TrafficRadiusMeters` 250, `MaxTrafficVehicles` 64). Todavía no hay archivo ni esquema en `Data/` (ver la lista de pendientes).
+- `Data/Replay/Replay.json` (tipo `ReplaySettings`) es **opcional**: si no existe se usan los valores por defecto de C++ (`DurationSeconds` 60, `SampleRateHz` 30, `TrafficRadiusMeters` 250, `MaxTrafficVehicles` 64). Todavía no hay archivo ni esquema en `Data/` (ver [Pendientes](#pendientes)). Los valores del JSON no pasan por los límites `ClampMin`/`ClampMax`, así que `GetFrameCapacity` los limita a 600 s y 120 Hz (como mucho, 72 000 fotogramas).
 
 ## Cómo extender
 
@@ -41,9 +41,10 @@ Cada muestra copia la transformación del jugador (si el peón es un `ALRVehicle
 
 `Private/Tests/LRReplayBufferSpec.cpp` (`LeftRight.Replay.Buffer.*`), sin mundo:
 
+- ajustes por defecto y límites de la capacidad con datos fuera de rango;
 - orden cronológico tras dar la vuelta al anillo y rechazo de tiempos no crecientes;
 - duración con 0, 1 y N fotogramas, y saturación a la capacidad;
-- puntos medios de posición, rotación (incluido el paso por ±180°) y escalares, y extremos limitados;
+- puntos medios de posición, rotación (incluido el paso por ±180°) y escalares, extremos limitados e interpolación a través de la costura del anillo;
 - emparejamiento del tráfico por `Id`, vehículos que aparecen o desaparecen, y límite por fotograma;
 - memoria: `GetAllocatedSize()` no crece tras el calentamiento y los arrays se reutilizan;
 - reloj de muestreo: 30 Hz estables y sin ráfagas tras un tirón.
@@ -53,3 +54,9 @@ Cada muestra copia la transformación del jugador (si el peón es un `ALRVehicle
 - **CPU:** < 0,1 ms por tick de juego (una muestra cada 33 ms: copia de unos 64 × 48 bytes y una ordenación in situ). Medido con `TRACE_CPUPROFILER_EVENT_SCOPE(ULRReplaySubsystem::Tick)` y `ULRReplaySubsystem::CaptureFrame`.
 - **Memoria:** 1800 fotogramas × 64 vehículos ≈ 5,5 MB, reservados una sola vez al iniciar el mundo. Sin asignaciones tras el calentamiento (el array auxiliar de tráfico solo crece hasta el pico de vehículos dentro del radio).
 - `EvaluateAt`: búsqueda binaria O(log n) y mezcla O(m) del tráfico; sin asignaciones si se reutiliza el fotograma de salida.
+
+## Pendientes
+
+- **Reproducción visual:** actores fantasma, cámaras cinemáticas y modo foto. `EvaluateAt` ya da todo lo necesario.
+- **Datos:** crear `Data/Replay/Replay.json` y `Data/Schema/ReplaySettings.schema.json` si hace falta ajustar los valores por defecto.
+- **Sin cubrir por los tests:** `ULRReplaySubsystem` necesita un mundo, así que su comportamiento automático no tiene tests propios; solo los tienen el búfer y el reloj.
