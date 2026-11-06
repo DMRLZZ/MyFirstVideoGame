@@ -1,0 +1,64 @@
+{
+	"type": "EngineAudioProfile",
+	"id": "engine_v8_supercharged",
+	"version": 1,
+	"data": {
+		"Id": "engine_v8_supercharged",
+		"CylinderCount": 8,
+		"Harmonics": [
+			{
+				"Order": 0.5,
+				"OffLoadGain": 0.42,
+				"OnLoadGain": 0.55
+			},
+			{
+				"Order": 1,
+				"OffLoadGain": 0.55,
+				"OnLoadGain": 0.7
+			},
+			{
+				"Order": 1.5,
+				"OffLoadGain": 0.22,
+				"OnLoadGain": 0.3
+			},
+			{
+				"Order": 2,
+				"OffLoadGain": 0.25,
+				"OnLoadGain": 0.4
+			},
+			{
+				"Order": 2.5,
+				"OffLoadGain": 0.08,
+				"OnLoadGain": 0.14
+			},
+			{
+				"Order": 3,
+				"OffLoadGain": 0.1,
+				"OnLoadGain": 0.2
+			},
+			{
+				"Order": 4,
+				"OffLoadGain": 0.04,
+				"OnLoadGain": 0.1
+			}
+		],
+		"EngineGain": 0.62,
+		"OffLoadLevel": 0.55,
+		"IdleLevel": 0.58,
+		"OffLoadCutoffHz": 850,
+		"OnLoadCutoffHz": 3000,
+		"CutoffRpmTracking": 0.4,
+		"Drive": 2.6,
+		"CycleJitter": 0.009,
+		"AmplitudeJitter": 0.14,
+		"IntakeNoiseGain": 0.24,
+		"IntakeNoiseOrder": 7,
+		"IntakeNoiseQ": 8,
+		"ExhaustNoiseGain": 0.16,
+		"ExhaustNoiseCutoffHz": 380,
+		"OverrunCrackleProbability": 0.06,
+		"OverrunCrackleGain": 0.45,
+		"OverrunMinRpmFraction": 0.4,
+		"FallbackMaxRpm": 6500
+	}
+}
