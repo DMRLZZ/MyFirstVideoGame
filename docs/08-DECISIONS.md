@@ -113,3 +113,13 @@ Formato: contexto → decisión → alternativas descartadas → consecuencias. 
   - `LRGameplay` depende de `LRUI`, `LRCamera`, `LRAudio`, `LRReplay` y `LRProgression`, porque configura las clases de HUD, cámara y audio.
   - `ILRRoadParticipant` (en `LRCore`) permite al tráfico leer la huella y la velocidad del jugador sin depender de `LRVehicle`.
 - **Consecuencias:** el grafo sigue siendo acíclico. `LRGameplay` es el integrador.
+
+## ADR-014 · Resolución dinámica y límite de 60 fps por defecto
+
+- **Contexto:** en un portátil con Quadro RTX 3000 la GPU llega a 86-91 °C en menos de un minuto y baja de unos 1800 a unos 900 MHz. El coste de la escena no explica el problema: el mismo juego rinde muy distinto según la temperatura y el estado de energía.
+- **Decisión:**
+  - Resolución dinámica siempre activa, entre el 50 % y el 100 %, con un presupuesto de 16,6 ms.
+  - Límite de 60 fps por defecto, hasta que exista un menú de ajustes.
+  - TSR en calidad alta: la épica mantiene el historial al doble de la resolución de salida y su coste no baja con la resolución dinámica.
+  - LODs en las mallas del tráfico y en las ruedas, generados con `Tools/Editor/build_traffic_lods.py`.
+- **Consecuencias:** el juego mantiene una tasa de fotogramas jugable en un equipo caliente, a cambio de una imagen más blanda cuando la resolución baja. El límite de 60 fps y la calidad de TSR deben pasar al menú de ajustes (M4) para quien tenga un equipo mejor o una pantalla de más de 60 Hz. `DefaultGameUserSettings.ini` solo se aplica si el jugador no tiene ya un `GameUserSettings.ini` guardado con esos valores.
