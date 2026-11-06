@@ -494,6 +494,10 @@ def build_details(mesh, design, c, arches, P, seg):
     quality = design.get("Quality", 1.0)
     jv = np.arange(P.shape[1])[None, :] * np.ones((P.shape[0], 1), dtype=int)
 
+    # Before anything else is painted: only the shell of the body may get a lining.
+    if design.get("Cabin") and quality >= 1:
+        build_headliner(mesh, design, c)
+
     # Wheel wells: dark drum behind each opening.
     for ax, radius, R in arches:
         outer = float(c["HalfWidth"](ax)) - 0.015
@@ -555,6 +559,18 @@ def build_details(mesh, design, c, arches, P, seg):
     if cab and quality >= 1:
         build_interior(mesh, cab, c["Top"])
         close_cabin(mesh, design, c, cab)
+
+
+def build_headliner(mesh, design, c):
+    """From the cockpit the roof and pillars would show the back of the paint: line them with the interior material."""
+    v, n, f = mesh.arrays()["Paint"]
+    front = design["Regions"]["Windshield"][0][0][0]  # Lower edge of the windshield.
+    rear = min(point[0] for poly in design["Regions"]["RearGlass"] for point in poly)
+    center = v[f].mean(axis=1)
+    keep = (center[:, 0] > rear) & (center[:, 0] < front) & (center[:, 2] > c["Belt"](center[:, 0]) - 0.02)
+    corners = f[keep][:, ::-1].reshape(-1)
+    faces = np.arange(len(corners)).reshape(-1, 3)
+    mesh.add("Interior", v[corners] - n[corners] * 0.015, -n[corners], faces)
 
 
 def close_cabin(mesh, design, c, cab):
