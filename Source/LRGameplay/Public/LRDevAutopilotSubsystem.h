@@ -75,6 +75,8 @@ private:
 	/** Frame statistics since the previous telemetry line. */
 	double AccumulatedFrameSeconds = 0.0;
 	int32 AccumulatedFrames = 0;
+	double WorstFrameSeconds = 0.0;
+	int32 HitchFrames = 0;
 
 	int32 ScreenshotIndex = 0;
 	bool bCycleCameras = false;

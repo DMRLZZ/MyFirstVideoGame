@@ -41,6 +41,9 @@ namespace LRDevAutopilotPrivate
 	constexpr double RestartDelaySeconds = 6.0;
 	constexpr double TracePeriodSeconds = 0.05;
 	constexpr double LaneSweepPeriodSeconds = 6.0;
+
+	/** A frame longer than this counts as a visible hitch (under 30 fps). */
+	constexpr double HitchThresholdSeconds = 1.0 / 30.0;
 }
 
 bool ULRDevAutopilotSubsystem::ShouldCreateSubsystem(UObject* Outer) const
@@ -99,6 +102,8 @@ void ULRDevAutopilotSubsystem::Tick(float DeltaTime)
 	ElapsedSeconds += DeltaTime;
 	AccumulatedFrameSeconds += DeltaTime;
 	++AccumulatedFrames;
+	WorstFrameSeconds = FMath::Max(WorstFrameSeconds, static_cast<double>(DeltaTime));
+	HitchFrames += DeltaTime > HitchThresholdSeconds ? 1 : 0;
 
 	if (ElapsedSeconds >= QuitAfterSeconds && !bQuitRequested)
 	{
@@ -288,7 +293,7 @@ void ULRDevAutopilotSubsystem::LogTelemetry(const ALRVehicle& Vehicle)
 	const double AverageFrameMs = AccumulatedFrames > 0 ? 1000.0 * AccumulatedFrameSeconds / AccumulatedFrames : 0.0;
 
 	UE_LOG(LogLRGameplay, Log,
-		TEXT("DevTelemetry t=%.1f state=%s speed=%.0f km/h gear=%d rpm=%.0f S=%.1f D=%.2f lane=%d target=%d wrecked=%d traffic=%d cam=%s frame=%.1f ms (%.0f fps) game=%.1f render=%.1f gpu=%.1f"),
+		TEXT("DevTelemetry t=%.1f state=%s speed=%.0f km/h gear=%d rpm=%.0f S=%.1f D=%.2f lane=%d target=%d wrecked=%d traffic=%d cam=%s frame=%.1f ms (%.0f fps) worst=%.0f hitches=%d game=%.1f render=%.1f gpu=%.1f"),
 		ElapsedSeconds,
 		Context ? *UEnum::GetValueAsString(Context->GetRunState()) : TEXT("?"),
 		Vehicle.GetSpeedKmh(), Vehicle.GetCurrentGear(), Vehicle.GetEngineRpm(),
@@ -296,11 +301,14 @@ void ULRDevAutopilotSubsystem::LogTelemetry(const ALRVehicle& Vehicle)
 		Traffic ? Traffic->GetNumVehicles() : -1,
 		Camera ? *UEnum::GetValueAsString(Camera->GetCameraMode()) : TEXT("?"),
 		AverageFrameMs, AverageFrameMs > 0.0 ? 1000.0 / AverageFrameMs : 0.0,
+		1000.0 * WorstFrameSeconds, HitchFrames,
 		FPlatformTime::ToMilliseconds(GGameThreadTime), FPlatformTime::ToMilliseconds(GRenderThreadTime),
 		FPlatformTime::ToMilliseconds(RHIGetGPUFrameCycles()));
 
 	AccumulatedFrameSeconds = 0.0;
 	AccumulatedFrames = 0;
+	WorstFrameSeconds = 0.0;
+	HitchFrames = 0;
 }
 
 void ULRDevAutopilotSubsystem::TickShowroom(float DeltaTime)
