@@ -113,6 +113,8 @@ Tools/Scripts/run-python.ps1 -Script Tools/Editor/x.py -ExtraArgs "-NoSound"
 - Requiere que el plugin **Python Editor Script Plugin** esté activado en el proyecto.
 - Log: `Saved/Logs/run-python.log`. Devuelve el código de salida del editor.
 
+Los `.uasset` son `lockable`: quedan en solo lectura hasta hacer `git lfs lock <ruta>`, y sin ese bloqueo Unreal no puede guardar los cambios. Por eso hay que bloquear los materiales antes de ejecutar `import_generated_cars.py` y desbloquearlos después del push.
+
 `Tools/Editor/build_traffic_lods.py` es la excepción: `set_lods` no funciona en un commandlet, así que necesita el editor completo. Hay que ejecutarlo después de `import_generated_cars.py`, porque al reimportar se pierden los LODs:
 
 ```powershell
