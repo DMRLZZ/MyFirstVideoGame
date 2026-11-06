@@ -37,17 +37,21 @@ def surface_instance(name, color, roughness, metallic=0.0, specular=0.5, grain=0
 
 
 SLOTS = {
-    "Paint": assets.load_asset("/Game/ConceptCar/Car/Assets/MI_CarPaint"),
+    "Paint": assets.load_asset("/Game/LeftRight/Materials/M_LRCarPaint"),
     "Glass": assets.load_asset("/Game/ConceptCar/Car/Assets/M_Glass"),
     "Metal": assets.load_asset("/Game/ConceptCar/Car/Assets/M_Metal"),
-    "Tire": assets.load_asset("/Game/ConceptCar/Car/Assets/M_TireRubber"),
-    "Trim": surface_instance("MI_Car_Trim", (0.012, 0.012, 0.013), 0.45, grain=0.15),
+    "Tire": surface_instance("MI_Car_Tire", (0.01, 0.01, 0.011), 0.82, specular=0.25, grain=0.2),
+    "Trim": surface_instance("MI_Car_Trim", (0.006, 0.006, 0.007), 0.55, specular=0.3, grain=0.15),
     "Gap": surface_instance("MI_Car_Gap", (0.002, 0.002, 0.002), 0.9),
     "Interior": surface_instance("MI_Car_Interior", (0.02, 0.016, 0.014), 0.7, grain=0.3),
-    "Rim": surface_instance("MI_Car_Rim", (0.55, 0.56, 0.58), 0.28, metallic=1.0),
+    "Rim": surface_instance("MI_Car_Rim", (0.2, 0.205, 0.22), 0.32, metallic=1.0),
     "Brake": surface_instance("MI_Car_Brake", (0.25, 0.25, 0.26), 0.4, metallic=1.0),
-    "HeadLight": surface_instance("MI_Car_HeadLight", (0.8, 0.82, 0.85), 0.12, emissive=(6.0, 6.2, 6.8)),
-    "TailLight": surface_instance("MI_Car_TailLight", (0.25, 0.005, 0.005), 0.18, emissive=(1.4, 0.03, 0.02)),
+    "HeadLight": surface_instance("MI_Car_HeadLight", (0.02, 0.022, 0.026), 0.06, specular=0.8, emissive=(0.02, 0.02, 0.025)),
+    "DRL": surface_instance("MI_Car_DRL", (0.9, 0.92, 1.0), 0.3, emissive=(14.0, 14.5, 16.0)),
+    "TailLight": surface_instance("MI_Car_TailLight", (0.09, 0.003, 0.004), 0.1, emissive=(0.03, 0.0, 0.0)),
+    "TailLED": surface_instance("MI_Car_TailLED", (0.6, 0.02, 0.02), 0.3, emissive=(5.0, 0.12, 0.07)),
+    "Screen": surface_instance("MI_Car_Screen", (0.01, 0.015, 0.02), 0.2, emissive=(0.5, 0.75, 1.0)),
+    "Caliper": surface_instance("MI_Car_Caliper", (0.6, 0.03, 0.02), 0.35, specular=0.6),
 }
 
 for source in sorted(glob.glob(os.path.join(SOURCE_DIR, "*.glb"))):
@@ -73,6 +77,24 @@ for source in sorted(glob.glob(os.path.join(SOURCE_DIR, "*.glb"))):
                 asset.set_material(index, SLOTS[slot_name])
             else:
                 unreal.log_warning(f"LRCars: unknown slot {slot_name} on {path}")
+        # Plain triangles: the Interchange importer turns Nanite on, and its coarse fallback is what shows on this project.
+        nanite = asset.get_editor_property("nanite_settings")
+        nanite.set_editor_property("enabled", False)
+        asset.set_editor_property("nanite_settings", nanite)
+
+        # The traffic shows many cars at once, most of them far away.
+        if name.endswith("_Traffic"):
+            options = unreal.EditorScriptingMeshReductionOptions()
+            settings = []
+            for percent, screen in ((1.0, 1.0), (0.4, 0.35), (0.12, 0.14), (0.03, 0.05)):
+                level = unreal.EditorScriptingMeshReductionSettings()
+                level.set_editor_property("percent_triangles", percent)
+                level.set_editor_property("screen_size", screen)
+                settings.append(level)
+            options.set_editor_property("reduction_settings", settings)
+            options.set_editor_property("auto_compute_lod_screen_size", False)
+            count = unreal.EditorStaticMeshLibrary.set_lods(asset, options)
+            unreal.log(f"LRCars: {name} LODs: {count}")
         bounds = asset.get_bounding_box()
         names = [str(s.get_editor_property("material_slot_name")) for s in slots]
         unreal.log(f"LRCars: {path} slots={names} min={bounds.min} max={bounds.max}")
