@@ -143,6 +143,9 @@
 		"Cameras": {
 			"$ref": "#/$defs/Cameras"
 		},
+		"SmoothSteering": {
+			"$ref": "#/$defs/SmoothSteering"
+		},
 		"LaneAssist": {
 			"$ref": "#/$defs/LaneAssist"
 		},
@@ -211,6 +214,24 @@
 		"RearWheels"
 	],
 	"$defs": {
+		"SmoothSteering": {
+			"type": "object",
+			"description": "FLRSmoothSteeringParams (default control scheme: the car moves sideways while steering is held).",
+			"properties": {
+				"InputRisePerS": { "type": "number", "description": "Growth of the input while held, per second.", "minimum": 0.1, "maximum": 100 },
+				"InputFallPerS": { "type": "number", "description": "Fade of the input on release, per second.", "minimum": 0.1, "maximum": 100 },
+				"InputReversePerS": { "type": "number", "description": "Change of the input when crossing to the other side, per second.", "minimum": 0.1, "maximum": 100 },
+				"MaxLateralSpeedMs": { "type": "number", "description": "Sideways speed with full input, m/s.", "minimum": 0.1, "maximum": 30 },
+				"LateralSpeedPerForwardSpeed": { "type": "number", "description": "Limit of the sideways speed per m/s of forward speed.", "minimum": 0.01, "maximum": 1 },
+				"HoldGain": { "type": "number", "description": "Lateral speed per meter of error when returning to a position, 1/s.", "minimum": 0.1, "maximum": 10 },
+				"MaxLateralAccelMs2": { "type": "number", "description": "Grip budget of the sideways moves, m/s^2.", "minimum": 1, "maximum": 30 },
+				"EdgeMarginMeters": { "type": "number", "description": "Margin to the barrier on top of half the width of the car, meters.", "minimum": 0, "maximum": 5 },
+				"EdgeSlowdownMeters": { "type": "number", "description": "Distance to that limit where the outward speed starts to fade, meters.", "minimum": 0.1, "maximum": 20 },
+				"LaneMagnetRadiusMeters": { "type": "number", "description": "With no input, a lane center closer than this attracts the car, meters.", "minimum": 0, "maximum": 3 },
+				"LaneMagnetSpeedMs": { "type": "number", "description": "Speed of that attraction, m/s.", "minimum": 0, "maximum": 5 }
+			},
+			"additionalProperties": false
+		},
 		"Vector": {
 			"type": "object",
 			"description": "FVector, centimeters in actor space (X forward, Y right, Z up).",
