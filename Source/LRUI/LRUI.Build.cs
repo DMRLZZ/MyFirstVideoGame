@@ -13,6 +13,7 @@ public class LRUI : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "SlateCore", "LRCore", "LRVehicle" });
 
 		// Slate + InputCore + LRInput: input pre-processor that detects the last device used (FLRInputDeviceTracker).
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "InputCore", "LRInput" });
+		// LRAudio: the pause menu and the HUD show and control the music.
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "InputCore", "LRInput", "LRAudio" });
 	}
 }
