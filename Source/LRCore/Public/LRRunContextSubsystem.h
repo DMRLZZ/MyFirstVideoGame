@@ -56,7 +56,7 @@ private:
 	int32 RunSeed = 0;
 	ELRRunState RunState = ELRRunState::Garage;
 	ELRGameModeType GameMode = ELRGameModeType::EndlessOneWay;
-	ELRControlScheme ControlScheme = ELRControlScheme::Arcade;
+	ELRControlScheme ControlScheme = ELRControlScheme::Smooth;
 
 	UPROPERTY()
 	TWeakObjectPtr<APawn> PlayerPawn;
