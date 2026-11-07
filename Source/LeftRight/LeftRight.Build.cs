@@ -31,6 +31,7 @@ public class LeftRight : ModuleRules
 		});
 
 		// Design data lives as JSON at <Project>/Data and is loaded at runtime by ULRDataSubsystem.
-		RuntimeDependencies.Add(Path.Combine("$(ProjectDir)", "Data", "..."), StagedFileType.UFS);
+		// Loose files, not inside the pak: the media player opens the music in Data/Music straight from disk.
+		RuntimeDependencies.Add(Path.Combine("$(ProjectDir)", "Data", "..."), StagedFileType.NonUFS);
 	}
 }
