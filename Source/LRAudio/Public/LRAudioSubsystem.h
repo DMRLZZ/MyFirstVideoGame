@@ -48,6 +48,11 @@ private:
 	/** Bus callback: a car was passed closely. */
 	void HandleNearMiss(const FLRNearMissEvent& Event);
 
+	/** Sends the volume chosen by the player to the sound of the car. */
+	void ApplyEffectsVolume() const;
+
+	FDelegateHandle SettingsHandle;
+
 	/** Bus callback: the player hit something. */
 	void HandleCrash(const FLRCrashEvent& Event);
 

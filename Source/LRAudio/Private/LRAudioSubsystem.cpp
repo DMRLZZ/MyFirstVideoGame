@@ -2,6 +2,8 @@
 
 #include "LRAudioSubsystem.h"
 
+#include "LRUserSettings.h"
+
 #include "DSP/LRVehicleSynth.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -81,8 +83,22 @@ void ULRAudioSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	Super::OnWorldBeginPlay(InWorld);
 
 	RefreshPlayerAudio();
+	ApplyEffectsVolume();
+	if (ULRUserSettingsSubsystem* Settings = ULRUserSettingsSubsystem::Get(this))
+	{
+		SettingsHandle = Settings->OnChanged.AddWeakLambda(this, [this](const FLRUserSettings&) { ApplyEffectsVolume(); });
+	}
 	InWorld.GetTimerManager().SetTimer(RefreshTimer, FTimerDelegate::CreateUObject(this, &ULRAudioSubsystem::RefreshPlayerAudio),
 		LRAudioSubsystemPrivate::RefreshIntervalSeconds, true);
+}
+
+void ULRAudioSubsystem::ApplyEffectsVolume() const
+{
+	const ULRUserSettingsSubsystem* Settings = ULRUserSettingsSubsystem::Get(this);
+	if (ULRVehicleAudioComponent* VehicleAudio = PlayerAudio.Get(); VehicleAudio && Settings)
+	{
+		VehicleAudio->SetVolumeMultiplier(Settings->GetSettings().EffectsVolume);
+	}
 }
 
 void ULRAudioSubsystem::HandleNearMiss(const FLRNearMissEvent& Event)
