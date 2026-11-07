@@ -44,6 +44,11 @@ public:
 	/** Input actions of this player (owned by this controller), or nullptr before the input system starts. */
 	ULRInputActions* GetInputActions() const { return InputActions; }
 
+	/** Opens the pause menu, or closes it if it is open. */
+	void TogglePauseMenu();
+
+	bool IsPauseMenuOpen() const { return PauseMenu.IsValid(); }
+
 	//~ APlayerController
 	virtual void PlayerTick(float DeltaTime) override;
 
@@ -74,6 +79,10 @@ private:
 	void HandlePause();
 	void HandleToggleControlScheme();
 	void HandleCycleVehicle();
+	void HandleNextTrack();
+	void ClosePauseMenu();
+	void ReleaseDrivingInput();
+	void HandleSettingsChanged(const struct FLRUserSettings& Settings);
 
 	/** Bus callback: rumble scaled by the near-miss tier. */
 	void HandleNearMiss(const FLRNearMissEvent& Event);
@@ -99,6 +108,11 @@ private:
 
 	/** Turns the steering axis into lane change requests (Arcade). */
 	FLRLaneChangeDetector LaneDetector;
+
+	/** Menu on screen and the wrapper that keeps it in the viewport. Null while closed. */
+	TSharedPtr<class SLRPauseMenu> PauseMenu;
+	TSharedPtr<class SWidget> PauseMenuContainer;
+	FDelegateHandle SettingsHandle;
 
 	/** Last steering value, clamped to -1..1. */
 	float SteerAxis = 0.f;

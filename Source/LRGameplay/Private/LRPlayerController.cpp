@@ -2,14 +2,18 @@
 
 #include "LRPlayerController.h"
 
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedPlayerInput.h"
+#include "Framework/Application/SlateApplication.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "LREvents.h"
 #include "LRGameEventSubsystem.h"
 #include "LRGameModeEndless.h"
@@ -18,9 +22,13 @@
 #include "LRInputActions.h"
 #include "LRInputCurves.h"
 #include "LRInputTypes.h"
+#include "LRMusicSubsystem.h"
 #include "LRPlayerCameraManager.h"
 #include "LRRunContextSubsystem.h"
+#include "LRUserSettings.h"
 #include "LRVehicle.h"
+#include "SLRPauseMenu.h"
+#include "Widgets/SWeakWidget.h"
 
 namespace LRPlayerControllerPrivate
 {
@@ -94,6 +102,7 @@ void ALRPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(Actions->Pause, ETriggerEvent::Triggered, this, &ALRPlayerController::HandlePause);
 	EnhancedInput->BindAction(Actions->ToggleControlScheme, ETriggerEvent::Triggered, this, &ALRPlayerController::HandleToggleControlScheme);
 	EnhancedInput->BindAction(Actions->CycleVehicle, ETriggerEvent::Triggered, this, &ALRPlayerController::HandleCycleVehicle);
+	EnhancedInput->BindAction(Actions->NextTrack, ETriggerEvent::Triggered, this, &ALRPlayerController::HandleNextTrack);
 }
 
 void ALRPlayerController::BeginPlay()
@@ -113,6 +122,12 @@ void ALRPlayerController::BeginPlay()
 		CrashHandle = Events->OnCrash.AddUObject(this, &ALRPlayerController::HandleCrash);
 		RunResetHandle = Events->OnRunReset.AddUObject(this, &ALRPlayerController::HandleRunReset);
 	}
+
+	if (ULRUserSettingsSubsystem* Settings = ULRUserSettingsSubsystem::Get(this))
+	{
+		SettingsHandle = Settings->OnChanged.AddUObject(this, &ALRPlayerController::HandleSettingsChanged);
+		SetControlScheme(Settings->GetSettings().ControlScheme);
+	}
 }
 
 void ALRPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -123,6 +138,14 @@ void ALRPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		Events->OnCrash.Remove(CrashHandle);
 		Events->OnRunReset.Remove(RunResetHandle);
 	}
+	if (ULRUserSettingsSubsystem* Settings = ULRUserSettingsSubsystem::Get(this))
+	{
+		Settings->OnChanged.Remove(SettingsHandle);
+	}
+	if (PauseMenu.IsValid())
+	{
+		ClosePauseMenu();
+	}
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -132,6 +155,10 @@ void ALRPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	ALRVehicle* Vehicle = GetVehicle();
+	if (const ULRUserSettingsSubsystem* Settings = ULRUserSettingsSubsystem::Get(this); Settings && Vehicle)
+	{
+		Vehicle->SetSteeringSensitivity(Settings->GetSettings().SteeringSensitivity);
+	}
 	if (Vehicle && Vehicle->GetControlScheme() == ELRControlScheme::Arcade)
 	{
 		const int32 LaneRequest = LaneDetector.Update(SteerAxis, DeltaTime);
@@ -158,8 +185,18 @@ void ALRPlayerController::SetControlScheme(ELRControlScheme Scheme)
 void ALRPlayerController::ToggleControlScheme()
 {
 	const ULRRunContextSubsystem* Context = ULRRunContextSubsystem::Get(this);
-	const ELRControlScheme Current = Context ? Context->GetControlScheme() : ELRControlScheme::Arcade;
-	SetControlScheme(Current == ELRControlScheme::Arcade ? ELRControlScheme::Simcade : ELRControlScheme::Arcade);
+	const ELRControlScheme Current = Context ? Context->GetControlScheme() : ELRControlScheme::Smooth;
+	const ELRControlScheme Next = Current == ELRControlScheme::Smooth ? ELRControlScheme::Arcade
+		: (Current == ELRControlScheme::Arcade ? ELRControlScheme::Simcade : ELRControlScheme::Smooth);
+	SetControlScheme(Next);
+
+	// The key and the menu are two views of the same setting.
+	if (ULRUserSettingsSubsystem* Settings = ULRUserSettingsSubsystem::Get(this))
+	{
+		FLRUserSettings Edited = Settings->GetSettings();
+		Edited.ControlScheme = Next;
+		Settings->SetSettings(Edited);
+	}
 }
 
 ALRVehicle* ALRPlayerController::GetVehicle() const
@@ -291,7 +328,127 @@ void ALRPlayerController::HandleRestart()
 
 void ALRPlayerController::HandlePause()
 {
-	SetPause(!IsPaused());
+	TogglePauseMenu();
+}
+
+void ALRPlayerController::TogglePauseMenu()
+{
+	if (PauseMenu.IsValid())
+	{
+		ClosePauseMenu();
+		return;
+	}
+
+	UGameViewportClient* Viewport = GEngine ? GEngine->GameViewport : nullptr;
+	if (Viewport == nullptr || !FSlateApplication::IsInitialized())
+	{
+		return;
+	}
+
+	// Key releases do not arrive while the menu has the input: without this the car would keep the keys "held".
+	ReleaseDrivingInput();
+	SetPause(true);
+
+	TWeakObjectPtr<ALRPlayerController> WeakThis(this);
+	PauseMenu = SNew(SLRPauseMenu)
+		.Settings(ULRUserSettingsSubsystem::Get(this))
+		.Music(ULRMusicSubsystem::Get(this))
+		.CarName_Lambda([WeakThis]()
+		{
+			const ALRVehicle* Vehicle = WeakThis.IsValid() ? WeakThis->GetVehicle() : nullptr;
+			return Vehicle ? FText::FromString(Vehicle->GetDefinition().DisplayName) : FText::GetEmpty();
+		})
+		.OnResume_Lambda([WeakThis]()
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->ClosePauseMenu();
+			}
+		})
+		.OnRestart_Lambda([WeakThis]()
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->ClosePauseMenu();
+				WeakThis->HandleRestart();
+			}
+		})
+		.OnNextCar_Lambda([WeakThis]()
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->HandleCycleVehicle();
+			}
+		})
+		.OnQuit_Lambda([WeakThis]()
+		{
+			if (WeakThis.IsValid())
+			{
+				UKismetSystemLibrary::QuitGame(WeakThis.Get(), WeakThis.Get(), EQuitPreference::Quit, false);
+			}
+		});
+
+	PauseMenuContainer = SNew(SWeakWidget).PossiblyNullContent(PauseMenu);
+	Viewport->AddViewportWidgetContent(PauseMenuContainer.ToSharedRef(), 100);
+
+	// The input mode applies its focus later in the frame, so it has to name the widget that should end up with it.
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(PauseMenu->GetInitialFocus());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
+	SetShowMouseCursor(true);
+	PauseMenu->FocusFirstItem();
+}
+
+void ALRPlayerController::ClosePauseMenu()
+{
+	if (UGameViewportClient* Viewport = GEngine ? GEngine->GameViewport : nullptr; Viewport && PauseMenuContainer.IsValid())
+	{
+		Viewport->RemoveViewportWidgetContent(PauseMenuContainer.ToSharedRef());
+	}
+	PauseMenu.Reset();
+	PauseMenuContainer.Reset();
+
+	SetShowMouseCursor(false);
+	SetInputMode(FInputModeGameOnly());
+	SetPause(false);
+	if (FSlateApplication::IsInitialized())
+	{
+		FSlateApplication::Get().SetAllUserFocusToGameViewport();
+	}
+}
+
+void ALRPlayerController::ReleaseDrivingInput()
+{
+	SteerAxis = 0.f;
+	if (ALRVehicle* Vehicle = GetVehicle())
+	{
+		Vehicle->SetThrottleInput(0.f);
+		Vehicle->SetBrakeInput(0.f);
+		Vehicle->SetSteeringInput(0.f);
+		Vehicle->SetHandbrakeInput(false);
+	}
+	if (ALRPlayerCameraManager* CameraManager = GetLRCameraManager())
+	{
+		CameraManager->SetLookBack(false);
+	}
+}
+
+void ALRPlayerController::HandleSettingsChanged(const FLRUserSettings& Settings)
+{
+	const ULRRunContextSubsystem* Context = ULRRunContextSubsystem::Get(this);
+	if (Context && Context->GetControlScheme() != Settings.ControlScheme)
+	{
+		SetControlScheme(Settings.ControlScheme);
+	}
+}
+
+void ALRPlayerController::HandleNextTrack()
+{
+	if (ULRMusicSubsystem* Music = ULRMusicSubsystem::Get(this))
+	{
+		Music->NextTrack();
+	}
 }
 
 void ALRPlayerController::HandleCycleVehicle()
