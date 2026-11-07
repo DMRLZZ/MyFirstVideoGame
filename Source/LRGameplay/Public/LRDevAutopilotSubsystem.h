@@ -45,6 +45,7 @@ public:
 	//~ FTickableGameObject
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
+	virtual bool IsTickableWhenPaused() const override { return true; }
 
 private:
 	/** Picks a lane change direction (-1, 0, +1) toward the lane with the largest free gap ahead. */
