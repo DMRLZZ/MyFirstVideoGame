@@ -45,4 +45,14 @@ struct LRVEHICLE_API FLRLaneAssist
 	 */
 	static float ComputeSteering(const FLRLaneAssistParams& Params, float CurrentD, float TargetD, float HeadingErrorRad,
 		float YawRateRadS, float SpeedMs, float RoadCurvaturePerM = 0.f);
+
+	/**
+	 * Inner loop on its own: steering input that reaches a lateral speed relative to the road.
+	 *
+	 * @param DesiredLateralSpeedMs  Lateral speed to reach, m/s (+ = right).
+	 * @param MaxLateralAccelMs2     Grip budget for this move, m/s^2.
+	 * @return steering input in [-MaxSteering, MaxSteering] (+ = steer right).
+	 */
+	static float ComputeSteeringForLateralSpeed(const FLRLaneAssistParams& Params, float DesiredLateralSpeedMs, float MaxLateralAccelMs2,
+		float HeadingErrorRad, float YawRateRadS, float SpeedMs, float RoadCurvaturePerM = 0.f);
 };
