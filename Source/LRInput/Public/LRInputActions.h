@@ -134,6 +134,10 @@ public:
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> CycleVehicle;
 
+	/** Skips to the next song. */
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> NextTrack;
+
 	/** Menu confirm, Boolean pressed. Keys: Enter, SpaceBar, Gamepad face button bottom. */
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category = "Input|Menu")
 	TObjectPtr<UInputAction> MenuConfirm;
