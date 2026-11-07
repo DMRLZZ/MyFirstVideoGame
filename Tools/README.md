@@ -148,6 +148,16 @@ Tools/Scripts/play.ps1 -Wait                    # espera a que se cierre y devue
 - `-ExtraArgs` añade argumentos tal cual (por ejemplo, un mapa o `-ExecCmds=...`).
 - Requiere haber compilado `LeftRightEditor`.
 
+## Generadores de contenido
+
+Todo se genera desde código, sin assets ni licencias de terceros. Necesitan Python 3 con numpy, scipy y Pillow.
+
+| Script | Qué genera | Siguiente paso |
+|---|---|---|
+| `Tools/CarGen/lrcargen.py` | Coches en `.glb` | `Tools/Editor/import_generated_cars.py` y `build_traffic_lods.py` |
+| `Tools/SceneGen/lrtexgen.py` | Texturas de asfalto, hormigón y terreno en `Saved/SceneGen/Textures` | `Tools/Editor/create_scene_materials.py` crea `M_LRAsphalt`, `M_LRConcrete` y `M_LRTerrain` |
+| `Tools/MusicGen/lrmusicgen.py` | Tres temas synthwave en `Data/Music` (AAC) | Nada: el juego los lee del disco. Necesita `ffmpeg` en el PATH |
+
 ## Cómo añadir un script nuevo
 
 1. Crea `Tools/Scripts/<nombre>.ps1` con bloque de ayuda (`<# .SYNOPSIS ... #>`), `[CmdletBinding()]` y parámetros validados (`ValidateSet`, `ValidateRange`).
