@@ -79,13 +79,13 @@ namespace LRGameModeEndlessPrivate
 
 	FAutoConsoleCommandWithWorldAndArgs ControlSchemeCommand(
 		TEXT("lr.ControlScheme"),
-		TEXT("Selects the control scheme: lr.ControlScheme <Arcade|Simcade>."),
+		TEXT("Selects the control scheme: lr.ControlScheme <Smooth|Arcade|Simcade>."),
 		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
 		{
 			ELRControlScheme Scheme = ELRControlScheme::Arcade;
 			if (!Args.IsValidIndex(0) || !FLRGameRulesLogic::ParseControlScheme(Args[0], Scheme))
 			{
-				UE_LOG(LogLRGameplay, Warning, TEXT("Usage: lr.ControlScheme <Arcade|Simcade>"));
+				UE_LOG(LogLRGameplay, Warning, TEXT("Usage: lr.ControlScheme <Smooth|Arcade|Simcade>"));
 				return;
 			}
 			if (ALRPlayerController* Controller = World ? Cast<ALRPlayerController>(World->GetFirstPlayerController()) : nullptr)

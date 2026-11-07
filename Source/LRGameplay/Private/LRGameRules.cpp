@@ -104,6 +104,11 @@ bool FLRGameRulesLogic::ParseControlScheme(const FString& Text, ELRControlScheme
 		OutScheme = ELRControlScheme::Arcade;
 		return true;
 	}
+	if (Text.Equals(TEXT("Smooth"), ESearchCase::IgnoreCase))
+	{
+		OutScheme = ELRControlScheme::Smooth;
+		return true;
+	}
 	if (Text.Equals(TEXT("Simcade"), ESearchCase::IgnoreCase))
 	{
 		OutScheme = ELRControlScheme::Simcade;
