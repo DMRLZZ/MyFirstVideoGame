@@ -48,6 +48,9 @@
 		},
 		"Dressing": {
 			"$ref": "#/$defs/Dressing"
+		},
+		"Terrain": {
+			"$ref": "#/$defs/Terrain"
 		}
 	},
 	"additionalProperties": false,
@@ -60,6 +63,23 @@
 		"DefaultPlayerLane"
 	],
 	"$defs": {
+		"Terrain": {
+			"description": "Land around the road (FLRTerrainParams). Optional: every field has a default.",
+			"type": "object",
+			"properties": {
+				"bEnabled": { "type": "boolean", "description": "Builds the land next to the road." },
+				"DitchWidthM": { "type": "number", "description": "Width of the ditch behind the barrier, meters.", "minimum": 0, "maximum": 50 },
+				"DitchDepthM": { "type": "number", "description": "Depth of the ditch, meters.", "minimum": 0, "maximum": 10 },
+				"FlatWidthM": { "type": "number", "description": "Distance from the barrier where the hills start, meters.", "minimum": 0, "maximum": 200 },
+				"HillRampM": { "type": "number", "description": "Distance over which the hills reach their full height, meters.", "minimum": 1, "maximum": 2000 },
+				"HillAmplitudeM": { "type": "number", "description": "Scale of the height of the hills, meters.", "minimum": 0, "maximum": 1000 },
+				"HillWavelengthM": { "type": "number", "description": "Typical distance between two hills, meters.", "minimum": 10, "maximum": 10000 },
+				"HillOctaves": { "type": "integer", "description": "Noise layers of the hills.", "minimum": 1, "maximum": 8 },
+				"MaxDistanceM": { "type": "number", "description": "Where the land mesh ends, meters from the barrier. Below the minimum curve radius.", "minimum": 10, "maximum": 5000 },
+				"Seed": { "type": "integer", "description": "Changes the shape of the hills." }
+			},
+			"additionalProperties": false
+		},
 		"Profile": {
 			"description": "Road cross-section profile (FLRRoadProfile).",
 			"type": "object",
