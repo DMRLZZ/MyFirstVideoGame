@@ -129,7 +129,7 @@ void ALRVehicle::SetHandbrakeInput(bool bEngaged)
 
 void ALRVehicle::RequestLaneChange(int32 Direction)
 {
-	if (ControlScheme != ELRControlScheme::Arcade || !bInputEnabled || bWrecked || Direction == 0)
+	if (ControlScheme == ELRControlScheme::Simcade || !bInputEnabled || bWrecked || Direction == 0)
 	{
 		return;
 	}
@@ -151,6 +151,7 @@ void ALRVehicle::RequestLaneChange(int32 Direction)
 	if (Lanes.IsValidIndex(TargetLane))
 	{
 		TargetLaneCenterD = Lanes[TargetLane].CenterD;
+		SmoothSteering.SetHoldTarget(TargetLaneCenterD);
 	}
 }
 
@@ -158,6 +159,7 @@ void ALRVehicle::SetControlScheme(ELRControlScheme Scheme)
 {
 	ControlScheme = Scheme;
 	TargetLane = CurrentLane;
+	SmoothSteering.Reset(CachedRoadCoord.D);
 }
 
 void ALRVehicle::SetInputEnabled(bool bEnabled)
@@ -539,6 +541,7 @@ void ALRVehicle::ResetForRun(double S, float D, float InitialSpeedKmh)
 	CurrentLane = Road->FindNearestLane(D);
 	TargetLane = CurrentLane;
 	TargetLaneCenterD = Road->GetLaneCenterD(TargetLane);
+	SmoothSteering.Reset(TargetLaneCenterD);
 
 	// Kinematics.
 	LastVelocityCms = VelocityCms;
@@ -568,7 +571,7 @@ void ALRVehicle::Tick(float DeltaSeconds)
 		UpdateRoadState(*Road);
 	}
 
-	UpdateDriving();
+	UpdateDriving(DeltaSeconds);
 	UpdateVisualWheels();
 }
 
@@ -737,7 +740,8 @@ void ALRVehicle::UpdateRoadState(const ULRRoadSubsystem& Road)
 		}
 	}
 
-	if (ControlScheme == ELRControlScheme::Simcade || !Lanes.IsValidIndex(TargetLane))
+	// Only the Arcade scheme steers towards a lane of its own; in the others the target just follows the car.
+	if (ControlScheme != ELRControlScheme::Arcade || !Lanes.IsValidIndex(TargetLane))
 	{
 		TargetLane = CurrentLane;
 	}
@@ -752,9 +756,46 @@ bool ALRVehicle::AllowsOncomingLanes(const ULRRoadSubsystem& Road) const
 	return Road.GetProfile().bTwoWay;
 }
 
-float ALRVehicle::ComputeSteering() const
+float ALRVehicle::ComputeSmoothSteering(float RawSteering, float DeltaSeconds)
+{
+	const ULRRoadSubsystem* Road = ULRRoadSubsystem::Get(this);
+	const FLRLaneAssistParams& Assist = Definition.LaneAssist;
+	if (Road == nullptr || !Road->HasRoad() || !bHasRoadCoord)
+	{
+		return RawSteering;
+	}
+
+	const FLRRoadCrossSection& Section = Road->GetCrossSection();
+	const float Inset = 0.5f * Definition.WidthMeters + Definition.SmoothSteering.EdgeMarginMeters;
+	FLRSmoothSteering::FLimits Limits;
+	Limits.MinD = Section.LeftBarrierD + Inset;
+	Limits.MaxD = Section.RightBarrierD - Inset;
+
+	const TArray<FLRLaneDesc>& Lanes = Road->GetPath().GetLanes();
+	const int32 NearestLane = LRVehicleMath::FindNearestLane(Lanes, CachedRoadCoord.D);
+	const float LaneCenter = Lanes.IsValidIndex(NearestLane) ? Lanes[NearestLane].CenterD : CachedRoadCoord.D;
+
+	const float LateralSpeed = ForwardSpeedMs * FMath::Sin(FMath::UnwindRadians(HeadingErrorRad));
+	const float DesiredLateralSpeed = SmoothSteering.Update(Definition.SmoothSteering, RawSteering, SteeringSensitivity, DeltaSeconds,
+		CachedRoadCoord.D, ForwardSpeedMs, LateralSpeed, LaneCenter, Limits);
+
+	// Parking speeds: nothing to hold on to yet, the wheels simply follow the ramped input.
+	if (ForwardSpeedMs < Assist.MinActiveSpeedMs)
+	{
+		return SmoothSteering.GetSmoothedInput();
+	}
+	return FLRLaneAssist::ComputeSteeringForLateralSpeed(Assist, DesiredLateralSpeed, Definition.SmoothSteering.MaxLateralAccelMs2,
+		HeadingErrorRad, YawRateRadS, ForwardSpeedMs, RoadCurvaturePerM);
+}
+
+float ALRVehicle::ComputeSteering(float DeltaSeconds)
 {
 	const float RawSteering = bInputEnabled ? SteeringInput : 0.f;
+
+	if (ControlScheme == ELRControlScheme::Smooth)
+	{
+		return ComputeSmoothSteering(RawSteering, DeltaSeconds);
+	}
 
 	if (ControlScheme == ELRControlScheme::Arcade)
 	{
@@ -771,7 +812,7 @@ float ALRVehicle::ComputeSteering() const
 		Definition.WheelbaseMeters, Definition.FrontWheels.MaxSteerAngleDeg);
 }
 
-void ALRVehicle::UpdateDriving()
+void ALRVehicle::UpdateDriving(float DeltaSeconds)
 {
 	ULRVehicleMovementComponent* Movement = GetLRMovement();
 	if (Movement == nullptr)
@@ -829,7 +870,7 @@ void ALRVehicle::UpdateDriving()
 	}
 
 	AppliedThrottle = ChaosThrottle;
-	AppliedSteering = ComputeSteering();
+	AppliedSteering = ComputeSteering(DeltaSeconds);
 
 	Movement->SetThrottleInput(ChaosThrottle);
 	Movement->SetBrakeInput(ChaosBrake);

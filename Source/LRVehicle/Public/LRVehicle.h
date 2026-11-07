@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Assist/LRSmoothSteering.h"
 #include "CoreMinimal.h"
 #include "LRCoreTypes.h"
 #include "LRRoadParticipant.h"
@@ -50,6 +51,9 @@ public:
 
 	/** Analog steering, -1 (left) .. +1 (right). Used directly in Simcade; in Arcade only below the assist speed. */
 	void SetSteeringInput(float ValueMinus1To1);
+
+	/** Player setting that scales the sideways speed of the Smooth scheme. 1 = as tuned. */
+	void SetSteeringSensitivity(float Sensitivity) { SteeringSensitivity = FMath::Clamp(Sensitivity, 0.2f, 2.f); }
 
 	/** Handbrake on/off. */
 	void SetHandbrakeInput(bool bEngaged);
@@ -184,10 +188,13 @@ private:
 	void UpdateKinematics(float DeltaSeconds);
 
 	/** Computes and sends throttle, brake, steering and handbrake to Chaos. */
-	void UpdateDriving();
+	void UpdateDriving(float DeltaSeconds);
 
 	/** Steering for the active scheme (lane assist or stability assist). */
-	float ComputeSteering() const;
+	float ComputeSteering(float DeltaSeconds);
+
+	/** Steering of the Smooth scheme (ramped input and lateral speed). */
+	float ComputeSmoothSteering(float RawSteering, float DeltaSeconds);
 
 	/** Shows / hides the fallback box used when the skeletal mesh is missing. */
 	void SetFallbackBodyVisible(bool bVisible);
@@ -242,6 +249,7 @@ private:
 	float ThrottleInput = 0.f;
 	float BrakeInput = 0.f;
 	float SteeringInput = 0.f;
+	float SteeringSensitivity = 1.f;
 	bool bHandbrakeInput = false;
 
 	// Values sent to Chaos this tick.
@@ -265,6 +273,9 @@ private:
 	int32 CurrentLane = INDEX_NONE;
 	int32 TargetLane = INDEX_NONE;
 	float TargetLaneCenterD = 0.f;
+
+	/** Smooth scheme state. */
+	FLRSmoothSteering SmoothSteering;
 
 	// Kinematics.
 	/** World velocity sampled this tick (start of frame, i.e. before this frame's physics step), cm/s. */
