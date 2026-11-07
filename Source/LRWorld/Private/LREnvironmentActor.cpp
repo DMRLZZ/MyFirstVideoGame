@@ -10,10 +10,13 @@
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "ProceduralMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/SkyAtmosphereComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "LRDataLoader.h"
+#include "LRTerrainField.h"
+#include "LRUnits.h"
 #include "LRWorld.h"
 
 ALREnvironmentActor::ALREnvironmentActor()
@@ -32,7 +35,15 @@ ALREnvironmentActor::ALREnvironmentActor()
 	GroundPlane->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GroundPlane->SetGenerateOverlapEvents(false);
 	GroundPlane->SetCanEverAffectNavigation(false);
-	GroundPlane->SetRelativeScale3D(FVector(6000.0, 6000.0, 1.0)); // The engine plane is 1 m wide: 6 km.
+	GroundPlane->SetRelativeScale3D(FVector(30000.0, 30000.0, 1.0)); // The engine plane is 1 m wide: 30 km.
+	GroundPlane->SetCastShadow(false);
+
+	FarRidges = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("FarRidges"));
+	FarRidges->SetupAttachment(Root);
+	FarRidges->SetMobility(EComponentMobility::Movable);
+	FarRidges->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FarRidges->SetCanEverAffectNavigation(false);
+	FarRidges->SetCastShadow(false);
 
 	SunLight = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("SunLight"));
 	SunLight->SetupAttachment(Root);
@@ -86,19 +97,81 @@ bool ALREnvironmentActor::LoadAndApplyPreset(const FString& RelativePath)
 
 void ALREnvironmentActor::UpdateGround(const FVector& FocusLocationCm)
 {
-	// Below the road so that grade changes never make it poke through the asphalt.
-	constexpr double GroundDepthCm = 250.0;
+	// Only fills what the land around the road leaves open: deep enough for the grades of the road never to reach it.
+	constexpr double GroundDepthCm = 15000.0;
 	GroundPlane->SetWorldLocation(FVector(FocusLocationCm.X, FocusLocationCm.Y, FocusLocationCm.Z - GroundDepthCm));
+	FarRidges->SetWorldLocation(FocusLocationCm);
+}
+
+void ALREnvironmentActor::BuildRidge(int32 Section, float InnerRadiusM, float PeakRadiusM, float BaseHeightM, float AmplitudeM, int32 Seed, UMaterialInterface* Material)
+{
+	constexpr int32 NumSegments = 360;
+	// Share of the way from the foot of the ring to its crest, with the matching share of the height.
+	constexpr float RowDistance[] = { 0.f, 0.45f, 0.8f, 1.f };
+	constexpr float RowHeight[] = { 0.f, 0.3f, 0.8f, 1.f };
+	constexpr int32 NumRows = UE_ARRAY_COUNT(RowDistance);
+
+	const float StepRad = 2.f * PI / NumSegments;
+	const auto Point = [&](int32 Segment, int32 Row)
+	{
+		const float Angle = StepRad * Segment;
+		const float Radius = FMath::Lerp(InnerRadiusM, PeakRadiusM, RowDistance[Row]);
+		const float Crest = LRTerrainField::GetRidgeHeightM(Angle, BaseHeightM, AmplitudeM, Seed);
+		return FVector(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, RowHeight[Row] * Crest - 150.f) * LRUnits::MetersToCm(1.f);
+	};
+
+	TArray<FVector> Vertices;
+	TArray<int32> Triangles;
+	TArray<FVector> Normals;
+	Vertices.Reserve((NumSegments + 1) * NumRows);
+	Normals.Reserve((NumSegments + 1) * NumRows);
+	for (int32 Segment = 0; Segment <= NumSegments; ++Segment)
+	{
+		for (int32 Row = 0; Row < NumRows; ++Row)
+		{
+			const FVector AlongRing = Point(Segment + 1, Row) - Point(Segment - 1, Row);
+			const FVector UpSlope = Point(Segment, FMath::Min(Row + 1, NumRows - 1)) - Point(Segment, FMath::Max(Row - 1, 0));
+			Vertices.Add(Point(Segment, Row));
+			Normals.Add(FVector::CrossProduct(UpSlope, AlongRing).GetSafeNormal());
+		}
+	}
+	for (int32 Segment = 0; Segment < NumSegments; ++Segment)
+	{
+		for (int32 Row = 0; Row + 1 < NumRows; ++Row)
+		{
+			const int32 A = Segment * NumRows + Row;
+			const int32 B = A + NumRows;
+			Triangles.Add(A);
+			Triangles.Add(A + 1);
+			Triangles.Add(B);
+			Triangles.Add(A + 1);
+			Triangles.Add(B + 1);
+			Triangles.Add(B);
+		}
+	}
+
+	FarRidges->CreateMeshSection_LinearColor(Section, Vertices, Triangles, Normals, TArray<FVector2D>(), TArray<FLinearColor>(), TArray<FProcMeshTangent>(), false);
+	FarRidges->SetMaterial(Section, Material);
 }
 
 void ALREnvironmentActor::ApplyPreset(const FLREnvironmentPreset& Preset)
 {
+	if (UMaterialInterface* Terrain = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/LeftRight/Materials/M_LRTerrain.M_LRTerrain")))
+	{
+		GroundPlane->SetMaterial(0, Terrain);
+		if (FarRidges->GetNumSections() == 0)
+		{
+			BuildRidge(0, 2200.f, 3600.f, 90.f, 260.f, 11, Terrain);
+			BuildRidge(1, 6000.f, 11000.f, 350.f, 1300.f, 23, Terrain);
+		}
+	}
+
 	UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/LeftRight/Materials/M_LRSurface.M_LRSurface"));
 	if (Base == nullptr)
 	{
 		Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
 	}
-	if (Base != nullptr)
+	if (Base != nullptr && GroundPlane->GetMaterial(0) == nullptr)
 	{
 		UMaterialInstanceDynamic* GroundMaterial = UMaterialInstanceDynamic::Create(Base, this);
 		GroundMaterial->SetVectorParameterValue(TEXT("Color"), Preset.GroundColor);

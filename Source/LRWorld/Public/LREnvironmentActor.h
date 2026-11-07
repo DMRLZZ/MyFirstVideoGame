@@ -58,6 +58,10 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Environment")
 	TObjectPtr<class UStaticMeshComponent> GroundPlane;
 
+	/** Two rings of distant hills and mountains that travel with the player: too far away for any parallax to show. */
+	UPROPERTY(VisibleAnywhere, Category = "Environment")
+	TObjectPtr<class UProceduralMeshComponent> FarRidges;
+
 	UPROPERTY(VisibleAnywhere, Category = "Environment")
 	TObjectPtr<UDirectionalLightComponent> SunLight;
 
@@ -72,6 +76,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Environment")
 	TObjectPtr<UPostProcessComponent> PostProcess;
+
+	/** Builds one closed ring of FarRidges into a mesh section. */
+	void BuildRidge(int32 Section, float InnerRadiusM, float PeakRadiusM, float BaseHeightM, float AmplitudeM, int32 Seed, class UMaterialInterface* Material);
 
 	/** Last applied preset (defaults = day). */
 	FLREnvironmentPreset CurrentPreset;
