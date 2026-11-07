@@ -2,6 +2,8 @@
 
 #include "LRHUD.h"
 
+#include "LRMusicSubsystem.h"
+
 #include "CanvasItem.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
@@ -83,6 +85,7 @@ void FLRHUDLabels::Build()
 	TagThreadTheNeedle = FLRHUDFormat::GetThreadTheNeedleLabel();
 	SchemeArcade = FLRHUDFormat::GetControlSchemeLabel(ELRControlScheme::Arcade);
 	SchemeSimcade = FLRHUDFormat::GetControlSchemeLabel(ELRControlScheme::Simcade);
+	SchemeSmooth = FLRHUDFormat::GetControlSchemeLabel(ELRControlScheme::Smooth);
 
 	CountdownGo = LOCTEXT("CountdownGo", "¡YA!");
 	Crashed = LOCTEXT("Crashed", "¡CHOQUE!");
@@ -116,6 +119,7 @@ void FLRHUDLabels::Build()
 	// Prompts match the mappings of ULRInputActions (see Source/LRInput/README.md).
 	const FHintRow Throttle{ LOCTEXT("HintThrottle", "Acelerar"), LOCTEXT("HintThrottleKey", "W"), LOCTEXT("HintThrottlePad", "RT") };
 	const FHintRow Brake{ LOCTEXT("HintBrake", "Frenar"), LOCTEXT("HintBrakeKey", "S"), LOCTEXT("HintBrakePad", "LT") };
+	const FHintRow Dodge{ LOCTEXT("HintDodge", "Moverse"), LOCTEXT("HintDodgeKey", "A / D"), LOCTEXT("HintDodgePad", "Stick izq.") };
 	const FHintRow LaneChange{ LOCTEXT("HintLane", "Cambiar de carril"), LOCTEXT("HintLaneKey", "A / D o Q / E"), LOCTEXT("HintLanePad", "Stick izq. / cruceta") };
 	const FHintRow Steering{ LOCTEXT("HintSteer", "Dirección"), LOCTEXT("HintSteerKey", "A / D"), LOCTEXT("HintSteerPad", "Stick izq.") };
 	const FHintRow Handbrake{ LOCTEXT("HintHandbrake", "Freno de mano"), LOCTEXT("HintHandbrakeKey", "Espacio"), LOCTEXT("HintHandbrakePad", "B / Círculo") };
@@ -124,9 +128,12 @@ void FLRHUDLabels::Build()
 	const FHintRow Scheme{ LOCTEXT("HintScheme", "Cambiar esquema"), LOCTEXT("HintSchemeKey", "T"), LOCTEXT("HintSchemePad", "LB") };
 	const FHintRow Restart{ LOCTEXT("HintRestart", "Reiniciar"), LOCTEXT("HintRestartKey", "R"), LOCTEXT("HintRestartPad", "View / Share") };
 
+	const FHintRow Menu{ LOCTEXT("HintMenu", "Menú y ajustes"), LOCTEXT("HintMenuKey", "Esc"), LOCTEXT("HintMenuPad", "Menu / Options") };
+	const FHintRow NextSong{ LOCTEXT("HintNextSong", "Siguiente canción"), LOCTEXT("HintNextSongKey", "M"), LOCTEXT("HintNextSongPad", "Cruceta abajo") };
 	const FHintRow NextCar{ LOCTEXT("HintNextCar", "Cambiar de coche"), LOCTEXT("HintNextCarKey", "V"), LOCTEXT("HintNextCarPad", "Cruceta arriba") };
-	ArcadeHints = { Throttle, Brake, LaneChange, Handbrake, Camera, LookBack, Scheme, NextCar, Restart };
-	SimcadeHints = { Throttle, Brake, Steering, Handbrake, Camera, LookBack, Scheme, NextCar, Restart };
+	SmoothHints = { Throttle, Brake, Dodge, Handbrake, Camera, LookBack, NextCar, NextSong, Restart, Menu };
+	ArcadeHints = { Throttle, Brake, LaneChange, Handbrake, Camera, LookBack, Scheme, NextCar, NextSong, Restart, Menu };
+	SimcadeHints = { Throttle, Brake, Steering, Handbrake, Camera, LookBack, Scheme, NextCar, NextSong, Restart, Menu };
 }
 
 // --- ALRHUD: setup -------------------------------------------------------------------------------
@@ -463,6 +470,7 @@ void ALRHUD::DrawHUD()
 	default:
 		break;
 	}
+	DrawNowPlaying();
 }
 
 void ALRHUD::UpdateTime()
@@ -970,9 +978,29 @@ void ALRHUD::DrawControlScheme()
 		return;
 	}
 
-	const FText& SchemeLabel = Context->GetControlScheme() == ELRControlScheme::Simcade ? Labels.SchemeSimcade : Labels.SchemeArcade;
+	const ELRControlScheme ActiveScheme = Context->GetControlScheme();
+	const FText& SchemeLabel = ActiveScheme == ELRControlScheme::Smooth ? Labels.SchemeSmooth : ActiveScheme == ELRControlScheme::Simcade ? Labels.SchemeSimcade : Labels.SchemeArcade;
 	DrawTextAt(Labels.SchemeCaption, Fonts.Small, FVector2D(Margin, Margin), Tuning.SecondaryColor);
 	DrawTextAt(SchemeLabel, Fonts.SmallBold, FVector2D(Margin, Margin + GetLineHeight(Fonts.Small)), Tuning.AccentColor);
+}
+
+void ALRHUD::DrawNowPlaying()
+{
+	constexpr double VisibleSeconds = 4.0;
+	const ULRMusicSubsystem* Music = ULRMusicSubsystem::Get(this);
+	if (Music == nullptr || Music->GetTrackChangedSeconds() < 0.0 || NowSeconds - Music->GetTrackChangedSeconds() > VisibleSeconds)
+	{
+		return;
+	}
+	const FString Name = Music->GetCurrentTrackName();
+	if (Name.IsEmpty())
+	{
+		return;
+	}
+
+	const FText Text = FText::Format(LOCTEXT("NowPlaying", "MÚSICA: {0}"), FText::FromString(Name));
+	const FVector2D Size = MeasureText(Text, Fonts.SmallBold);
+	DrawTextAt(Text, Fonts.SmallBold, FVector2D(CanvasWidth - Margin - Size.X, Margin), Tuning.AccentColor);
 }
 
 void ALRHUD::DrawControlsHint()
@@ -994,8 +1022,9 @@ void ALRHUD::DrawControlsHint()
 	}
 
 	const ULRRunContextSubsystem* Context = RunContext.Get();
-	const bool bSimcade = Context && Context->GetControlScheme() == ELRControlScheme::Simcade;
-	const TArray<FLRHUDLabels::FHintRow>& Rows = bSimcade ? Labels.SimcadeHints : Labels.ArcadeHints;
+	const ELRControlScheme ActiveScheme = Context ? Context->GetControlScheme() : ELRControlScheme::Smooth;
+	const TArray<FLRHUDLabels::FHintRow>& Rows = ActiveScheme == ELRControlScheme::Smooth ? Labels.SmoothHints
+		: (ActiveScheme == ELRControlScheme::Simcade ? Labels.SimcadeHints : Labels.ArcadeHints);
 
 	const float TitleHeight = GetLineHeight(Fonts.MediumBold);
 	const float RowHeight = GetLineHeight(Fonts.Small) + Px(4.f);

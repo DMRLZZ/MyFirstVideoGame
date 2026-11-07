@@ -35,6 +35,7 @@ struct LRUI_API FLRHUDLabels
 	FText TagThreadTheNeedle;
 	FText SchemeArcade;
 	FText SchemeSimcade;
+	FText SchemeSmooth;
 	FText CountdownGo;
 	FText Crashed;
 	FText ResultsTitle;
@@ -66,6 +67,7 @@ struct LRUI_API FLRHUDLabels
 		FText Gamepad;
 	};
 	/** Rows for the Arcade scheme. */
+	TArray<FHintRow> SmoothHints;
 	TArray<FHintRow> ArcadeHints;
 	/** Rows for the Simcade scheme. */
 	TArray<FHintRow> SimcadeHints;
@@ -204,6 +206,9 @@ private:
 
 	/** Measured size of a text with a font, pixels. */
 	FVector2D MeasureText(const FText& Text, const FSlateFontInfo& Font) const;
+
+	/** Name of the song, for a few seconds after it changes. */
+	void DrawNowPlaying();
 
 	/** Height of one line of a font, pixels. */
 	float GetLineHeight(const FSlateFontInfo& Font) const;
