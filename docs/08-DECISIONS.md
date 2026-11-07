@@ -123,3 +123,13 @@ Formato: contexto → decisión → alternativas descartadas → consecuencias. 
   - TSR en calidad alta: la épica mantiene el historial al doble de la resolución de salida y su coste no baja con la resolución dinámica.
   - LODs en las mallas del tráfico y en las ruedas, generados con `Tools/Editor/build_traffic_lods.py`.
 - **Consecuencias:** el juego mantiene una tasa de fotogramas jugable en un equipo caliente, a cambio de una imagen más blanda cuando la resolución baja. El límite de 60 fps y la calidad de TSR deben pasar al menú de ajustes (M4) para quien tenga un equipo mejor o una pantalla de más de 60 Hz. `DefaultGameUserSettings.ini` solo se aplica si el jugador no tiene ya un `GameUserSettings.ini` guardado con esos valores.
+
+## ADR-015 · Dirección suave por defecto, menú de pausa en Slate y música desde disco
+
+- **Contexto:** con el esquema Arcade, cada toque de tecla pedía un cambio de carril completo: el coche salía de golpe y se paraba en el carril siguiente aunque la tecla siguiera pulsada. El juego no tenía menú ni música.
+- **Decisión:**
+  - Nuevo esquema `Smooth`, el predeterminado. Mientras se mantiene la dirección, el coche se desplaza de lado con una rampa (`FLRSmoothSteering`); al soltar sigue recto donde quedó. Cerca de las barreras la velocidad hacia fuera se apaga, así que mantener la tecla no acaba en un choque. Arcade y Simcade siguen disponibles con T o desde el menú.
+  - Menú de pausa con Esc, hecho en Slate desde C++ (`SLRPauseMenu`), sin assets de UMG: funciona con ratón, teclado y mando. Los ajustes se guardan en `GameUserSettings.ini` (`ULRUserSettingsSubsystem`).
+  - Música con el Media Framework (`ULRMusicSubsystem`): temas propios en `Data/Music` (AAC) y la música del jugador en `Documentos/LeftRight/Music`. El plugin de Windows no abre MP3 ni FLAC, así que esos archivos se convierten una vez a WAV con Media Foundation (`LRAudioFileDecoder`) en `Saved/MusicCache`.
+  - `LRUI` pasa a depender de `LRAudio`: el menú y el HUD muestran y controlan la música. El grafo sigue siendo acíclico.
+- **Consecuencias:** el juego es fácil de controlar desde el primer minuto y tiene ajustes básicos. El menú de M4-06 con CommonUI puede sustituir a este cuando haya arte de interfaz. Los temas propios se generan con `Tools/MusicGen/lrmusicgen.py` y no tienen derechos de terceros.
