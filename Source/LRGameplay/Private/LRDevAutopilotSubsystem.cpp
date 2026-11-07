@@ -72,6 +72,7 @@ void ULRDevAutopilotSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	bSteer = !FParse::Param(CommandLine, TEXT("LRDevNoSteer"));
 	bNoTraffic = FParse::Param(CommandLine, TEXT("LRDevNoTraffic"));
 	bLaneSweep = FParse::Param(CommandLine, TEXT("LRDevLaneSweep"));
+	bSteerTest = FParse::Param(CommandLine, TEXT("LRDevSteerTest"));
 	TraceBuffer = TEXT("t,state,speed_kmh,S,D,target_d,heading_deg,yaw_rate,steering,height_m\n");
 	NextScreenshotTime = ScreenshotPeriodSeconds;
 
@@ -182,7 +183,14 @@ void ULRDevAutopilotSubsystem::Tick(float DeltaTime)
 			}
 		}
 
-		if (bSteer && ElapsedSeconds >= NextLaneDecisionTime)
+		if (bSteerTest)
+		{
+			// One second right, a rest, a tap to the left, a rest, one second left, a rest: repeats every 12 s.
+			const double Phase = FMath::Fmod(ElapsedSeconds, 12.0);
+			const float Script = Phase < 1.0 ? 1.f : (Phase >= 4.0 && Phase < 4.1 ? -1.f : (Phase >= 7.0 && Phase < 8.0 ? -1.f : 0.f));
+			Vehicle->SetSteeringInput(Script);
+		}
+		else if (bSteer && ElapsedSeconds >= NextLaneDecisionTime)
 		{
 			if (bLaneSweep)
 			{
