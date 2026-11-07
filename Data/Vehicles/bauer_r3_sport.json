@@ -155,6 +155,19 @@
 			"ChaseNearHeightCm": 170,
 			"ChaseLookAtHeightCm": 90
 		},
+		"SmoothSteering": {
+			"InputRisePerS": 4.0,
+			"InputFallPerS": 5.0,
+			"InputReversePerS": 7.0,
+			"MaxLateralSpeedMs": 6.5,
+			"LateralSpeedPerForwardSpeed": 0.22,
+			"HoldGain": 1.5,
+			"MaxLateralAccelMs2": 12.0,
+			"EdgeMarginMeters": 0.35,
+			"EdgeSlowdownMeters": 2.5,
+			"LaneMagnetRadiusMeters": 0.35,
+			"LaneMagnetSpeedMs": 0.4
+		},
 		"LaneAssist": {
 			"bEnabled": true,
 			"LateralGain": 2.2,
