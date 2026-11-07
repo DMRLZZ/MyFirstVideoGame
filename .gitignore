@@ -31,3 +31,6 @@ __pycache__/
 # --- OS ---
 Thumbs.db
 .DS_Store
+
+# File order logs the cooker writes on every package.
+Build/Windows/FileOpenOrder/
