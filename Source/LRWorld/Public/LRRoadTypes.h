@@ -332,6 +332,53 @@ struct LRWORLD_API FLRRoadDressing
 	FLinearColor MetalColor = FLinearColor(0.25f, 0.26f, 0.27f, 1.f);
 };
 
+/** Land around the road: ditch, verge and hills. See LRTerrainField. Part of FLRRouteDefinition. */
+USTRUCT(BlueprintType)
+struct LRWORLD_API FLRTerrainParams
+{
+	GENERATED_BODY()
+
+	/** Builds the land next to the road. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain")
+	bool bEnabled = true;
+
+	/** Width of the ditch behind the barrier, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain", meta = (ClampMin = "0.0"))
+	float DitchWidthM = 8.f;
+
+	/** Depth of the ditch, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain", meta = (ClampMin = "0.0"))
+	float DitchDepthM = 1.2f;
+
+	/** Distance from the barrier where the hills start to grow, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain", meta = (ClampMin = "0.0"))
+	float FlatWidthM = 14.f;
+
+	/** Distance over which the hills reach their full height, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain", meta = (ClampMin = "1.0"))
+	float HillRampM = 450.f;
+
+	/** Scale of the height of the hills, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain", meta = (ClampMin = "0.0"))
+	float HillAmplitudeM = 60.f;
+
+	/** Typical distance between two hills, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain", meta = (ClampMin = "10.0"))
+	float HillWavelengthM = 620.f;
+
+	/** Noise layers: more of them means a rougher outline. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain", meta = (ClampMin = "1", ClampMax = "8"))
+	int32 HillOctaves = 5;
+
+	/** Where the land mesh ends, meters from the barrier. Keep it below the minimum curve radius. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain", meta = (ClampMin = "10.0"))
+	float MaxDistanceM = 1400.f;
+
+	/** Changes the shape of the hills. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Terrain")
+	int32 Seed = 7;
+};
+
 /**
  * Complete description of a procedural route: profile, generator, streaming, dressing and environment.
  * Data/World/Route_*.json (type "RouteDefinition"). Selected by ULRWorldSettings.
@@ -380,4 +427,8 @@ struct LRWORLD_API FLRRouteDefinition
 	/** Greybox dressing (markings, barriers, roadside objects, colors). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Route")
 	FLRRoadDressing Dressing;
+
+	/** Land around the road. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Route")
+	FLRTerrainParams Terrain;
 };
