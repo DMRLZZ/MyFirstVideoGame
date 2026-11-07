@@ -7,6 +7,7 @@
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "LRRoadPath.h"
+#include "LRTerrainField.h"
 #include "LRUnits.h"
 #include "LRWorld.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -21,6 +22,14 @@ namespace LRRoadStreamerPrivate
 	constexpr int32 SectionWhitePaint = 1;
 	constexpr int32 SectionYellowPaint = 2;
 	constexpr int32 SectionBarrier = 3;
+
+	/** Generated surface materials (Tools/Editor/create_scene_materials.py). */
+	const TCHAR* const AsphaltMaterialPath = TEXT("/Game/LeftRight/Materials/M_LRAsphalt.M_LRAsphalt");
+	const TCHAR* const ConcreteMaterialPath = TEXT("/Game/LeftRight/Materials/M_LRConcrete.M_LRConcrete");
+	const TCHAR* const TerrainMaterialPath = TEXT("/Game/LeftRight/Materials/M_LRTerrain.M_LRTerrain");
+
+	/** Distance used to measure the slope of the land for its normals, meters. */
+	constexpr double TerrainSlopeProbeM = 4.0;
 
 	/** Vector parameter of /Engine/BasicShapes/BasicShapeMaterial. */
 	const FName ColorParameterName(TEXT("Color"));
@@ -76,10 +85,17 @@ void ALRRoadStreamer::EnsureMaterials()
 		return;
 	}
 
-	AsphaltMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+	const auto CreateFrom = [this](const TCHAR* Path)
+	{
+		UMaterialInterface* Parent = LoadObject<UMaterialInterface>(nullptr, Path);
+		return UMaterialInstanceDynamic::Create(Parent ? Parent : BaseMaterial.Get(), this);
+	};
+
+	AsphaltMaterial = CreateFrom(LRRoadStreamerPrivate::AsphaltMaterialPath);
 	WhitePaintMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
 	YellowPaintMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-	ConcreteMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
+	ConcreteMaterial = CreateFrom(LRRoadStreamerPrivate::ConcreteMaterialPath);
+	TerrainMaterial = CreateFrom(LRRoadStreamerPrivate::TerrainMaterialPath);
 	MetalMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
 }
 
@@ -90,6 +106,8 @@ void ALRRoadStreamer::Configure(const FLRRouteDefinition& Route)
 	Profile = Route.Profile;
 	Dressing = Route.Dressing;
 	Streaming = Route.Streaming;
+	Terrain = Route.Terrain;
+	LRTerrainField::BuildColumnDistances(Terrain, TerrainColumns);
 	Streaming.ChunkLengthM = FMath::Max(20.f, Streaming.ChunkLengthM);
 	Streaming.MeshSampleStepM = FMath::Clamp(Streaming.MeshSampleStepM, 0.5f, Streaming.ChunkLengthM);
 	Streaming.MaxChunkBuildsPerFrame = FMath::Max(1, Streaming.MaxChunkBuildsPerFrame);
@@ -105,6 +123,10 @@ void ALRRoadStreamer::Configure(const FLRRouteDefinition& Route)
 		YellowPaintMaterial->SetVectorParameterValue(ColorParameterName, Dressing.YellowPaintColor);
 		ConcreteMaterial->SetVectorParameterValue(ColorParameterName, Dressing.ConcreteColor);
 		MetalMaterial->SetVectorParameterValue(ColorParameterName, Dressing.MetalColor);
+
+		// Wheel tracks of M_LRAsphalt: one every half lane, starting a quarter of a lane in.
+		AsphaltMaterial->SetScalarParameterValue(TEXT("LaneOrigin"), CrossSection.LanesLeftD + 0.25f * Profile.LaneWidthMeters);
+		AsphaltMaterial->SetScalarParameterValue(TEXT("LanePeriod"), 0.5f * Profile.LaneWidthMeters);
 
 		// Surface response (parameters of M_LRSurface, ignored by the basic shape fallback).
 		const auto SetSurface = [](UMaterialInstanceDynamic* Material, float Roughness, float GrainAmount, float GrainScale)
@@ -191,6 +213,14 @@ int32 ALRRoadStreamer::AcquireSlot()
 	Slot.Mesh->SetCanEverAffectNavigation(false);
 	Slot.Mesh->RegisterComponent();
 
+	Slot.TerrainMesh = NewObject<UProceduralMeshComponent>(this, NAME_None, RF_Transient);
+	Slot.TerrainMesh->SetupAttachment(Slot.Mesh);
+	Slot.TerrainMesh->SetMobility(EComponentMobility::Movable);
+	Slot.TerrainMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Slot.TerrainMesh->SetCanEverAffectNavigation(false);
+	Slot.TerrainMesh->SetCastShadow(false);
+	Slot.TerrainMesh->RegisterComponent();
+
 	auto MakeInstanced = [this, &Slot](UStaticMesh* Mesh, UMaterialInterface* Material, bool bCastShadow)
 	{
 		UInstancedStaticMeshComponent* Instanced = NewObject<UInstancedStaticMeshComponent>(this, NAME_None, RF_Transient);
@@ -221,6 +251,10 @@ void ALRRoadStreamer::ReleaseSlot(FLRRoadChunkSlot& Slot)
 	if (Slot.Mesh)
 	{
 		Slot.Mesh->ClearAllMeshSections();
+	}
+	if (Slot.TerrainMesh)
+	{
+		Slot.TerrainMesh->ClearAllMeshSections();
 	}
 	if (Slot.LampPoles)
 	{
@@ -543,10 +577,81 @@ bool ALRRoadStreamer::BuildChunk(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot
 		FlushSection(Mesh, SectionAsphalt, true, AsphaltMaterial);
 	}
 
+	BuildTerrain(Slot, Origin);
 	BuildRoadside(Path, Slot, S0, S1, Origin);
 
 	Slot.ChunkIndex = ChunkIndex;
 	return true;
+}
+
+void ALRRoadStreamer::BuildTerrain(FLRRoadChunkSlot& Slot, const FVector& Origin)
+{
+	using namespace LRRoadStreamerPrivate;
+	TRACE_CPUPROFILER_EVENT_SCOPE(ALRRoadStreamer::BuildTerrain);
+
+	ResetBuffers();
+	const int32 NumRows = RowS.Num();
+	const int32 NumColumns = TerrainColumns.Num();
+	if (!Terrain.bEnabled || NumRows < 2 || NumColumns < 2 || !TerrainMaterial)
+	{
+		Slot.TerrainMesh->ClearAllMeshSections();
+		return;
+	}
+
+	const auto Height = [this](const FVector& PositionCm, float Distance)
+	{
+		return LRTerrainField::GetHeightM(Terrain, LRUnits::CmToMeters(PositionCm.X), LRUnits::CmToMeters(PositionCm.Y), Distance);
+	};
+
+	// Sign of D going away from the road. D grows to the right, and triangles need D ascending to face up.
+	for (const float Side : { -1.f, 1.f })
+	{
+		const float BarrierD = Side < 0.f ? CrossSection.LeftBarrierD : CrossSection.RightBarrierD;
+		const int32 Base = Vertices.Num();
+
+		for (int32 Row = 0; Row < NumRows; ++Row)
+		{
+			for (int32 Column = 0; Column < NumColumns; ++Column)
+			{
+				const float Distance = TerrainColumns[Side < 0.f ? NumColumns - 1 - Column : Column];
+				const FVector Lateral = RowRight[Row] * LRUnits::MetersToCm(BarrierD + Side * Distance);
+				const FVector Flat = RowCenter[Row] + Origin + Lateral;
+				const float H = Height(Flat, Distance);
+				Vertices.Add(RowCenter[Row] + Lateral + FVector(0.0, 0.0, LRUnits::MetersToCm(H)));
+
+				// Slope along the road and across it, measured on the height function: no seams between chunks.
+				const FVector Along = RowForward[Row] * LRUnits::MetersToCm(TerrainSlopeProbeM);
+				const FVector Across = RowRight[Row] * Side * LRUnits::MetersToCm(TerrainSlopeProbeM);
+				const float SlopeAlong = (Height(Flat + Along, Distance) - Height(Flat - Along, Distance)) / static_cast<float>(2.0 * TerrainSlopeProbeM);
+				const float SlopeAcross = (Height(Flat + Across, Distance + TerrainSlopeProbeM)
+					- Height(Flat - Across, FMath::Max(0.f, Distance - static_cast<float>(TerrainSlopeProbeM)))) / static_cast<float>(2.0 * TerrainSlopeProbeM);
+				const FVector Normal = (FVector::UpVector - RowForward[Row] * SlopeAlong - RowRight[Row] * Side * SlopeAcross).GetSafeNormal();
+
+				Normals.Add(Normal);
+				Tangents.Add(FProcMeshTangent(RowForward[Row], false));
+				UV0.Add(FVector2D::ZeroVector); // M_LRTerrain projects from above in world space.
+			}
+		}
+
+		for (int32 Row = 0; Row + 1 < NumRows; ++Row)
+		{
+			for (int32 Column = 0; Column + 1 < NumColumns; ++Column)
+			{
+				const int32 A0 = Base + Row * NumColumns + Column;
+				const int32 A1 = A0 + 1;
+				const int32 B0 = A0 + NumColumns;
+				const int32 B1 = B0 + 1;
+				Triangles.Add(A0);
+				Triangles.Add(A1);
+				Triangles.Add(B0);
+				Triangles.Add(A1);
+				Triangles.Add(B1);
+				Triangles.Add(B0);
+			}
+		}
+	}
+
+	FlushSection(Slot.TerrainMesh, 0, false, TerrainMaterial);
 }
 
 void ALRRoadStreamer::BuildRoadside(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, double S0, double S1, const FVector& Origin)

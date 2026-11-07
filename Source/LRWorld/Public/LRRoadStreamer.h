@@ -26,6 +26,10 @@ struct FLRRoadChunkSlot
 	UPROPERTY()
 	TObjectPtr<UProceduralMeshComponent> Mesh;
 
+	/** Land on both sides of the chunk. No collision and no shadows. */
+	UPROPERTY()
+	TObjectPtr<UProceduralMeshComponent> TerrainMesh;
+
 	/** Vertical lamp poles (engine cylinder). */
 	UPROPERTY()
 	TObjectPtr<UInstancedStaticMeshComponent> LampPoles;
@@ -117,6 +121,9 @@ private:
 	/** Uploads the reusable buffers as a mesh section. */
 	void FlushSection(UProceduralMeshComponent* Mesh, int32 SectionIndex, bool bCollision, UMaterialInterface* Material);
 
+	/** Fills the land mesh on both sides of a chunk, from the cached rows. */
+	void BuildTerrain(FLRRoadChunkSlot& Slot, const FVector& Origin);
+
 	/** Fills the instanced roadside objects of a chunk. */
 	void BuildRoadside(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, double S0, double S1, const FVector& Origin);
 
@@ -150,10 +157,15 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> MetalMaterial;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> TerrainMaterial;
+
 	FLRRoadProfile Profile;
 	FLRRoadDressing Dressing;
 	FLRRoadStreamingParams Streaming;
 	FLRRoadCrossSection CrossSection;
+	FLRTerrainParams Terrain;
+	TArray<float> TerrainColumns;
 	TArray<FLRLaneMarking> Markings;
 
 	/** Window of the last update, used to skip work when nothing changed. */
