@@ -260,6 +260,57 @@ struct LRVEHICLE_API FLRCameraAnchors
 	float ChaseLookAtHeightCm = 90.f;
 };
 
+/** Smooth scheme: how the car answers to a steering key or stick. See FLRSmoothSteering. */
+USTRUCT(BlueprintType)
+struct LRVEHICLE_API FLRSmoothSteeringParams
+{
+	GENERATED_BODY()
+
+	/** How fast the input grows while a key is held, per second. 4 = full input after a quarter of a second. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.1"))
+	float InputRisePerS = 4.f;
+
+	/** How fast the input fades on release, per second. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.1"))
+	float InputFallPerS = 5.f;
+
+	/** How fast the input changes when crossing to the other side, per second. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.1"))
+	float InputReversePerS = 7.f;
+
+	/** Sideways speed with full input, m/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.1"))
+	float MaxLateralSpeedMs = 6.5f;
+
+	/** Limit of the sideways speed per m/s of forward speed: keeps the angle of the car moderate at low speed. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.01"))
+	float LateralSpeedPerForwardSpeed = 0.22f;
+
+	/** How firmly the car returns to its position with no input: lateral speed per meter of error, 1/s. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.1"))
+	float HoldGain = 1.5f;
+
+	/** Grip budget of the sideways moves, m/s^2. Sets how quickly the car stops moving after a release. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "1.0"))
+	float MaxLateralAccelMs2 = 12.f;
+
+	/** Closest the center of the car gets to the barrier, meters, on top of half the width of the car. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.0"))
+	float EdgeMarginMeters = 0.35f;
+
+	/** Distance to that limit where the outward speed starts to fade, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.1"))
+	float EdgeSlowdownMeters = 2.5f;
+
+	/** With no input, a lane center closer than this attracts the car, meters. 0 = free positioning. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.0"))
+	float LaneMagnetRadiusMeters = 0.35f;
+
+	/** Speed of that attraction, m/s. Slow enough not to be felt as a pull. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SmoothSteering", meta = (ClampMin = "0.0"))
+	float LaneMagnetSpeedMs = 0.4f;
+};
+
 /**
  * Lane-keeping assist (Arcade scheme), consumed by FLRLaneAssist::ComputeSteering.
  *
@@ -562,6 +613,9 @@ struct LRVEHICLE_API FLRVehicleDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Assists")
 	FLRLaneAssistParams LaneAssist;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Assists")
+	FLRSmoothSteeringParams SmoothSteering;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Assists")
 	FLRStabilityAssistParams StabilityAssist;
