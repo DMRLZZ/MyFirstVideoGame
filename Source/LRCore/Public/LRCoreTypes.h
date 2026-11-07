@@ -77,7 +77,9 @@ enum class ELRControlScheme : uint8
 	/** Discrete lane changes driven by the lane-keeping assist; real physics underneath. */
 	Arcade,
 	/** Full analog steering with configurable stability aids. */
-	Simcade
+	Simcade,
+	/** Default: the car moves sideways while steering is held and goes straight on release. No lane steps, no walls. */
+	Smooth
 };
 
 /** Game modes (docs/04-GAMEPLAY.md §6). */
