@@ -206,9 +206,15 @@ FText FLRHUDFormat::GetThreadTheNeedleLabel()
 
 FText FLRHUDFormat::GetControlSchemeLabel(ELRControlScheme Scheme)
 {
-	return Scheme == ELRControlScheme::Simcade
-		? LOCTEXT("SchemeSimcade", "SIMCADE")
-		: LOCTEXT("SchemeArcade", "ARCADE");
+	switch (Scheme)
+	{
+	case ELRControlScheme::Simcade:
+		return LOCTEXT("SchemeSimcade", "SIMCADE");
+	case ELRControlScheme::Smooth:
+		return LOCTEXT("SchemeSmooth", "SUAVE");
+	default:
+		return LOCTEXT("SchemeArcade", "ARCADE");
+	}
 }
 
 // --- FLRHUDAnim ------------------------------------------------------------------------------
