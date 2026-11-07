@@ -517,11 +517,20 @@ bool ALRRoadStreamer::BuildChunk(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot
 		const float HalfTop = 0.5f * FMath::Min(Dressing.BarrierTopWidthM, Dressing.BarrierBaseWidthM);
 		const float Height = Dressing.BarrierHeightM;
 
+		// New Jersey profile: a short vertical kerb, a sloped foot and a nearly vertical upper wall.
+		const float KerbHeight = 0.09f * Height;
+		const float KneeHeight = 0.38f * Height;
+		const float HalfKnee = HalfTop + 0.28f * (HalfBase - HalfTop);
+
 		for (const float BarrierD : { CrossSection.LeftBarrierD, CrossSection.RightBarrierD })
 		{
-			AppendStripOverRows(BarrierD - HalfBase, 0.f, BarrierD - HalfTop, Height, UVOffsetS);
+			AppendStripOverRows(BarrierD - HalfBase, 0.f, BarrierD - HalfBase, KerbHeight, UVOffsetS);
+			AppendStripOverRows(BarrierD - HalfBase, KerbHeight, BarrierD - HalfKnee, KneeHeight, UVOffsetS);
+			AppendStripOverRows(BarrierD - HalfKnee, KneeHeight, BarrierD - HalfTop, Height, UVOffsetS);
 			AppendStripOverRows(BarrierD - HalfTop, Height, BarrierD + HalfTop, Height, UVOffsetS);
-			AppendStripOverRows(BarrierD + HalfTop, Height, BarrierD + HalfBase, 0.f, UVOffsetS);
+			AppendStripOverRows(BarrierD + HalfTop, Height, BarrierD + HalfKnee, KneeHeight, UVOffsetS);
+			AppendStripOverRows(BarrierD + HalfKnee, KneeHeight, BarrierD + HalfBase, KerbHeight, UVOffsetS);
+			AppendStripOverRows(BarrierD + HalfBase, KerbHeight, BarrierD + HalfBase, 0.f, UVOffsetS);
 		}
 
 		FlushSection(Mesh, SectionBarrier, true, ConcreteMaterial);
