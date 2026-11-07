@@ -77,6 +77,17 @@ namespace LRGameModeEndlessPrivate
 			}
 		}));
 
+	FAutoConsoleCommandWithWorld PauseMenuCommand(
+		TEXT("lr.Menu"),
+		TEXT("Opens or closes the pause menu."),
+		FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
+		{
+			if (ALRPlayerController* Controller = World ? Cast<ALRPlayerController>(World->GetFirstPlayerController()) : nullptr)
+			{
+				Controller->TogglePauseMenu();
+			}
+		}));
+
 	FAutoConsoleCommandWithWorldAndArgs ControlSchemeCommand(
 		TEXT("lr.ControlScheme"),
 		TEXT("Selects the control scheme: lr.ControlScheme <Smooth|Arcade|Simcade>."),
