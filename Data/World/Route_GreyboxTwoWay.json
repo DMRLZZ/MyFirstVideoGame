@@ -41,7 +41,7 @@
 		"Streaming": {
 			"GenerateAheadM": 3000.0,
 			"KeepBehindM": 1000.0,
-			"VisibleBehindM": 300.0,
+			"VisibleBehindM": 600.0,
 			"VisibleAheadM": 2000.0,
 			"ChunkLengthM": 100.0,
 			"MeshSampleStepM": 5.0,
