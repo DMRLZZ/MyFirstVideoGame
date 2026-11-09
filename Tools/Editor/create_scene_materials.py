@@ -3,10 +3,16 @@
 Run Tools/SceneGen/lrtexgen.py first, then: Tools/Scripts/run-python.ps1 -Script Tools/Editor/create_scene_materials.py
 The assets are lockable: to run it again over existing assets, `git lfs lock` them first or the save fails.
 
+Run Tools/SceneGen/lrpropgen.py too: it writes the leaf and sign textures.
+LR_ONLY (environment variable, comma separated) limits the run to some assets, e.g. LR_ONLY=T_Leaves_D,M_LRFoliage,
+so the assets that did not change are not saved again.
+
 Output in /Game/LeftRight/Materials, used from C++ through dynamic instances:
   M_LRAsphalt   road surface, UVs in meters. Adds wheel tracks from LaneOrigin and LanePeriod.
   M_LRConcrete  barriers and structures, UVs in meters.
   M_LRTerrain   ground and hills, projected from above in world space. ColorB tints large patches.
+  M_LRFoliage   leaf cards: masked, two-sided, tinted per instance between Color and ColorB.
+  M_LRSign      guide signs, with a little glow for the retroreflective sheeting.
 All of them have a "Color" parameter that multiplies the texture.
 """
 import os
@@ -16,6 +22,13 @@ import unreal
 SOURCE = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "SceneGen", "Textures")
 TEXTURES = "/Game/LeftRight/Textures"
 MATERIALS = "/Game/LeftRight/Materials"
+
+ONLY = {name.strip() for name in os.environ.get("LR_ONLY", "").split(",") if name.strip()}
+
+
+def wanted(name):
+    return not ONLY or name in ONLY
+
 
 assets = unreal.EditorAssetLibrary
 tools = unreal.AssetToolsHelpers.get_asset_tools()
@@ -206,9 +219,42 @@ def build_terrain(textures):
     g.finish(base, normal, rough, specular=0.3)
 
 
+def build_foliage(textures):
+    g = Graph("M_LRFoliage")
+    g.material.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
+    g.material.set_editor_property("two_sided", True)
+    g.material.set_editor_property("opacity_mask_clip_value", 0.45)
+    leaves = g.texture("BaseTex", textures["T_Leaves_D"], g.node(unreal.MaterialExpressionTextureCoordinate), COLOR)
+    random = g.node(unreal.MaterialExpressionPerInstanceRandom)
+    tint = g.lerp(g.vector("Color", (0.42, 0.5, 0.17)), g.vector("ColorB", (0.75, 0.58, 0.24)), g.mul(g.mul(random, random), g.constant(0.7)))
+    lib.connect_material_property(g.mul(leaves, tint), "", unreal.MaterialProperty.MP_BASE_COLOR)
+    lib.connect_material_property(leaves, "A", unreal.MaterialProperty.MP_OPACITY_MASK)
+    lib.connect_material_property(g.constant(0.75), "", unreal.MaterialProperty.MP_ROUGHNESS)
+    lib.connect_material_property(g.constant(0.3), "", unreal.MaterialProperty.MP_SPECULAR)
+    save_material(g)
+
+
+def build_sign(textures):
+    g = Graph("M_LRSign")
+    g.material.set_editor_property("two_sided", True)
+    sign = g.texture("BaseTex", textures["T_Signs_D"], g.node(unreal.MaterialExpressionTextureCoordinate), COLOR)
+    lib.connect_material_property(sign, "RGB", unreal.MaterialProperty.MP_BASE_COLOR)
+    lib.connect_material_property(g.mul(sign, g.scalar("Glow", 0.25)), "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    lib.connect_material_property(g.constant(0.5), "", unreal.MaterialProperty.MP_ROUGHNESS)
+    save_material(g)
+
+
+def save_material(g):
+    lib.recompile_material(g.material)
+    if not assets.save_loaded_asset(g.material, only_if_is_dirty=False):
+        unreal.log_error(f"LRScene: could not save {g.name}, is it locked with git lfs lock?")
+    unreal.log(f"LRScene: built {g.name}")
+
+
 names = ["T_Asphalt_D", "T_Asphalt_N", "T_Asphalt_R", "T_Concrete_D", "T_Concrete_N", "T_Concrete_R",
-         "T_Terrain_D", "T_Terrain_N", "T_Terrain_R", "T_Macro_M"]
-loaded = {name: import_texture(name) for name in names}
-build_asphalt(loaded)
-build_concrete(loaded)
-build_terrain(loaded)
+         "T_Terrain_D", "T_Terrain_N", "T_Terrain_R", "T_Macro_M", "T_Leaves_D", "T_Signs_D"]
+loaded = {name: import_texture(name) if wanted(name) else assets.load_asset(f"{TEXTURES}/{name}") for name in names}
+for material, build in (("M_LRAsphalt", build_asphalt), ("M_LRConcrete", build_concrete), ("M_LRTerrain", build_terrain),
+                        ("M_LRFoliage", build_foliage), ("M_LRSign", build_sign)):
+    if wanted(material):
+        build(loaded)
