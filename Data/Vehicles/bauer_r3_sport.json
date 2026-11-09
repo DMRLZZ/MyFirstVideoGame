@@ -125,7 +125,7 @@
 		},
 		"Steering": {
 			"AngleRatio": 0.7,
-			"InputRiseRate": 8,
+			"InputRiseRate": 10,
 			"InputFallRate": 10
 		},
 		"Cameras": {
