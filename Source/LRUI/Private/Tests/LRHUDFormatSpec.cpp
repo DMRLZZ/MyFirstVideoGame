@@ -109,6 +109,15 @@ void FLRHUDFormatSpec::Define()
 			TestEqual(TEXT("Fourth"), FLRHUDFormat::FormatGear(4).ToString(), FString(TEXT("4")));
 		});
 
+		It("keeps the previous gear on screen during a shift", [this]()
+		{
+			TestEqual(TEXT("Shifting at speed"), FLRHUDFormat::ChooseDisplayedGear(0, 3, 150.f), 3);
+			TestEqual(TEXT("Stopped in neutral"), FLRHUDFormat::ChooseDisplayedGear(0, 1, 0.f), 0);
+			TestEqual(TEXT("Nothing shown yet"), FLRHUDFormat::ChooseDisplayedGear(0, MIN_int32, 150.f), 0);
+			TestEqual(TEXT("New gear"), FLRHUDFormat::ChooseDisplayedGear(4, 3, 150.f), 4);
+			TestEqual(TEXT("Reverse"), FLRHUDFormat::ChooseDisplayedGear(-1, 1, 10.f), -1);
+		});
+
 		It("formats multipliers without trailing zeros", [this]()
 		{
 			TestEqual(TEXT("1"), FLRHUDFormat::FormatMultiplier(1.f).ToString(), FString(TEXT("x1")));
