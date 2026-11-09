@@ -332,6 +332,75 @@ struct LRWORLD_API FLRRoadDressing
 	FLinearColor MetalColor = FLinearColor(0.25f, 0.26f, 0.27f, 1.f);
 };
 
+/** How a roadside object is spread along the road. */
+UENUM(BlueprintType)
+enum class ELRPropPlacement : uint8
+{
+	/** Random positions on both sides, on the land: trees, bushes, rocks. */
+	Scatter,
+	/** One every SpacingM, centered over the road and facing along it: gantries, overpasses. */
+	OverRoad
+};
+
+/** One kind of object placed along the road by ALRRoadStreamer. Part of FLRRouteDefinition. */
+USTRUCT(BlueprintType)
+struct LRWORLD_API FLRRoadsideProp
+{
+	GENERATED_BODY()
+
+	/** Static mesh to place. Built along the road's X axis for OverRoad objects. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop")
+	FSoftObjectPath Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop")
+	ELRPropPlacement Placement = ELRPropPlacement::Scatter;
+
+	/** Scatter: average number per side and per 100 m of road. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.0"))
+	float CountPer100M = 1.f;
+
+	/** OverRoad: distance between two of them along the road, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "10.0"))
+	float SpacingM = 1000.f;
+
+	/** OverRoad: position of the first one, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.0"))
+	float PhaseM = 0.f;
+
+	/** Scatter: nearest distance from the barrier, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.0"))
+	float MinDistanceM = 10.f;
+
+	/** Scatter: farthest distance from the barrier, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.0"))
+	float MaxDistanceM = 300.f;
+
+	/** Scatter: above 1, the objects gather near the road. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float DistancePower = 1.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.05"))
+	float MinScale = 0.8f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.05"))
+	float MaxScale = 1.2f;
+
+	/** How far into the ground the object goes, meters: hides its base on slopes. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop")
+	float SinkM = 0.1f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop")
+	bool bCastShadow = true;
+
+	/** Beyond this distance from the camera the object is not drawn, meters. 0 = always drawn. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.0"))
+	float CullDistanceM = 1500.f;
+
+	/** Changes where the objects of this kind land. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop")
+	int32 Seed = 1;
+};
+
 /** Land around the road: ditch, verge and hills. See LRTerrainField. Part of FLRRouteDefinition. */
 USTRUCT(BlueprintType)
 struct LRWORLD_API FLRTerrainParams
@@ -431,4 +500,8 @@ struct LRWORLD_API FLRRouteDefinition
 	/** Land around the road. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Route")
 	FLRTerrainParams Terrain;
+
+	/** Trees, rocks, gantries, bridges... in drawing order. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Route")
+	TArray<FLRRoadsideProp> Props;
 };
