@@ -12,6 +12,7 @@
 #include "LRWorld.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "Math/RandomStream.h"
 #include "Templates/Function.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -108,6 +109,18 @@ void ALRRoadStreamer::Configure(const FLRRouteDefinition& Route)
 	Streaming = Route.Streaming;
 	Terrain = Route.Terrain;
 	LRTerrainField::BuildColumnDistances(Terrain, TerrainColumns);
+
+	Props = Route.Props;
+	PropMeshes.Reset(Props.Num());
+	for (const FLRRoadsideProp& Prop : Props)
+	{
+		UStaticMesh* Mesh = Cast<UStaticMesh>(Prop.Mesh.TryLoad());
+		if (Mesh == nullptr)
+		{
+			UE_LOG(LogLRWorld, Warning, TEXT("ALRRoadStreamer: roadside mesh '%s' not found"), *Prop.Mesh.ToString());
+		}
+		PropMeshes.Add(Mesh);
+	}
 	Streaming.ChunkLengthM = FMath::Max(20.f, Streaming.ChunkLengthM);
 	Streaming.MeshSampleStepM = FMath::Clamp(Streaming.MeshSampleStepM, 0.5f, Streaming.ChunkLengthM);
 	Streaming.MaxChunkBuildsPerFrame = FMath::Max(1, Streaming.MaxChunkBuildsPerFrame);
@@ -255,6 +268,13 @@ void ALRRoadStreamer::ReleaseSlot(FLRRoadChunkSlot& Slot)
 	if (Slot.TerrainMesh)
 	{
 		Slot.TerrainMesh->ClearAllMeshSections();
+	}
+	for (UInstancedStaticMeshComponent* Instances : Slot.Props)
+	{
+		if (Instances)
+		{
+			Instances->ClearInstances();
+		}
 	}
 	if (Slot.LampPoles)
 	{
@@ -579,6 +599,7 @@ bool ALRRoadStreamer::BuildChunk(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot
 
 	BuildTerrain(Slot, Origin);
 	BuildRoadside(Path, Slot, S0, S1, Origin);
+	BuildProps(Path, Slot, ChunkIndex, S0, S1, Origin);
 
 	Slot.ChunkIndex = ChunkIndex;
 	return true;
@@ -652,6 +673,112 @@ void ALRRoadStreamer::BuildTerrain(FLRRoadChunkSlot& Slot, const FVector& Origin
 	}
 
 	FlushSection(Slot.TerrainMesh, 0, false, TerrainMaterial);
+}
+
+bool ALRRoadStreamer::IsNearStructure(double S, double MarginM) const
+{
+	for (const FLRRoadsideProp& Prop : Props)
+	{
+		if (Prop.Placement != ELRPropPlacement::OverRoad || Prop.SpacingM <= 0.f)
+		{
+			continue;
+		}
+		const double Offset = FMath::Fmod(S - Prop.PhaseM, static_cast<double>(Prop.SpacingM));
+		const double Wrapped = Offset < 0.0 ? Offset + Prop.SpacingM : Offset;
+		if (Wrapped <= MarginM || Prop.SpacingM - Wrapped <= MarginM)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void ALRRoadStreamer::BuildProps(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, int64 ChunkIndex, double S0, double S1, const FVector& Origin)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(ALRRoadStreamer::BuildProps);
+
+	// Trees stay out of the earth ramps of the bridges.
+	constexpr double StructureMarginM = 90.0;
+	constexpr float StructureReachM = 75.f;
+
+	for (int32 Index = 0; Index < Props.Num(); ++Index)
+	{
+		const FLRRoadsideProp& Prop = Props[Index];
+		UStaticMesh* Mesh = PropMeshes.IsValidIndex(Index) ? PropMeshes[Index].Get() : nullptr;
+		if (Mesh == nullptr)
+		{
+			continue;
+		}
+
+		// One component per kind of object, created the first time this slot needs it.
+		if (Slot.Props.Num() <= Index)
+		{
+			Slot.Props.SetNum(Props.Num());
+		}
+		TObjectPtr<UInstancedStaticMeshComponent>& Instances = Slot.Props[Index];
+		if (Instances == nullptr)
+		{
+			Instances = NewObject<UInstancedStaticMeshComponent>(this, NAME_None, RF_Transient);
+			Instances->SetupAttachment(Slot.Mesh);
+			Instances->SetMobility(EComponentMobility::Movable);
+			Instances->SetStaticMesh(Mesh);
+			Instances->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Instances->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+			Instances->SetCanEverAffectNavigation(false);
+			Instances->SetCastShadow(Prop.bCastShadow);
+			const int32 CullCm = FMath::RoundToInt32(LRUnits::MetersToCm(Prop.CullDistanceM));
+			Instances->SetCullDistances(0, CullCm);
+			Instances->RegisterComponent();
+		}
+		Instances->ClearInstances();
+		InstanceTransforms.Reset();
+
+		// Same chunk, same objects: the stream depends only on the chunk and the kind of object.
+		FRandomStream Random(HashCombine(GetTypeHash(ChunkIndex), GetTypeHash(Prop.Seed * 7919 + Index)));
+
+		if (Prop.Placement == ELRPropPlacement::OverRoad)
+		{
+			const float CenterD = 0.5f * (CrossSection.LeftBarrierD + CrossSection.RightBarrierD);
+			const double First = Prop.PhaseM + FMath::CeilToDouble((S0 - Prop.PhaseM) / Prop.SpacingM) * Prop.SpacingM;
+			for (double S = First; S < S1; S += Prop.SpacingM)
+			{
+				const FVector Location = Path.RoadToWorldLocation(S, CenterD) - Origin;
+				const FRotator Yaw(0.0, Path.GetHeadingYawDegrees(S), 0.0);
+				InstanceTransforms.Add(FTransform(Yaw, Location));
+			}
+		}
+		else
+		{
+			const double Length = S1 - S0;
+			for (const float Side : { -1.f, 1.f })
+			{
+				const float BarrierD = Side < 0.f ? CrossSection.LeftBarrierD : CrossSection.RightBarrierD;
+				const int32 Count = FMath::FloorToInt32(Prop.CountPer100M * Length / 100.0 + Random.FRand());
+				for (int32 Item = 0; Item < Count; ++Item)
+				{
+					const double S = S0 + Random.FRand() * Length;
+					const float Distance = FMath::Lerp(Prop.MinDistanceM, Prop.MaxDistanceM, FMath::Pow(Random.FRand(), Prop.DistancePower));
+					const float Yaw = Random.FRandRange(0.f, 360.f);
+					const float Scale = Random.FRandRange(Prop.MinScale, Prop.MaxScale);
+					if (Distance < StructureReachM && IsNearStructure(S, StructureMarginM))
+					{
+						continue;
+					}
+
+					const FVector Flat = Path.RoadToWorldLocation(S, BarrierD + Side * Distance);
+					const float Ground = Terrain.bEnabled
+						? LRTerrainField::GetHeightM(Terrain, LRUnits::CmToMeters(Flat.X), LRUnits::CmToMeters(Flat.Y), Distance) : 0.f;
+					const FVector Location = Flat - Origin + FVector(0.0, 0.0, LRUnits::MetersToCm(Ground - Prop.SinkM * Scale));
+					InstanceTransforms.Add(FTransform(FRotator(0.f, Yaw, 0.f), Location, FVector(Scale)));
+				}
+			}
+		}
+
+		if (InstanceTransforms.Num() > 0)
+		{
+			Instances->AddInstances(InstanceTransforms, false, false, false);
+		}
+	}
 }
 
 void ALRRoadStreamer::BuildRoadside(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, double S0, double S1, const FVector& Origin)

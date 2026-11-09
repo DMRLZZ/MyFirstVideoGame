@@ -42,6 +42,10 @@ struct FLRRoadChunkSlot
 	UPROPERTY()
 	TObjectPtr<UInstancedStaticMeshComponent> Reflectors;
 
+	/** One instanced component per kind of roadside object, in the order of the route's props. */
+	UPROPERTY()
+	TArray<TObjectPtr<UInstancedStaticMeshComponent>> Props;
+
 	/** Chunk index currently built in this slot (chunk i covers [i * L, (i + 1) * L)), INDEX_NONE when free. */
 	int64 ChunkIndex = INDEX_NONE;
 };
@@ -124,6 +128,12 @@ private:
 	/** Fills the land mesh on both sides of a chunk, from the cached rows. */
 	void BuildTerrain(FLRRoadChunkSlot& Slot, const FVector& Origin);
 
+	/** Places the trees, rocks and structures of a chunk. */
+	void BuildProps(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, int64 ChunkIndex, double S0, double S1, const FVector& Origin);
+
+	/** True when S is close to a structure over the road (no trees in its earth ramps). */
+	bool IsNearStructure(double S, double MarginM) const;
+
 	/** Fills the instanced roadside objects of a chunk. */
 	void BuildRoadside(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, double S0, double S1, const FVector& Origin);
 
@@ -166,6 +176,11 @@ private:
 	FLRRoadCrossSection CrossSection;
 	FLRTerrainParams Terrain;
 	TArray<float> TerrainColumns;
+	TArray<FLRRoadsideProp> Props;
+
+	/** Meshes of Props, loaded once; null when a path is wrong. */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UStaticMesh>> PropMeshes;
 	TArray<FLRLaneMarking> Markings;
 
 	/** Window of the last update, used to skip work when nothing changed. */
