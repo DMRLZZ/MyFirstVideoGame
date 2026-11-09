@@ -51,6 +51,11 @@
 		},
 		"Terrain": {
 			"$ref": "#/$defs/Terrain"
+		},
+		"Props": {
+			"description": "Trees, rocks and structures along the road (FLRRoadsideProp).",
+			"type": "array",
+			"items": { "$ref": "#/$defs/Prop" }
 		}
 	},
 	"additionalProperties": false,
@@ -63,6 +68,27 @@
 		"DefaultPlayerLane"
 	],
 	"$defs": {
+		"Prop": {
+			"type": "object",
+			"properties": {
+				"Mesh": { "type": "string", "description": "Static mesh path.", "pattern": "^/Game/" },
+				"Placement": { "type": "string", "enum": ["Scatter", "OverRoad"] },
+				"CountPer100M": { "type": "number", "description": "Scatter: per side and per 100 m.", "minimum": 0, "maximum": 100 },
+				"SpacingM": { "type": "number", "description": "OverRoad: meters between two of them.", "minimum": 10, "maximum": 100000 },
+				"PhaseM": { "type": "number", "description": "OverRoad: position of the first one, meters.", "minimum": 0, "maximum": 100000 },
+				"MinDistanceM": { "type": "number", "description": "Scatter: nearest distance from the barrier, meters.", "minimum": 0, "maximum": 5000 },
+				"MaxDistanceM": { "type": "number", "description": "Scatter: farthest distance from the barrier, meters.", "minimum": 0, "maximum": 5000 },
+				"DistancePower": { "type": "number", "description": "Scatter: above 1 gathers the objects near the road.", "minimum": 0.1, "maximum": 5 },
+				"MinScale": { "type": "number", "minimum": 0.05, "maximum": 20 },
+				"MaxScale": { "type": "number", "minimum": 0.05, "maximum": 20 },
+				"SinkM": { "type": "number", "description": "How far into the ground, meters.", "minimum": -5, "maximum": 5 },
+				"bCastShadow": { "type": "boolean" },
+				"CullDistanceM": { "type": "number", "description": "Not drawn beyond this distance, meters. 0 = always.", "minimum": 0, "maximum": 20000 },
+				"Seed": { "type": "integer" }
+			},
+			"required": ["Mesh", "Placement"],
+			"additionalProperties": false
+		},
 		"Terrain": {
 			"description": "Land around the road (FLRTerrainParams). Optional: every field has a default.",
 			"type": "object",
