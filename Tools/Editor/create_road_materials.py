@@ -28,6 +28,9 @@ if unreal.EditorAssetLibrary.does_asset_exist(full_path):
 else:
     material = tools.create_asset(ASSET_NAME, PACKAGE_PATH, unreal.Material, unreal.MaterialFactoryNew())
 
+# The game cannot add usage flags at runtime: instanced roadside objects (lamps, bark, rocks) need this one.
+material.set_editor_property("used_with_instanced_static_meshes", True)
+
 
 def expr(cls, x, y):
     return lib.create_material_expression(material, cls, x, y)
@@ -89,5 +92,5 @@ emissive = vector_param("Emissive", unreal.LinearColor(0.0, 0.0, 0.0, 1.0), -500
 lib.connect_material_property(emissive, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 
 lib.recompile_material(material)
-unreal.EditorAssetLibrary.save_loaded_asset(material)
+unreal.EditorAssetLibrary.save_loaded_asset(material, only_if_is_dirty=False)
 unreal.log(f"LRMaterials: created {full_path}")
