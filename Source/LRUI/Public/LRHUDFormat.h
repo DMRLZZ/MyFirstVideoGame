@@ -61,6 +61,13 @@ struct LRUI_API FLRHUDFormat
 	/** Gear indicator: negative -> "R", 0 -> "N", otherwise the gear number. */
 	static FText FormatGear(int32 Gear);
 
+	/**
+	 * Gear to show. While the gearbox shifts it reports neutral for a moment; on the move the previous gear stays
+	 * on screen instead, so the HUD does not flash "N" on every change.
+	 * @param PreviousGear  Gear shown last frame, MIN_int32 if none.
+	 */
+	static int32 ChooseDisplayedGear(int32 ReportedGear, int32 PreviousGear, float SpeedKmh);
+
 	/** Multiplier with at most two decimals and no trailing zeros: 1 -> "x1", 1.5 -> "x1,5", 1.25 -> "x1,25". */
 	static FText FormatMultiplier(float Multiplier, TCHAR DecimalSeparator = TEXT(','));
 

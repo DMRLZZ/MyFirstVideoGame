@@ -142,6 +142,13 @@ FText FLRHUDFormat::FormatDistanceKm(double DistanceMeters, int32 Decimals, TCHA
 	return FText::Format(LOCTEXT("DistanceKmFmt", "{0} km"), FText::AsCultureInvariant(MoveTemp(Number)));
 }
 
+int32 FLRHUDFormat::ChooseDisplayedGear(int32 ReportedGear, int32 PreviousGear, float SpeedKmh)
+{
+	constexpr float MovingKmh = 5.f;
+	const bool bShifting = ReportedGear == 0 && FMath::Abs(SpeedKmh) > MovingKmh;
+	return bShifting && PreviousGear != MIN_int32 && PreviousGear != 0 ? PreviousGear : ReportedGear;
+}
+
 FText FLRHUDFormat::FormatGear(int32 Gear)
 {
 	if (Gear < 0)
