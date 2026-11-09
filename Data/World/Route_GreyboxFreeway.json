@@ -97,6 +97,124 @@
 				"B": 0.27,
 				"A": 1.0
 			}
-		}
+		},
+		"Props": [
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Oak_A/SM_Prop_Oak_A/StaticMeshes/SM_Prop_Oak_A.SM_Prop_Oak_A",
+				"Placement": "Scatter",
+				"CountPer100M": 1.6,
+				"MinDistanceM": 16,
+				"MaxDistanceM": 650,
+				"DistancePower": 1.7,
+				"MinScale": 0.75,
+				"MaxScale": 1.35,
+				"SinkM": 0.2,
+				"bCastShadow": true,
+				"CullDistanceM": 2200,
+				"Seed": 11
+			},
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Oak_B/SM_Prop_Oak_B/StaticMeshes/SM_Prop_Oak_B.SM_Prop_Oak_B",
+				"Placement": "Scatter",
+				"CountPer100M": 1.4,
+				"MinDistanceM": 20,
+				"MaxDistanceM": 700,
+				"DistancePower": 1.6,
+				"MinScale": 0.8,
+				"MaxScale": 1.4,
+				"SinkM": 0.2,
+				"bCastShadow": true,
+				"CullDistanceM": 2200,
+				"Seed": 12
+			},
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Eucalyptus/SM_Prop_Eucalyptus/StaticMeshes/SM_Prop_Eucalyptus.SM_Prop_Eucalyptus",
+				"Placement": "Scatter",
+				"CountPer100M": 0.5,
+				"MinDistanceM": 22,
+				"MaxDistanceM": 260,
+				"DistancePower": 1.2,
+				"MinScale": 0.85,
+				"MaxScale": 1.3,
+				"SinkM": 0.2,
+				"bCastShadow": true,
+				"CullDistanceM": 2200,
+				"Seed": 13
+			},
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Bush_A/SM_Prop_Bush_A/StaticMeshes/SM_Prop_Bush_A.SM_Prop_Bush_A",
+				"Placement": "Scatter",
+				"CountPer100M": 5.0,
+				"MinDistanceM": 7,
+				"MaxDistanceM": 220,
+				"DistancePower": 2.0,
+				"MinScale": 0.6,
+				"MaxScale": 1.5,
+				"SinkM": 0.15,
+				"bCastShadow": false,
+				"CullDistanceM": 700,
+				"Seed": 14
+			},
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Bush_B/SM_Prop_Bush_B/StaticMeshes/SM_Prop_Bush_B.SM_Prop_Bush_B",
+				"Placement": "Scatter",
+				"CountPer100M": 4.0,
+				"MinDistanceM": 9,
+				"MaxDistanceM": 260,
+				"DistancePower": 2.0,
+				"MinScale": 0.6,
+				"MaxScale": 1.6,
+				"SinkM": 0.15,
+				"bCastShadow": false,
+				"CullDistanceM": 700,
+				"Seed": 15
+			},
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Rock_A/SM_Prop_Rock_A/StaticMeshes/SM_Prop_Rock_A.SM_Prop_Rock_A",
+				"Placement": "Scatter",
+				"CountPer100M": 1.0,
+				"MinDistanceM": 6,
+				"MaxDistanceM": 300,
+				"DistancePower": 1.8,
+				"MinScale": 0.4,
+				"MaxScale": 1.6,
+				"SinkM": 0.25,
+				"bCastShadow": true,
+				"CullDistanceM": 600,
+				"Seed": 16
+			},
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Rock_B/SM_Prop_Rock_B/StaticMeshes/SM_Prop_Rock_B.SM_Prop_Rock_B",
+				"Placement": "Scatter",
+				"CountPer100M": 0.8,
+				"MinDistanceM": 8,
+				"MaxDistanceM": 300,
+				"DistancePower": 1.8,
+				"MinScale": 0.5,
+				"MaxScale": 2.2,
+				"SinkM": 0.25,
+				"bCastShadow": true,
+				"CullDistanceM": 600,
+				"Seed": 17
+			},
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Gantry/SM_Prop_Gantry/StaticMeshes/SM_Prop_Gantry.SM_Prop_Gantry",
+				"Placement": "OverRoad",
+				"SpacingM": 2300,
+				"PhaseM": 900,
+				"bCastShadow": true,
+				"CullDistanceM": 0,
+				"Seed": 18
+			},
+			{
+				"Mesh": "/Game/LeftRight/Props/SM_Prop_Overpass/SM_Prop_Overpass/StaticMeshes/SM_Prop_Overpass.SM_Prop_Overpass",
+				"Placement": "OverRoad",
+				"SpacingM": 3100,
+				"PhaseM": 1700,
+				"bCastShadow": true,
+				"CullDistanceM": 0,
+				"Seed": 19
+			}
+		]
 	}
 }
