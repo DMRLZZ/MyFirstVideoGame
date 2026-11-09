@@ -564,8 +564,8 @@
 				},
 				"InputRiseRate": {
 					"type": "number",
-					"description": "Steering input rise rate, 1/s.",
-					"minimum": 0.5,
+					"description": "Steering input rise rate, 1/s. Below 9 the wheels lag the assists and the car oscillates into a spin at speed.",
+					"minimum": 9,
 					"maximum": 50
 				},
 				"InputFallRate": {
