@@ -24,7 +24,7 @@
 			"MinGroundClearanceCm": 40.0,
 			"Fov": {
 				"MinFovDeg": 72.0,
-				"MaxFovDeg": 86.0,
+				"MaxFovDeg": 92.0,
 				"StartSpeedKmh": 40.0,
 				"FullSpeedKmh": 320.0,
 				"Exponent": 1.3
