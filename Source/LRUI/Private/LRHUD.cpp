@@ -608,7 +608,7 @@ void ALRHUD::RefreshCachedTexts(const ALRVehicle* Vehicle)
 			CachedSpeedText = FLRHUDFormat::FormatSpeed(SpeedKmh, Units);
 		}
 
-		const int32 Gear = Vehicle->GetCurrentGear();
+		const int32 Gear = FLRHUDFormat::ChooseDisplayedGear(Vehicle->GetCurrentGear(), CachedGear, SpeedKmh);
 		if (Gear != CachedGear)
 		{
 			CachedGear = Gear;
