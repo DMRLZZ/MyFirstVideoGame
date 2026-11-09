@@ -156,6 +156,7 @@ Todo se genera desde código, sin assets ni licencias de terceros. Necesitan Pyt
 |---|---|---|
 | `Tools/CarGen/lrcargen.py` | Coches en `.glb` | `Tools/Editor/import_generated_cars.py` y `build_traffic_lods.py` |
 | `Tools/SceneGen/lrtexgen.py` | Texturas de asfalto, hormigón y terreno en `Saved/SceneGen/Textures` | `Tools/Editor/create_scene_materials.py` crea `M_LRAsphalt`, `M_LRConcrete` y `M_LRTerrain` |
+| `Tools/SceneGen/lrpropgen.py` | Árboles, arbustos, rocas, pórticos con señales y pasos elevados en `Saved/PropGen`, más las texturas de hojas y señales | `create_scene_materials.py` (`M_LRFoliage`, `M_LRSign`) y `Tools/Editor/import_generated_props.py`; las rutas los colocan con su bloque `Props` |
 | `Tools/MusicGen/lrmusicgen.py` | Tres temas synthwave en `Data/Music` (AAC) | Nada: el juego los lee del disco. Necesita `ffmpeg` en el PATH |
 
 ## Cómo añadir un script nuevo
