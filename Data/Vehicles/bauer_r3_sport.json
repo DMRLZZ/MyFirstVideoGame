@@ -17,7 +17,7 @@
 			"Y": 0,
 			"Z": -8
 		},
-		"TopSpeedKmh": 250,
+		"TopSpeedKmh": 300,
 		"TopSpeedFadeFraction": 0.03,
 		"ReverseEngageSpeedKmh": 5,
 		"CrashImpactKmh": 25,
@@ -27,7 +27,7 @@
 		"AccelerationSmoothingSeconds": 0.12,
 		"SpawnHeightOffsetCm": 15,
 		"Engine": {
-			"MaxTorqueNm": 500,
+			"MaxTorqueNm": 700,
 			"MaxRpm": 7000,
 			"IdleRpm": 850,
 			"TorqueCurve": [
