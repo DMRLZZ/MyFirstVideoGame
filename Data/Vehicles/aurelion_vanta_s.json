@@ -27,7 +27,7 @@
 		"AccelerationSmoothingSeconds": 0.15,
 		"SpawnHeightOffsetCm": 15,
 		"Engine": {
-			"MaxTorqueNm": 850,
+			"MaxTorqueNm": 1000,
 			"MaxRpm": 6800,
 			"IdleRpm": 700,
 			"TorqueCurve": [
