@@ -17,7 +17,7 @@
 			"Y": 0,
 			"Z": -8
 		},
-		"TopSpeedKmh": 300,
+		"TopSpeedKmh": 250,
 		"TopSpeedFadeFraction": 0.03,
 		"ReverseEngageSpeedKmh": 5,
 		"CrashImpactKmh": 25,
