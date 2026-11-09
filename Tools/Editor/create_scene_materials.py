@@ -57,6 +57,8 @@ class Graph:
             self.material = tools.create_asset(name, MATERIALS, unreal.Material, unreal.MaterialFactoryNew())
         self.name = name
         self.x = -1800
+        # The game cannot add usage flags at runtime: without this, instanced props fall back to the default material.
+        self.material.set_editor_property("used_with_instanced_static_meshes", True)
 
     def node(self, cls, **properties):
         self.x += 8
