@@ -28,6 +28,7 @@ class ALRVehicle;
  *   -LRDevLaneSweep           change lane on a fixed schedule instead of avoiding traffic
  *   -LRDevExecAt=<s> -LRDevExec=<cmd>   run a console command at this time; '+' stands for a space,
  *                             e.g. -LRDevExec=ProfileGPU or -LRDevExec=stat+dumpframe+-ms=0.3
+ *   -LRDevBrakeAt=<s>         brakes fully for 6 s from this time, to measure the stopping distance in trace.csv
  *   -LRDevSteerTest           holds, taps and releases the steering on a fixed script, to read the response in trace.csv
  *   -LRDevShowroom=a+b        park each listed vehicle and photograph it from several angles, then quit
  */
@@ -91,6 +92,7 @@ private:
 	double NextTraceTime = 0.0;
 	double ExecAtSeconds = -1.0;
 	bool bSteerTest = false;
+	double BrakeAtSeconds = -1.0;
 	FString ExecCommand;
 
 	/** Showroom state: vehicles still to photograph, current camera index, time until the next step. */

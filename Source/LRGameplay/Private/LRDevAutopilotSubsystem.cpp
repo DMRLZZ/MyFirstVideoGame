@@ -74,6 +74,7 @@ void ULRDevAutopilotSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	bNoTraffic = FParse::Param(CommandLine, TEXT("LRDevNoTraffic"));
 	bLaneSweep = FParse::Param(CommandLine, TEXT("LRDevLaneSweep"));
 	bSteerTest = FParse::Param(CommandLine, TEXT("LRDevSteerTest"));
+	FParse::Value(CommandLine, TEXT("LRDevBrakeAt="), BrakeAtSeconds);
 	TraceBuffer = TEXT("t,state,speed_kmh,S,D,target_d,heading_deg,yaw_rate,steering,height_m\n");
 	NextScreenshotTime = ScreenshotPeriodSeconds;
 
@@ -171,8 +172,9 @@ void ULRDevAutopilotSubsystem::Tick(float DeltaTime)
 	if (State == ELRRunState::Running)
 	{
 		RestartAtTime = -1.0;
-		Vehicle->SetThrottleInput(1.f);
-		Vehicle->SetBrakeInput(0.f);
+		const bool bBraking = BrakeAtSeconds >= 0.0 && ElapsedSeconds >= BrakeAtSeconds && ElapsedSeconds < BrakeAtSeconds + 6.0;
+		Vehicle->SetThrottleInput(bBraking ? 0.f : 1.f);
+		Vehicle->SetBrakeInput(bBraking ? 1.f : 0.f);
 
 		if (bNoTraffic && !bTrafficCleared)
 		{
