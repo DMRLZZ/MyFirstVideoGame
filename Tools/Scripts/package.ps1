@@ -7,16 +7,18 @@
 	in <repo>/Packaged. The full argument list is built in one place below and printed before UAT
 	starts, so this script is the single reference for the packaging command.
 
-	The build carries the Visual C++ runtime installers (vc_redist.x64.exe and
+	By default the build carries the Visual C++ runtime installers (-prereqs: vc_redist.x64.exe and
 	vc_redist.arm64.exe under Engine/Extras/Redist, about 30 MB). Only the bootstrap launcher at the
 	root of the build (<archive>/Windows/LeftRight.exe) checks for the runtime and offers to install
 	it; starting Binaries/Win64/LeftRight-Win64-Shipping.exe directly on a PC without the runtime
-	fails with a missing DLL error and no prompt.
+	fails with a missing DLL error and no prompt. Use -NoPrereqs for builds whose installer already
+	provides the runtime, such as a Steam depot with the Visual C++ redistributable enabled.
 
 	Logs to Saved/Logs/package.log and propagates the exit code.
 .EXAMPLE
 	Tools/Scripts/package.ps1
 	Tools/Scripts/package.ps1 -Configuration Development
+	Tools/Scripts/package.ps1 -NoPrereqs
 #>
 [CmdletBinding()]
 param(
@@ -24,7 +26,10 @@ param(
 	[string]$Configuration = 'Shipping',
 
 	# Output folder for the archived build (default <repo>/Packaged).
-	[string]$ArchiveDirectory = ''
+	[string]$ArchiveDirectory = '',
+
+	# Leave out the Visual C++ runtime installers (for example, when Steam installs the runtime).
+	[switch]$NoPrereqs
 )
 
 . "$PSScriptRoot\common.ps1"
@@ -48,7 +53,11 @@ $argumentList = @(
 	'-cook'
 	'-stage'
 	'-pak'
-	'-prereqs'
+)
+if (-not $NoPrereqs) {
+	$argumentList += '-prereqs'
+}
+$argumentList += @(
 	'-archive'
 	"-archivedirectory=`"$ArchiveDirectory`""
 	'-noP4'
@@ -58,6 +67,9 @@ $argumentList = @(
 $arguments = $argumentList -join ' '
 
 Write-LRInfo "Packaging Win64 $Configuration into $ArchiveDirectory (log: $log)"
+if ($NoPrereqs) {
+	Write-LRWarn 'Building without the Visual C++ runtime installers (-NoPrereqs).'
+}
 Write-LRInfo "RunUAT $arguments"
 $started = Get-Date
 $exitCode = Invoke-LRProcess -FilePath $runUat -Arguments $arguments -LogFile $log
