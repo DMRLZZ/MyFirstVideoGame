@@ -76,6 +76,8 @@
 				"CountPer100M": { "type": "number", "description": "Scatter: per side and per 100 m.", "minimum": 0, "maximum": 100 },
 				"SpacingM": { "type": "number", "description": "OverRoad: meters between two of them.", "minimum": 10, "maximum": 100000 },
 				"PhaseM": { "type": "number", "description": "OverRoad: position of the first one, meters.", "minimum": 0, "maximum": 100000 },
+				"KeepClearAlongM": { "type": "number", "description": "OverRoad: scattered objects stay this far from it along the road, meters.", "minimum": 0, "maximum": 1000 },
+				"KeepClearReachM": { "type": "number", "description": "OverRoad: the clearing applies to objects nearer than this to the barrier, meters.", "minimum": 0, "maximum": 5000 },
 				"MinDistanceM": { "type": "number", "description": "Scatter: nearest distance from the barrier, meters.", "minimum": 0, "maximum": 5000 },
 				"MaxDistanceM": { "type": "number", "description": "Scatter: farthest distance from the barrier, meters.", "minimum": 0, "maximum": 5000 },
 				"DistancePower": { "type": "number", "description": "Scatter: above 1 gathers the objects near the road.", "minimum": 0.1, "maximum": 5 },
