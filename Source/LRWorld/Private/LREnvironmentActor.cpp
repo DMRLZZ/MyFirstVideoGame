@@ -103,8 +103,14 @@ void ALREnvironmentActor::UpdateGround(const FVector& FocusLocationCm)
 	FarRidges->SetWorldLocation(FocusLocationCm);
 }
 
-void ALREnvironmentActor::BuildRidge(int32 Section, float InnerRadiusM, float PeakRadiusM, float BaseHeightM, float AmplitudeM, int32 Seed, UMaterialInterface* Material)
+void ALREnvironmentActor::BuildRidge(int32 Section, const FLRFarRidge& Ridge, UMaterialInterface* Material)
 {
+	const float InnerRadiusM = FMath::Max(Ridge.InnerRadiusM, 100.f);
+	const float PeakRadiusM = FMath::Max(Ridge.PeakRadiusM, InnerRadiusM + 1.f);
+	const float BaseHeightM = FMath::Max(Ridge.BaseHeightM, 0.f);
+	const float AmplitudeM = FMath::Max(Ridge.AmplitudeM, 0.f);
+	const int32 Seed = Ridge.Seed;
+
 	constexpr int32 NumSegments = 360;
 	// Share of the way from the foot of the ring to its crest, with the matching share of the height.
 	constexpr float RowDistance[] = { 0.f, 0.45f, 0.8f, 1.f };
@@ -143,11 +149,11 @@ void ALREnvironmentActor::BuildRidge(int32 Section, float InnerRadiusM, float Pe
 			const int32 A = Segment * NumRows + Row;
 			const int32 B = A + NumRows;
 			Triangles.Add(A);
-			Triangles.Add(A + 1);
 			Triangles.Add(B);
 			Triangles.Add(A + 1);
+			Triangles.Add(A + 1);
+			Triangles.Add(B);
 			Triangles.Add(B + 1);
-			Triangles.Add(B);
 		}
 	}
 
@@ -160,11 +166,14 @@ void ALREnvironmentActor::ApplyPreset(const FLREnvironmentPreset& Preset)
 	if (UMaterialInterface* Terrain = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/LeftRight/Materials/M_LRTerrain.M_LRTerrain")))
 	{
 		GroundPlane->SetMaterial(0, Terrain);
-		if (FarRidges->GetNumSections() == 0)
+
+		// The horizon belongs to the preset: rebuilt when it changes, which only happens on a load or a data reload.
+		FarRidges->ClearAllMeshSections();
+		for (int32 Index = 0; Index < Preset.FarRidges.Num(); ++Index)
 		{
-			BuildRidge(0, 2200.f, 3600.f, 90.f, 260.f, 11, Terrain);
-			BuildRidge(1, 6000.f, 11000.f, 350.f, 1300.f, 23, Terrain);
+			BuildRidge(Index, Preset.FarRidges[Index], Terrain);
 		}
+		UE_LOG(LogLRWorld, Log, TEXT("Environment: %d far ridge(s) on the horizon"), Preset.FarRidges.Num());
 	}
 
 	UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/LeftRight/Materials/M_LRSurface.M_LRSurface"));
