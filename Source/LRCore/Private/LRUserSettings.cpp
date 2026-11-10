@@ -136,11 +136,19 @@ void ULRUserSettingsSubsystem::ApplyGraphics() const
 	const bool bWindowForced = FParse::Param(FCommandLine::Get(), TEXT("windowed")) || FParse::Param(FCommandLine::Get(), TEXT("LRDevDrive"));
 	if (!bWindowForced)
 	{
-		Engine->SetFullscreenMode(Settings.bFullscreen ? EWindowMode::WindowedFullscreen : EWindowMode::Windowed);
+		const FIntPoint Desktop = Engine->GetDesktopResolution();
+		const FIntPoint Current = Engine->GetScreenResolution();
 		if (Settings.bFullscreen)
 		{
-			Engine->SetScreenResolution(Engine->GetDesktopResolution());
+			Engine->SetScreenResolution(Desktop);
 		}
+		else if (Engine->GetFullscreenMode() != EWindowMode::Windowed || Current.X >= Desktop.X || Current.Y >= Desktop.Y)
+		{
+			// Leaving full screen: a window as large as the desktop would have its borders off the screen.
+			// A window the player already has keeps its size.
+			Engine->SetScreenResolution(FLRUserSettings::ChooseWindowSize(Desktop));
+		}
+		Engine->SetFullscreenMode(Settings.bFullscreen ? EWindowMode::WindowedFullscreen : EWindowMode::Windowed);
 	}
 	Engine->ApplySettings(false);
 
