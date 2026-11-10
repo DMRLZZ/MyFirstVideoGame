@@ -73,8 +73,8 @@ void ULRMusicSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	Sound->SetEnableEnvelopeFollowing(true);
 	Sound->Start();
 
+	// Finding the first track starts it.
 	RescanTracks();
-	PlayCurrent();
 }
 
 void ULRMusicSubsystem::Deinitialize()
@@ -121,6 +121,13 @@ void ULRMusicSubsystem::RescanTracks()
 		Playlist.Next();
 	}
 	UE_LOG(LogLRAudio, Log, TEXT("Music: %d track(s) found"), Playlist.Num());
+
+	// The track that was playing is gone, or there was none: what sounds has to match what the list says.
+	if (Playlist.GetCurrent() != Current)
+	{
+		ConsecutiveFailures = 0;
+		PlayCurrent();
+	}
 }
 
 FString ULRMusicSubsystem::GetCurrentTrackName() const

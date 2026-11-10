@@ -35,7 +35,7 @@ public:
 	void NextTrack();
 	void PreviousTrack();
 
-	/** Looks for new files in the music folders. Keeps playing if the current track is still there. */
+	/** Looks for new files in the music folders. Keeps playing if the current track is still there, else starts the first one. */
 	void RescanTracks();
 
 	/** Signal level leaving the music player, 0 to 1. Above zero means that sound really is coming out. */
