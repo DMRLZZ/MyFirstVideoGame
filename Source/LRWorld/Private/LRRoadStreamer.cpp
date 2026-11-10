@@ -744,7 +744,8 @@ void ALRRoadStreamer::BuildProps(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot
 		InstanceTransforms.Reset();
 
 		// Same chunk, same objects: the stream depends only on the chunk and the kind of object.
-		FRandomStream Random(HashCombine(GetTypeHash(ChunkIndex), GetTypeHash(Prop.Seed * 7919 + Index)));
+		const uint32 KindSeed = static_cast<uint32>(Prop.Seed) * 7919u + static_cast<uint32>(Index);
+		FRandomStream Random(HashCombine(GetTypeHash(ChunkIndex), GetTypeHash(static_cast<int32>(KindSeed))));
 
 		if (Prop.Placement == ELRPropPlacement::OverRoad)
 		{
