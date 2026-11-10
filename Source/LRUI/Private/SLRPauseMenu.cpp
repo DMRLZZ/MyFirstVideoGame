@@ -463,6 +463,11 @@ FReply SLRPauseMenu::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InK
 	const FKey Key = InKeyEvent.GetKey();
 	if (Key == EKeys::Escape || Key == EKeys::Gamepad_Special_Right || Key == EKeys::Gamepad_FaceButton_Right)
 	{
+		// A key that is still held from opening the menu repeats: it must not close it again.
+		if (InKeyEvent.IsRepeat())
+		{
+			return FReply::Handled();
+		}
 		if (Pages.IsValid() && Pages->GetActiveWidgetIndex() == 1)
 		{
 			ShowMainPage();
