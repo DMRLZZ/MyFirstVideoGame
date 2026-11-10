@@ -305,9 +305,11 @@ Rutas con `$env:UE_ROOT` (por ejemplo, `C:\Program Files\Epic Games\UE_5.8`). Lo
 # Ejecutar un script Python del editor
 & "$env:UE_ROOT\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "$PWD\LeftRight.uproject" -run=pythonscript -script="$PWD\Tools\Editor\<script>.py" -unattended
 
-# Empaquetar (Shipping)
-& "$env:UE_ROOT\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="$PWD\LeftRight.uproject" -platform=Win64 -clientconfig=Shipping -build -cook -stage -pak -archive -archivedirectory="$PWD\Build"
+# Empaquetar (Shipping) en Packaged/: usa siempre el script, que escribe la línea completa de RunUAT
+Tools/Scripts/package.ps1
 ```
+
+El empaquetado no se copia aquí como comando de `RunUAT`: los flags viven solo en `Tools/Scripts/package.ps1` (detalles en `Tools/README.md`). No archives en `Build/`, porque esa carpeta guarda archivos fuente del proyecto, como `Build/Windows/Application.ico`.
 
 | Nivel | Qué | Cuándo |
 |---|---|---|
