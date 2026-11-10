@@ -131,8 +131,8 @@ private:
 	/** Places the trees, rocks and structures of a chunk. */
 	void BuildProps(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, int64 ChunkIndex, double S0, double S1, const FVector& Origin);
 
-	/** True when S is close to a structure over the road (no trees in its earth ramps). */
-	bool IsNearStructure(double S, double MarginM) const;
+	/** True when a scattered object at S, DistanceM away from the barrier, would land in the clearing of a structure. */
+	bool IsInStructureClearing(double S, float DistanceM) const;
 
 	/** Fills the instanced roadside objects of a chunk. */
 	void BuildRoadside(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, double S0, double S1, const FVector& Origin);

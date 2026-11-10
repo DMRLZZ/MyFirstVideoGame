@@ -689,17 +689,17 @@ void ALRRoadStreamer::BuildTerrain(FLRRoadChunkSlot& Slot, const FVector& Origin
 	FlushSection(Slot.TerrainMesh, 0, false, TerrainMaterial);
 }
 
-bool ALRRoadStreamer::IsNearStructure(double S, double MarginM) const
+bool ALRRoadStreamer::IsInStructureClearing(double S, float DistanceM) const
 {
 	for (const FLRRoadsideProp& Prop : Props)
 	{
-		if (Prop.Placement != ELRPropPlacement::OverRoad || Prop.SpacingM <= 0.f)
+		if (Prop.Placement != ELRPropPlacement::OverRoad || Prop.KeepClearAlongM <= 0.f || DistanceM >= Prop.KeepClearReachM)
 		{
 			continue;
 		}
 		const double Offset = FMath::Fmod(S - Prop.PhaseM, static_cast<double>(Prop.SpacingM));
 		const double Wrapped = Offset < 0.0 ? Offset + Prop.SpacingM : Offset;
-		if (Wrapped <= MarginM || Prop.SpacingM - Wrapped <= MarginM)
+		if (Wrapped <= Prop.KeepClearAlongM || Prop.SpacingM - Wrapped <= Prop.KeepClearAlongM)
 		{
 			return true;
 		}
@@ -710,10 +710,6 @@ bool ALRRoadStreamer::IsNearStructure(double S, double MarginM) const
 void ALRRoadStreamer::BuildProps(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot, int64 ChunkIndex, double S0, double S1, const FVector& Origin)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(ALRRoadStreamer::BuildProps);
-
-	// Trees stay out of the earth ramps of the bridges.
-	constexpr double StructureMarginM = 90.0;
-	constexpr float StructureReachM = 75.f;
 
 	for (int32 Index = 0; Index < Props.Num(); ++Index)
 	{
@@ -774,7 +770,8 @@ void ALRRoadStreamer::BuildProps(const FLRRoadPath& Path, FLRRoadChunkSlot& Slot
 					const float Distance = FMath::Lerp(Prop.MinDistanceM, Prop.MaxDistanceM, FMath::Pow(Random.FRand(), Prop.DistancePower));
 					const float Yaw = Random.FRandRange(0.f, 360.f);
 					const float Scale = Random.FRandRange(Prop.MinScale, Prop.MaxScale);
-					if (Distance < StructureReachM && IsNearStructure(S, StructureMarginM))
+					// Trees stay out of the earth ramps of the bridges.
+					if (IsInStructureClearing(S, Distance))
 					{
 						continue;
 					}
