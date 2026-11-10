@@ -180,6 +180,9 @@ void ULRAudioSubsystem::RefreshPlayerAudio()
 	ULRVehicleAudioComponent* VehicleAudio = ULRVehicleAudioComponent::FindOrAddTo(PlayerVehicle);
 	VehicleAudio->SetInteriorMix(bInteriorCamera);
 	PlayerAudio = VehicleAudio;
+
+	// The car appears after the settings were first read, so its sound takes the saved volume here.
+	ApplyEffectsVolume();
 }
 
 float ULRAudioSubsystem::FindWhooshPan(const FLRNearMissEvent& Event, float ProbeRadiusMeters) const
