@@ -18,6 +18,20 @@ void FLRUserSettingsSpec::Define()
 		TestTrue(TEXT("Music"), Defaults.bMusicEnabled);
 	});
 
+	It("picks a window smaller than the desktop", [this]()
+	{
+		const FIntPoint FullHd = FLRUserSettings::ChooseWindowSize(FIntPoint(1920, 1080));
+		TestEqual(TEXT("Width on a 1080p desktop"), FullHd.X, 1440);
+		TestEqual(TEXT("Height on a 1080p desktop"), FullHd.Y, 810);
+
+		const FIntPoint Odd = FLRUserSettings::ChooseWindowSize(FIntPoint(1366, 768));
+		TestTrue(TEXT("Even width"), Odd.X % 2 == 0);
+		TestTrue(TEXT("Narrower than the desktop"), Odd.X < 1366 && Odd.Y < 768);
+
+		const FIntPoint Tiny = FLRUserSettings::ChooseWindowSize(FIntPoint(600, 400));
+		TestTrue(TEXT("Never larger than a small desktop"), Tiny.X <= 600 && Tiny.Y <= 400);
+	});
+
 	It("clamps every value to its valid range", [this]()
 	{
 		FLRUserSettings Wild;
