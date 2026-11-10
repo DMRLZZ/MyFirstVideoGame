@@ -15,6 +15,10 @@
 		"FogInscatteringColor": { "R": 0.05, "G": 0.07, "B": 0.12, "A": 1.0 },
 		"bVolumetricFog": false,
 		"ExposureCompensation": 2.0,
-		"bNight": true
+		"bNight": true,
+		"FarRidges": [
+			{ "InnerRadiusM": 2200, "PeakRadiusM": 3600, "BaseHeightM": 90, "AmplitudeM": 260, "Seed": 11 },
+			{ "InnerRadiusM": 6000, "PeakRadiusM": 11000, "BaseHeightM": 350, "AmplitudeM": 1300, "Seed": 23 }
+		]
 	}
 }
