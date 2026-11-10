@@ -4,7 +4,14 @@
 	Builds, cooks, stages, paks and archives a Win64 build with RunUAT BuildCookRun.
 .DESCRIPTION
 	Runs <UE_ROOT>/Engine/Build/BatchFiles/RunUAT.bat BuildCookRun -project=<uproject> -platform=Win64
-	-clientconfig=<Configuration> -build -cook -stage -pak -archive -archivedirectory=<repo>/Packaged.
+	-clientconfig=<Configuration> -build -cook -stage -pak -prereqs -archive -archivedirectory=<repo>/Packaged.
+
+	With -prereqs the build carries the Visual C++ runtime installers (vc_redist.x64.exe and
+	vc_redist.arm64.exe under Engine/Extras/Redist, about 30 MB). Only the bootstrap launcher at the
+	root of the build (<archive>/Windows/LeftRight.exe) checks for the runtime and offers to install
+	it; starting Binaries/Win64/LeftRight-Win64-Shipping.exe directly on a PC without the runtime
+	fails with a missing DLL error and no prompt.
+
 	Logs to Saved/Logs/package.log and propagates the exit code.
 .EXAMPLE
 	Tools/Scripts/package.ps1
@@ -31,7 +38,7 @@ $runUat = Get-LREngineFile 'Build\BatchFiles\RunUAT.bat'
 $project = Get-LRProjectFile
 $log = Join-Path (Get-LRLogDirectory) 'package.log'
 
-$arguments = "BuildCookRun -project=`"$project`" -platform=Win64 -clientconfig=$Configuration -build -cook -stage -pak -archive -archivedirectory=`"$ArchiveDirectory`" -noP4 -utf8output -unattended"
+$arguments = "BuildCookRun -project=`"$project`" -platform=Win64 -clientconfig=$Configuration -build -cook -stage -pak -prereqs -archive -archivedirectory=`"$ArchiveDirectory`" -noP4 -utf8output -unattended"
 
 Write-LRInfo "Packaging Win64 $Configuration into $ArchiveDirectory (log: $log)"
 $started = Get-Date
