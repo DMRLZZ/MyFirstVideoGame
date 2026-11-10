@@ -427,6 +427,14 @@ struct LRWORLD_API FLRRoadsideProp
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.0"))
 	float CullDistanceM = 1500.f;
 
+	/** OverRoad: scattered objects stay this far from it along the road, meters. For the earth ramps of a bridge. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.0"))
+	float KeepClearAlongM = 0.f;
+
+	/** OverRoad: the clearing only applies to objects nearer than this to the barrier, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop", meta = (ClampMin = "0.0"))
+	float KeepClearReachM = 0.f;
+
 	/** Changes where the objects of this kind land. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop")
 	int32 Seed = 1;
