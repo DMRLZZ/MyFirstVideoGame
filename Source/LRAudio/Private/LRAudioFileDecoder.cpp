@@ -63,6 +63,37 @@ TArray<FString> LRAudioFileDecoder::ChooseCacheFilesToDelete(TArray<FCacheEntry>
 	return ToDelete;
 }
 
+void LRAudioFileDecoder::PruneCache(int64 MaxBytes, const FString& KeepPath)
+{
+	IFileManager& Files = IFileManager::Get();
+	const FString Folder = GetCacheFolder();
+
+	TArray<FString> Leftovers;
+	Files.FindFiles(Leftovers, *(Folder / TEXT("*.part")), /*Files*/ true, /*Directories*/ false);
+	for (const FString& Name : Leftovers)
+	{
+		Files.Delete(*(Folder / Name), /*RequireExists*/ false, /*EvenReadOnly*/ false, /*Quiet*/ true);
+	}
+
+	TArray<FString> Names;
+	Files.FindFiles(Names, *(Folder / TEXT("*.wav")), /*Files*/ true, /*Directories*/ false);
+	TArray<FCacheEntry> Entries;
+	Entries.Reserve(Names.Num());
+	for (const FString& Name : Names)
+	{
+		FCacheEntry& Entry = Entries.AddDefaulted_GetRef();
+		Entry.Path = Folder / Name;
+		Entry.SizeBytes = FMath::Max<int64>(Files.FileSize(*Entry.Path), 0);
+		Entry.LastUsed = Files.GetTimeStamp(*Entry.Path);
+	}
+
+	// A copy that is being played cannot be deleted: Windows refuses, and it gets its turn in a later pass.
+	for (const FString& Path : ChooseCacheFilesToDelete(MoveTemp(Entries), MaxBytes, KeepPath))
+	{
+		Files.Delete(*Path, /*RequireExists*/ false, /*EvenReadOnly*/ false, /*Quiet*/ true);
+	}
+}
+
 #if PLATFORM_WINDOWS
 
 namespace LRAudioFileDecoderPrivate

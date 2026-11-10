@@ -35,4 +35,10 @@ namespace LRAudioFileDecoder
 
 	/** Files to delete, least recently used first, so that the rest fits in MaxBytes. Never includes KeepPath. */
 	LRAUDIO_API TArray<FString> ChooseCacheFilesToDelete(TArray<FCacheEntry> Entries, int64 MaxBytes, const FString& KeepPath);
+
+	/**
+	 * Keeps the cache under MaxBytes by deleting the copies that have gone longest without being played, and removes
+	 * what an interrupted conversion left behind. Blocking, and only safe while no conversion is running.
+	 */
+	LRAUDIO_API void PruneCache(int64 MaxBytes, const FString& KeepPath);
 }
