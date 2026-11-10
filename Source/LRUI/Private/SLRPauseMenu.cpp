@@ -114,11 +114,6 @@ namespace LRPauseMenuPrivate
 			return SButton::OnMouseButtonDown(MyGeometry, MouseEvent);
 		}
 
-		virtual void OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override
-		{
-			SButton::OnMouseEnter(MyGeometry, MouseEvent);
-		}
-
 		virtual FNavigationReply OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent) override
 		{
 			const EUINavigation Direction = InNavigationEvent.GetNavigationType();
