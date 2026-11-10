@@ -176,6 +176,7 @@ private:
 	FLRRoadCrossSection CrossSection;
 	FLRTerrainParams Terrain;
 	TArray<float> TerrainColumns;
+	/** Objects of the route, already sanitized. */
 	TArray<FLRRoadsideProp> Props;
 
 	/** Meshes of Props, loaded once; null when a path is wrong. */

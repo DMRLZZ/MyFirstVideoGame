@@ -110,10 +110,11 @@ void ALRRoadStreamer::Configure(const FLRRouteDefinition& Route)
 	Terrain = Route.Terrain;
 	LRTerrainField::BuildColumnDistances(Terrain, TerrainColumns);
 
-	Props = Route.Props;
-	PropMeshes.Reset(Props.Num());
-	for (const FLRRoadsideProp& Prop : Props)
+	Props.Reset(Route.Props.Num());
+	PropMeshes.Reset(Route.Props.Num());
+	for (const FLRRoadsideProp& RawProp : Route.Props)
 	{
+		const FLRRoadsideProp& Prop = Props.Add_GetRef(RawProp.Sanitized());
 		UStaticMesh* Mesh = Cast<UStaticMesh>(Prop.Mesh.TryLoad());
 		if (Mesh == nullptr)
 		{
