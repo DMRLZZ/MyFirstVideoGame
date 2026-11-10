@@ -37,6 +37,32 @@ FString LRAudioFileDecoder::GetCacheFolder()
 	return FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("MusicCache"));
 }
 
+TArray<FString> LRAudioFileDecoder::ChooseCacheFilesToDelete(TArray<FCacheEntry> Entries, int64 MaxBytes, const FString& KeepPath)
+{
+	int64 TotalBytes = 0;
+	for (const FCacheEntry& Entry : Entries)
+	{
+		TotalBytes += Entry.SizeBytes;
+	}
+
+	Entries.Sort([](const FCacheEntry& A, const FCacheEntry& B) { return A.LastUsed < B.LastUsed; });
+
+	TArray<FString> ToDelete;
+	for (const FCacheEntry& Entry : Entries)
+	{
+		if (TotalBytes <= MaxBytes)
+		{
+			break;
+		}
+		if (!FPaths::IsSamePath(Entry.Path, KeepPath))
+		{
+			ToDelete.Add(Entry.Path);
+			TotalBytes -= Entry.SizeBytes;
+		}
+	}
+	return ToDelete;
+}
+
 #if PLATFORM_WINDOWS
 
 namespace LRAudioFileDecoderPrivate

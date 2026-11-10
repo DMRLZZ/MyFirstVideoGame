@@ -23,4 +23,16 @@ namespace LRAudioFileDecoder
 
 	/** Folder of the converted copies, Saved/MusicCache. */
 	LRAUDIO_API FString GetCacheFolder();
+
+	/** One converted file of the cache. */
+	struct FCacheEntry
+	{
+		FString Path;
+		int64 SizeBytes = 0;
+		/** Last time it was converted or played. */
+		FDateTime LastUsed;
+	};
+
+	/** Files to delete, least recently used first, so that the rest fits in MaxBytes. Never includes KeepPath. */
+	LRAUDIO_API TArray<FString> ChooseCacheFilesToDelete(TArray<FCacheEntry> Entries, int64 MaxBytes, const FString& KeepPath);
 }
