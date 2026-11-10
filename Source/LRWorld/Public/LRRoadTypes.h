@@ -132,6 +132,33 @@ struct LRWORLD_API FLRRoadGenParams
 	float MinVerticalCurveRadiusM = 8000.f;
 };
 
+/** One ring of distant hills or mountains around the player. Part of FLREnvironmentPreset. */
+USTRUCT(BlueprintType)
+struct LRWORLD_API FLRFarRidge
+{
+	GENERATED_BODY()
+
+	/** Where the ring starts to rise, meters from the player. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ridge", meta = (ClampMin = "100.0"))
+	float InnerRadiusM = 2200.f;
+
+	/** Where the ring reaches its crest, meters from the player. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ridge", meta = (ClampMin = "100.0"))
+	float PeakRadiusM = 3600.f;
+
+	/** Height of the lowest crest above the road, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ridge", meta = (ClampMin = "0.0"))
+	float BaseHeightM = 90.f;
+
+	/** Extra height of the tallest crests, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ridge", meta = (ClampMin = "0.0"))
+	float AmplitudeM = 260.f;
+
+	/** Changes the outline of the ring. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ridge")
+	int32 Seed = 1;
+};
+
 /**
  * Lighting / atmosphere preset applied by ALREnvironmentActor.
  * Data/World/Environment_*.json (type "EnvironmentPreset").
@@ -192,6 +219,10 @@ struct LRWORLD_API FLREnvironmentPreset
 	/** Night preset: other systems (headlights, street lamps) read it through ALREnvironmentActor::IsNight(). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Environment")
 	bool bNight = false;
+
+	/** Distant hills and mountains on the horizon, nearest first. None = a flat horizon. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Environment")
+	TArray<FLRFarRidge> FarRidges;
 };
 
 /** Distances that drive geometry generation and mesh streaming around the player. Part of FLRRouteDefinition. */
