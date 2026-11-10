@@ -36,6 +36,9 @@ FString LRAudioFileDecoder::GetCachePath(const FString& Source)
 
 namespace LRAudioFileDecoderPrivate
 {
+	/** The sizes of a WAV are 32-bit: the most audio one file can hold, bytes. */
+	constexpr uint64 MaxWavDataBytes = MAX_uint32 - 64;
+
 	/** RIFF header of a 16-bit PCM file. */
 	void WriteWavHeader(FArchive& Writer, uint32 Channels, uint32 SampleRate, uint32 DataBytes)
 	{
@@ -125,9 +128,25 @@ namespace LRAudioFileDecoderPrivate
 			DWORD Length = 0;
 			if (SUCCEEDED(Buffer->Lock(&Data, nullptr, &Length)))
 			{
-				Writer.Serialize(Data, Length);
-				DataBytes += Length;
+				const bool bFits = static_cast<uint64>(DataBytes) + Length <= MaxWavDataBytes;
+				if (bFits)
+				{
+					Writer.Serialize(Data, Length);
+					DataBytes += Length;
+				}
 				Buffer->Unlock();
+				if (!bFits)
+				{
+					OutError = TEXT("The file is too long to convert");
+					return false;
+				}
+			}
+
+			// A full disk must not leave half a song behind with a valid name.
+			if (Writer.IsError())
+			{
+				OutError = TEXT("Cannot write to the music cache");
+				return false;
 			}
 		}
 
@@ -138,6 +157,11 @@ namespace LRAudioFileDecoderPrivate
 		}
 		Writer.Seek(0);
 		WriteWavHeader(Writer, Channels, SampleRate, DataBytes);
+		if (Writer.IsError())
+		{
+			OutError = TEXT("Cannot write to the music cache");
+			return false;
+		}
 		return true;
 	}
 }
@@ -165,7 +189,12 @@ bool LRAudioFileDecoder::DecodeToWav(const FString& Source, const FString& Desti
 		if (Writer.IsValid())
 		{
 			bDecoded = LRAudioFileDecoderPrivate::Decode(Source, *Writer, OutError);
-			Writer->Close();
+			if (!Writer->Close() && bDecoded)
+			{
+				// The last block is written on close.
+				bDecoded = false;
+				OutError = TEXT("Cannot write to the music cache");
+			}
 		}
 		else
 		{
