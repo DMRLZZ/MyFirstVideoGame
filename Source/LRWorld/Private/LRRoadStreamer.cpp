@@ -110,6 +110,19 @@ void ALRRoadStreamer::Configure(const FLRRouteDefinition& Route)
 	Terrain = Route.Terrain;
 	LRTerrainField::BuildColumnDistances(Terrain, TerrainColumns);
 
+	// The components of the slots were made for the objects of the previous route: other meshes, shadows and distances.
+	for (FLRRoadChunkSlot& Slot : Slots)
+	{
+		for (UInstancedStaticMeshComponent* Instances : Slot.Props)
+		{
+			if (Instances)
+			{
+				Instances->DestroyComponent();
+			}
+		}
+		Slot.Props.Reset();
+	}
+
 	Props.Reset(Route.Props.Num());
 	PropMeshes.Reset(Route.Props.Num());
 	for (const FLRRoadsideProp& RawProp : Route.Props)
