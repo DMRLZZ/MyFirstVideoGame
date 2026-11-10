@@ -135,6 +135,23 @@
 		},
 		"GroundColor": {
 			"type": "object"
+		},
+		"FarRidges": {
+			"type": "array",
+			"description": "Rings of distant hills and mountains on the horizon, nearest first (FLRFarRidge).",
+			"maxItems": 6,
+			"items": {
+				"type": "object",
+				"properties": {
+					"InnerRadiusM": { "type": "number", "description": "Where the ring starts to rise, meters from the player.", "minimum": 100, "maximum": 100000 },
+					"PeakRadiusM": { "type": "number", "description": "Where the ring reaches its crest, meters from the player.", "minimum": 100, "maximum": 100000 },
+					"BaseHeightM": { "type": "number", "description": "Height of the lowest crest above the road, meters.", "minimum": 0, "maximum": 10000 },
+					"AmplitudeM": { "type": "number", "description": "Extra height of the tallest crests, meters.", "minimum": 0, "maximum": 10000 },
+					"Seed": { "type": "integer", "description": "Changes the outline of the ring." }
+				},
+				"required": ["InnerRadiusM", "PeakRadiusM"],
+				"additionalProperties": false
+			}
 		}
 	},
 	"additionalProperties": false
