@@ -21,6 +21,9 @@ namespace LRMusicSubsystemPrivate
 	{
 		return FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("Data/Music"));
 	}
+
+	/** Disk the converted copies of the player's music may take: a bit over three hours of sound. */
+	constexpr int64 MaxCacheBytes = 2LL * 1024 * 1024 * 1024;
 }
 
 ULRMusicSubsystem* ULRMusicSubsystem::Get(const UObject* WorldContext)
@@ -173,6 +176,8 @@ void ULRMusicSubsystem::PlayCurrent()
 	const FString CachePath = LRAudioFileDecoder::GetCachePath(Track);
 	if (IFileManager::Get().FileExists(*CachePath))
 	{
+		// Marks the copy as used, so the cache drops the ones nobody listens to first.
+		IFileManager::Get().SetTimeStamp(*CachePath, FDateTime::UtcNow());
 		OpenPlayable(CachePath);
 		return;
 	}
@@ -208,6 +213,10 @@ void ULRMusicSubsystem::StartConversion(const FString& Track, const FString& Cac
 	{
 		FString Error;
 		const bool bConverted = LRAudioFileDecoder::DecodeToWav(Track, CachePath, Error);
+		if (bConverted)
+		{
+			LRAudioFileDecoder::PruneCache(LRMusicSubsystemPrivate::MaxCacheBytes, CachePath);
+		}
 		AsyncTask(ENamedThreads::GameThread, [WeakThis, Track, CachePath, bConverted, Error]()
 		{
 			if (ULRMusicSubsystem* Self = WeakThis.Get())
