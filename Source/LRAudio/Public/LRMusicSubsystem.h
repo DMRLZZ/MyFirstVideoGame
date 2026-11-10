@@ -62,8 +62,11 @@ private:
 	/** Opens a file the media player can read. */
 	void OpenPlayable(const FString& Path);
 
-	/** Converts a track in the background and plays it if the player has not moved on in the meantime. */
-	void ConvertAndPlay(const FString& Track, const FString& CachePath);
+	/** Converts a track in the background. Only one runs at a time. */
+	void StartConversion(const FString& Track, const FString& CachePath);
+
+	/** Plays the converted track if the player is still on it, or converts the one they moved on to. */
+	void HandleConversionFinished(const FString& Track, const FString& CachePath, bool bConverted, const FString& Error);
 
 	void HandleSettingsChanged(const FLRUserSettings& Settings);
 
@@ -87,6 +90,6 @@ private:
 	/** Files that failed in a row: stops looking for a playable one after a full turn of the list. */
 	int32 ConsecutiveFailures = 0;
 
-	/** Counts the requests to play: a conversion that finishes late sees it changed and does nothing. */
-	uint32 PlayRequest = 0;
+	/** Track being converted in the background, empty when none is. */
+	FString ConvertingTrack;
 };

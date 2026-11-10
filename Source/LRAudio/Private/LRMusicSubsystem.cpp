@@ -152,7 +152,6 @@ void ULRMusicSubsystem::PlayCurrent()
 		return;
 	}
 
-	++PlayRequest;
 	const FString Track = Playlist.GetCurrent();
 	if (!AppliedSettings.bMusicEnabled || Track.IsEmpty())
 	{
@@ -175,11 +174,14 @@ void ULRMusicSubsystem::PlayCurrent()
 	if (IFileManager::Get().FileExists(*CachePath))
 	{
 		OpenPlayable(CachePath);
+		return;
 	}
-	else
+
+	// Silence while the copy is made. One conversion at a time: a busy one looks at the current track when it ends.
+	Player->Close();
+	if (ConvertingTrack.IsEmpty())
 	{
-		Player->Close();
-		ConvertAndPlay(Track, CachePath);
+		StartConversion(Track, CachePath);
 	}
 }
 
@@ -196,34 +198,55 @@ void ULRMusicSubsystem::OpenPlayable(const FString& Path)
 	}
 }
 
-void ULRMusicSubsystem::ConvertAndPlay(const FString& Track, const FString& CachePath)
+void ULRMusicSubsystem::StartConversion(const FString& Track, const FString& CachePath)
 {
 	UE_LOG(LogLRAudio, Log, TEXT("Music: converting %s"), *Track);
+	ConvertingTrack = Track;
 	TWeakObjectPtr<ULRMusicSubsystem> WeakThis(this);
-	const uint32 Request = PlayRequest;
 
-	Async(EAsyncExecution::Thread, [WeakThis, Track, CachePath, Request]()
+	Async(EAsyncExecution::Thread, [WeakThis, Track, CachePath]()
 	{
 		FString Error;
 		const bool bConverted = LRAudioFileDecoder::DecodeToWav(Track, CachePath, Error);
-		AsyncTask(ENamedThreads::GameThread, [WeakThis, Track, CachePath, Request, bConverted, Error]()
+		AsyncTask(ENamedThreads::GameThread, [WeakThis, Track, CachePath, bConverted, Error]()
 		{
-			ULRMusicSubsystem* Self = WeakThis.Get();
-			if (Self == nullptr || Self->PlayRequest != Request)
+			if (ULRMusicSubsystem* Self = WeakThis.Get())
 			{
-				return;
-			}
-			if (bConverted)
-			{
-				Self->OpenPlayable(CachePath);
-			}
-			else
-			{
-				UE_LOG(LogLRAudio, Warning, TEXT("Music: could not convert %s: %s"), *Track, *Error);
-				Self->HandleOpenFailed(Track);
+				Self->HandleConversionFinished(Track, CachePath, bConverted, Error);
 			}
 		});
 	});
+}
+
+void ULRMusicSubsystem::HandleConversionFinished(const FString& Track, const FString& CachePath, bool bConverted, const FString& Error)
+{
+	ConvertingTrack.Reset();
+	if (!bConverted)
+	{
+		UE_LOG(LogLRAudio, Warning, TEXT("Music: could not convert %s: %s"), *Track, *Error);
+	}
+
+	const FString Current = Playlist.GetCurrent();
+	if (!AppliedSettings.bMusicEnabled || Player == nullptr)
+	{
+		return;
+	}
+
+	if (Current == Track)
+	{
+		bConverted ? OpenPlayable(CachePath) : HandleOpenFailed(Track);
+		return;
+	}
+
+	// The player moved on while this one was converting. Its copy stays for later; the track they stopped at may be waiting.
+	if (LRAudioFileDecoder::NeedsConversion(Current))
+	{
+		const FString CurrentCachePath = LRAudioFileDecoder::GetCachePath(Current);
+		if (!IFileManager::Get().FileExists(*CurrentCachePath))
+		{
+			StartConversion(Current, CurrentCachePath);
+		}
+	}
 }
 
 float ULRMusicSubsystem::GetOutputLevel() const
