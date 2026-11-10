@@ -438,6 +438,12 @@ struct LRWORLD_API FLRRoadsideProp
 	/** Changes where the objects of this kind land. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Prop")
 	int32 Seed = 1;
+
+	/**
+	 * Copy with every value in a range the streamer can build: data files are read as they are, and a spacing of
+	 * zero or thousands of objects per chunk would hang the game.
+	 */
+	FLRRoadsideProp Sanitized() const;
 };
 
 /** Land around the road: ditch, verge and hills. See LRTerrainField. Part of FLRRouteDefinition. */
