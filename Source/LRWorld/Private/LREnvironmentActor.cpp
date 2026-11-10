@@ -139,6 +139,7 @@ void ALREnvironmentActor::BuildRidge(int32 Section, float InnerRadiusM, float Pe
 	{
 		for (int32 Row = 0; Row + 1 < NumRows; ++Row)
 		{
+			// Wound to face the center of the ring: the player always looks at it from the inside.
 			const int32 A = Segment * NumRows + Row;
 			const int32 B = A + NumRows;
 			Triangles.Add(A);
