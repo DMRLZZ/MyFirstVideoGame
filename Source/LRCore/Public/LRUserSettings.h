@@ -28,6 +28,9 @@ struct LRCORE_API FLRUserSettings
 
 	/** Copy with every value clamped to its valid range. */
 	FLRUserSettings Sanitized() const;
+
+	/** Size of the game window on a desktop of this size, pixels: smaller than the screen, so its borders stay on it. */
+	static FIntPoint ChooseWindowSize(const FIntPoint& Desktop);
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FLROnUserSettingsChanged, const FLRUserSettings&);

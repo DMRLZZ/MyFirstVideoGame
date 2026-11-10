@@ -30,6 +30,17 @@ FLRUserSettings FLRUserSettings::Sanitized() const
 	return Safe;
 }
 
+FIntPoint FLRUserSettings::ChooseWindowSize(const FIntPoint& Desktop)
+{
+	// Three quarters of the screen leaves room for the title bar and the taskbar. Even numbers, as video modes like them.
+	const auto Fit = [](int32 DesktopPixels, int32 MinPixels)
+	{
+		const int32 Wanted = FMath::Max(DesktopPixels * 3 / 4, MinPixels) & ~1;
+		return DesktopPixels > 0 ? FMath::Min(Wanted, DesktopPixels) : Wanted;
+	};
+	return FIntPoint(Fit(Desktop.X, 640), Fit(Desktop.Y, 360));
+}
+
 ULRUserSettingsSubsystem* ULRUserSettingsSubsystem::Get(const UObject* WorldContext)
 {
 	const UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContext, EGetWorldErrorMode::ReturnNull) : nullptr;
