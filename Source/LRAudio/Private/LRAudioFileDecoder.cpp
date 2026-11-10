@@ -29,7 +29,12 @@ FString LRAudioFileDecoder::GetCachePath(const FString& Source)
 	const int64 Size = IFileManager::Get().FileSize(*Source);
 	const FDateTime Stamp = IFileManager::Get().GetTimeStamp(*Source);
 	const FString Key = FString::Printf(TEXT("%s|%lld|%lld"), *Source, Size, Stamp.GetTicks());
-	return FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("MusicCache") / (FMD5::HashAnsiString(*Key) + TEXT(".wav")));
+	return GetCacheFolder() / (FMD5::HashAnsiString(*Key) + TEXT(".wav"));
+}
+
+FString LRAudioFileDecoder::GetCacheFolder()
+{
+	return FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("MusicCache"));
 }
 
 #if PLATFORM_WINDOWS

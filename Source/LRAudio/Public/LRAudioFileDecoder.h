@@ -20,4 +20,7 @@ namespace LRAudioFileDecoder
 
 	/** Decodes Source into a 16-bit WAV at Destination. Blocking: call it from a worker thread. */
 	LRAUDIO_API bool DecodeToWav(const FString& Source, const FString& Destination, FString& OutError);
+
+	/** Folder of the converted copies, Saved/MusicCache. */
+	LRAUDIO_API FString GetCacheFolder();
 }
