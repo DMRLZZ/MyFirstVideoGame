@@ -26,6 +26,10 @@
 		"bVolumetricFog": false,
 		"ExposureCompensation": -0.8,
 		"bNight": false,
+		"FarRidges": [
+			{ "InnerRadiusM": 2200, "PeakRadiusM": 3600, "BaseHeightM": 90, "AmplitudeM": 260, "Seed": 11 },
+			{ "InnerRadiusM": 6000, "PeakRadiusM": 11000, "BaseHeightM": 350, "AmplitudeM": 1300, "Seed": 23 }
+		],
 		"GroundColor": {
 			"R": 0.05,
 			"G": 0.06,
