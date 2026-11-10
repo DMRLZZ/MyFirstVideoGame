@@ -3,10 +3,11 @@
 .SYNOPSIS
 	Builds, cooks, stages, paks and archives a Win64 build with RunUAT BuildCookRun.
 .DESCRIPTION
-	Runs <UE_ROOT>/Engine/Build/BatchFiles/RunUAT.bat BuildCookRun -project=<uproject> -platform=Win64
-	-clientconfig=<Configuration> -build -cook -stage -pak -prereqs -archive -archivedirectory=<repo>/Packaged.
+	Runs <UE_ROOT>/Engine/Build/BatchFiles/RunUAT.bat BuildCookRun for Win64 and archives the result
+	in <repo>/Packaged. The full argument list is built in one place below and printed before UAT
+	starts, so this script is the single reference for the packaging command.
 
-	With -prereqs the build carries the Visual C++ runtime installers (vc_redist.x64.exe and
+	The build carries the Visual C++ runtime installers (vc_redist.x64.exe and
 	vc_redist.arm64.exe under Engine/Extras/Redist, about 30 MB). Only the bootstrap launcher at the
 	root of the build (<archive>/Windows/LeftRight.exe) checks for the runtime and offers to install
 	it; starting Binaries/Win64/LeftRight-Win64-Shipping.exe directly on a PC without the runtime
@@ -38,9 +39,26 @@ $runUat = Get-LREngineFile 'Build\BatchFiles\RunUAT.bat'
 $project = Get-LRProjectFile
 $log = Join-Path (Get-LRLogDirectory) 'package.log'
 
-$arguments = "BuildCookRun -project=`"$project`" -platform=Win64 -clientconfig=$Configuration -build -cook -stage -pak -prereqs -archive -archivedirectory=`"$ArchiveDirectory`" -noP4 -utf8output -unattended"
+$argumentList = @(
+	'BuildCookRun'
+	"-project=`"$project`""
+	'-platform=Win64'
+	"-clientconfig=$Configuration"
+	'-build'
+	'-cook'
+	'-stage'
+	'-pak'
+	'-prereqs'
+	'-archive'
+	"-archivedirectory=`"$ArchiveDirectory`""
+	'-noP4'
+	'-utf8output'
+	'-unattended'
+)
+$arguments = $argumentList -join ' '
 
 Write-LRInfo "Packaging Win64 $Configuration into $ArchiveDirectory (log: $log)"
+Write-LRInfo "RunUAT $arguments"
 $started = Get-Date
 $exitCode = Invoke-LRProcess -FilePath $runUat -Arguments $arguments -LogFile $log
 $elapsed = [int]((Get-Date) - $started).TotalSeconds
