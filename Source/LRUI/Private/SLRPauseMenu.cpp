@@ -53,8 +53,7 @@ namespace LRPauseMenuPrivate
 
 	FText Percent(float Value)
 	{
-		return FText::AsNumber(FMath::RoundToInt32(Value * 100.f)).IsEmpty() ? FText::GetEmpty()
-			: FText::Format(LOCTEXT("PercentFormat", "{0} %"), FText::AsNumber(FMath::RoundToInt32(Value * 100.f)));
+		return FText::Format(LOCTEXT("PercentFormat", "{0} %"), FText::AsNumber(FMath::RoundToInt32(Value * 100.f)));
 	}
 
 	FText OnOff(bool bValue)
