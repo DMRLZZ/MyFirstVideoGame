@@ -101,9 +101,6 @@ void FLRHUDLabels::Build()
 	RestartKeyboard = LOCTEXT("RestartKeyboard", "Pulsa R para reiniciar");
 	RestartGamepad = LOCTEXT("RestartGamepad", "Pulsa View / Share para reiniciar");
 
-	GarageTitle = LOCTEXT("GarageTitle", "GARAJE");
-	GarageKeyboard = LOCTEXT("GarageKeyboard", "Pulsa Enter para conducir");
-	GarageGamepad = LOCTEXT("GarageGamepad", "Pulsa A / Cruz para conducir");
 	Replay = LOCTEXT("Replay", "REPETICIÓN");
 
 	SchemeCaption = LOCTEXT("SchemeCaption", "CONTROL");
@@ -419,7 +416,7 @@ void ALRHUD::DrawHUD()
 	switch (CurrentState)
 	{
 	case ELRRunState::Garage:
-		DrawGarage(Vehicle);
+		// The title screen (SLRTitleMenu) covers this state.
 		break;
 
 	case ELRRunState::Loading:
@@ -534,8 +531,6 @@ void ALRHUD::InvalidateTextCaches()
 	CachedCountdownNumber = INDEX_NONE;
 	CachedComboMultiplier = -1.f;
 	CachedComboChain = INDEX_NONE;
-	CachedVehicleId = NAME_None;
-	CachedVehicleName = FText::GetEmpty();
 
 	for (int64& Points : PopupPointsValues)
 	{
@@ -929,30 +924,6 @@ void ALRHUD::DrawResultsPanel()
 
 	const FText& Prompt = IsUsingGamepadPrompts() ? Labels.RestartGamepad : Labels.RestartKeyboard;
 	DrawTextAt(Prompt, Fonts.MediumBold, FVector2D(CanvasWidth * 0.5f, RowY), ValueColor, EAlign::Center);
-}
-
-void ALRHUD::DrawGarage(const ALRVehicle* Vehicle)
-{
-	const float CenterX = CanvasWidth * 0.5f;
-	float Y = CanvasHeight - Margin - Px(150.f);
-
-	DrawTextAt(Labels.GarageTitle, Fonts.LargeBold, FVector2D(CenterX, Y), Tuning.AccentColor, EAlign::Center);
-	Y += GetLineHeight(Fonts.LargeBold);
-
-	if (Vehicle)
-	{
-		const FLRVehicleDefinition& Definition = Vehicle->GetDefinition();
-		if (Definition.Id != CachedVehicleId || CachedVehicleName.IsEmpty())
-		{
-			CachedVehicleId = Definition.Id;
-			CachedVehicleName = FText::FromString(Definition.DisplayName);
-		}
-		DrawTextAt(CachedVehicleName, Fonts.MediumBold, FVector2D(CenterX, Y), Tuning.PrimaryColor, EAlign::Center);
-	}
-	Y += GetLineHeight(Fonts.MediumBold) + Px(8.f);
-
-	const FText& Prompt = IsUsingGamepadPrompts() ? Labels.GarageGamepad : Labels.GarageKeyboard;
-	DrawTextAt(Prompt, Fonts.Medium, FVector2D(CenterX, Y), Tuning.SecondaryColor, EAlign::Center);
 }
 
 void ALRHUD::DrawLoading()

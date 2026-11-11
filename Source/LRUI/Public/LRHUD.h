@@ -48,9 +48,6 @@ struct LRUI_API FLRHUDLabels
 	FText ResultsCredits;
 	FText RestartKeyboard;
 	FText RestartGamepad;
-	FText GarageTitle;
-	FText GarageKeyboard;
-	FText GarageGamepad;
 	FText Replay;
 	FText SchemeCaption;
 	FText ControlsTitle;
@@ -194,7 +191,6 @@ private:
 	void DrawGoBanner();
 	void DrawCrashOverlay();
 	void DrawResultsPanel();
-	void DrawGarage(const ALRVehicle* Vehicle);
 	void DrawLoading();
 	void DrawReplayTag();
 	void DrawControlScheme();
@@ -296,8 +292,6 @@ private:
 	/** Points text per popup slot, refreshed when the points of the slot change. */
 	TArray<FText> PopupPointsTexts;
 	TArray<int64> PopupPointsValues;
-	FName CachedVehicleId;
-	FText CachedVehicleName;
 	/** Result rows: score, distance, near misses, best combo, top speed, duration, credits. */
 	FText ResultValues[7];
 	ELRSpeedUnits ResultUnits = ELRSpeedUnits::Kmh;
