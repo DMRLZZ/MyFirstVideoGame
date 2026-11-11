@@ -133,7 +133,7 @@ Tools/Scripts/package.ps1 -NoPrereqs                      # sin los instaladores
 ```
 
 - Argumentos: el script los arma en un solo sitio y escribe la línea completa de `RunUAT` en la consola antes de empezar. Esa línea es la referencia; aquí no se copian los flags para que no se desfasen.
-- Por defecto pasa `-prereqs`: la build lleva `vc_redist.x64.exe` y `vc_redist.arm64.exe` (unos 30 MB). Solo el lanzador de la raíz, `Packaged/Windows/LeftRight.exe`, comprueba si falta el runtime de Visual C++ y ofrece instalarlo. Si se abre directamente `Binaries/Win64/LeftRight-Win64-Shipping.exe` en un PC sin el runtime, falla por falta de una DLL sin avisar.
+- Por defecto pasa `-prereqs`: la build lleva `vc_redist.x64.exe` y `vc_redist.arm64.exe` (unos 30 MB). Solo el lanzador de la raíz, `<archivo>/Windows/LeftRight.exe` (por defecto `Packaged/Windows/LeftRight.exe`), comprueba si falta el runtime de Visual C++ y ofrece instalarlo. Si se abre directamente `Binaries/Win64/LeftRight-Win64-Shipping.exe` en un PC sin el runtime, falla por falta de una DLL sin avisar.
 - `-NoPrereqs` quita esos instaladores. Úsalo cuando otro instalador ya pone el runtime, por ejemplo el depot de Steam con el redistribuible de Visual C++ activado (M7).
 - Empaquetar desde el editor también incluye los instaladores: `IncludePrerequisites=True` ya es el valor por defecto del motor (`BaseGame.ini`), y `Config/DefaultGame.ini` lo fija por si cambia. Borrar esa línea no los quita.
 - Log: `Saved/Logs/package.log` (UAT además guarda sus propios logs en la carpeta del motor). Devuelve el código de salida de UAT.
