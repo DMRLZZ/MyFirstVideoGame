@@ -20,6 +20,8 @@
 #include "LRRoadTypes.h"
 #include "LRRunContextSubsystem.h"
 #include "LRScoreComponent.h"
+#include "LRTitleCruise.h"
+#include "LRTrafficSubsystem.h"
 #include "LRVehicle.h"
 #include "LRVehicleAudioComponent.h"
 #include "Misc/DateTime.h"
@@ -31,6 +33,12 @@ namespace LRGameModeEndlessPrivate
 	{
 		return World ? Cast<ALRGameModeEndless>(World->GetAuthGameMode()) : nullptr;
 	}
+
+	/** Lateral distance from the player car that still counts as its lane for the title cruise, meters. */
+	constexpr float TitleLaneHalfWidthMeters = 1.6f;
+
+	/** Extra road ahead of twice the follow gap searched for a leader by the title cruise, meters. */
+	constexpr double TitleLookAheadMarginMeters = 20.0;
 
 	FAutoConsoleCommandWithWorldAndArgs RestartCommand(
 		TEXT("lr.Restart"),
@@ -113,6 +121,10 @@ ALRGameModeEndless::ALRGameModeEndless(const FObjectInitializer& ObjectInitializ
 	GameStateClass = ALRGameState::StaticClass();
 	HUDClass = ALRHUD::StaticClass();
 	DefaultPawnClass = nullptr;
+
+	// Ticks only to drive the car on the title screen.
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
 void ALRGameModeEndless::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -196,7 +208,7 @@ void ALRGameModeEndless::TryStartFirstRun()
 
 	if (SpawnPlayerVehicle(*Player))
 	{
-		StartRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()));
+		EnterTitle();
 	}
 }
 
@@ -300,6 +312,69 @@ void ALRGameModeEndless::RestartInMode(ELRGameModeType Mode)
 	StartRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()));
 }
 
+void ALRGameModeEndless::EnterTitle()
+{
+	ULRRunContextSubsystem* Context = ULRRunContextSubsystem::Get(this);
+	const ULRRoadSubsystem* Road = ULRRoadSubsystem::Get(this);
+	if (!PlayerVehicle || !Context || !Road)
+	{
+		UE_LOG(LogLRGameplay, Warning, TEXT("EnterTitle ignored: the player car or a world subsystem is missing"));
+		return;
+	}
+
+	ClearPause();
+	ClearRunTimers();
+	ScrapesUsed = 0;
+
+	if (StateMachine.GetState() != ELRRunState::Garage)
+	{
+		TransitionTo(ELRRunState::Garage);
+	}
+
+	Context->BeginNewRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()), ModeType);
+
+	const int32 Lane = FLRGameRulesLogic::ResolveStartLane(Road->GetPath().GetLanes(), Road->GetDefaultPlayerLane(), Rules.StartingLaneOffset);
+	PlayerVehicle->ResetForRun(Road->GetSpawnS(), Road->GetLaneCenterD(Lane), Rules.TitleCruiseKmh);
+
+	// UpdateTitleCruise drives the pedals. The player sends nothing: the title menu holds the input.
+	PlayerVehicle->SetInputEnabled(true);
+}
+
+void ALRGameModeEndless::PlayFromTitle()
+{
+	if (StateMachine.GetState() == ELRRunState::Garage)
+	{
+		StartRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()));
+	}
+}
+
+const TArray<ELRGameModeType>& ALRGameModeEndless::GetTitleModes()
+{
+	static const TArray<ELRGameModeType> Modes = {
+		ELRGameModeType::EndlessOneWay,
+		ELRGameModeType::EndlessTwoWay,
+		ELRGameModeType::FreeRide,
+		ELRGameModeType::Daily,
+	};
+	return Modes;
+}
+
+void ALRGameModeEndless::CycleMode(int32 Direction)
+{
+	const TArray<ELRGameModeType>& Modes = GetTitleModes();
+	const int32 Current = FMath::Max(Modes.IndexOfByKey(ModeType), 0);
+	ModeType = Modes[(Current + (Direction < 0 ? -1 : 1) + Modes.Num()) % Modes.Num()];
+
+	if (StateMachine.GetState() == ELRRunState::Garage)
+	{
+		EnterTitle();
+	}
+	else
+	{
+		StartRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()));
+	}
+}
+
 bool ALRGameModeEndless::SetPlayerVehicle(FName VehicleId)
 {
 	if (!PlayerVehicle || !PlayerVehicle->LoadDefinitionById(VehicleId))
@@ -313,11 +388,18 @@ bool ALRGameModeEndless::SetPlayerVehicle(FName VehicleId)
 		Progression->SelectVehicle(VehicleId);
 	}
 
-	StartRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()));
+	if (StateMachine.GetState() == ELRRunState::Garage)
+	{
+		EnterTitle();
+	}
+	else
+	{
+		StartRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()));
+	}
 	return true;
 }
 
-void ALRGameModeEndless::CycleVehicle()
+void ALRGameModeEndless::CycleVehicle(int32 Direction)
 {
 	if (!PlayerVehicle)
 	{
@@ -334,8 +416,48 @@ void ALRGameModeEndless::CycleVehicle()
 		File = FPaths::GetBaseFilename(File);
 	}
 
-	const int32 Current = Files.IndexOfByKey(PlayerVehicle->GetDefinition().Id.ToString());
-	SetPlayerVehicle(FName(*Files[(Current + 1) % Files.Num()]));
+	const int32 Current = FMath::Max(Files.IndexOfByKey(PlayerVehicle->GetDefinition().Id.ToString()), 0);
+	const int32 Step = Direction < 0 ? -1 : 1;
+	SetPlayerVehicle(FName(*Files[(Current + Step + Files.Num()) % Files.Num()]));
+}
+
+void ALRGameModeEndless::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (StateMachine.GetState() == ELRRunState::Garage)
+	{
+		UpdateTitleCruise();
+	}
+}
+
+void ALRGameModeEndless::UpdateTitleCruise()
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(ALRGameModeEndless::UpdateTitleCruise);
+	using namespace LRGameModeEndlessPrivate;
+
+	if (!PlayerVehicle || PlayerVehicle->IsWrecked())
+	{
+		return;
+	}
+
+	const FLRRoadCoord Coord = PlayerVehicle->GetRoadCoord();
+	float LeaderGap = -1.f;
+	float LeaderSpeedKmh = 0.f;
+	if (const ULRTrafficSubsystem* Traffic = ULRTrafficSubsystem::Get(this))
+	{
+		Traffic->GetSnapshot(TitleTrafficScratch, Coord.S, Coord.S + 2.0 * Rules.TitleFollowGapMeters + TitleLookAheadMarginMeters);
+		if (!FLRTitleCruise::FindLeader(TitleTrafficScratch, Coord.S, Coord.D, TitleLaneHalfWidthMeters, LeaderGap, LeaderSpeedKmh))
+		{
+			LeaderGap = -1.f;
+		}
+	}
+
+	const float TargetKmh = FLRTitleCruise::ComputeTargetSpeedKmh(Rules.TitleCruiseKmh, Rules.TitleFollowGapMeters, LeaderGap, LeaderSpeedKmh);
+	const FLRTitleCruisePedals Pedals = FLRTitleCruise::ComputePedals(PlayerVehicle->GetSpeedKmh(), TargetKmh);
+	PlayerVehicle->SetThrottleInput(Pedals.Throttle);
+	PlayerVehicle->SetBrakeInput(Pedals.Brake);
+	PlayerVehicle->SetSteeringInput(0.f);
 }
 
 bool ALRGameModeEndless::TransitionTo(ELRRunState NewState)
@@ -370,6 +492,15 @@ void ALRGameModeEndless::HandleResultsDelayFinished()
 
 void ALRGameModeEndless::HandleCrash(const FLRCrashEvent& Event)
 {
+	if (StateMachine.GetState() == ELRRunState::Garage)
+	{
+		// A hard hit behind the title menu: rebuild the scene, but not from inside the physics callback.
+		if (Event.bSevere)
+		{
+			GetWorldTimerManager().SetTimerForNextTick(this, &ALRGameModeEndless::EnterTitle);
+		}
+		return;
+	}
 	if (StateMachine.GetState() != ELRRunState::Running)
 	{
 		return;

@@ -7,6 +7,7 @@
 #include "LRCoreTypes.h"
 #include "LRGameRules.h"
 #include "LRRunStateMachine.h"
+#include "LRTrafficTypes.h"
 
 #include "LRGameModeEndless.generated.h"
 
@@ -19,7 +20,8 @@ struct FLRCrashEvent;
  * Game mode of LEFTRIGHT: owns the run lifecycle (FLRRunStateMachine) in every mode (endless, two-way, free ride, daily).
  *
  * One tick after play starts it spawns the player ALRVehicle with the vehicle selected in ULRProgressionSubsystem, possesses
- * it and starts the first run. A run resets road, traffic and every other listener through
+ * it and enters the title screen: the Garage state with a live world behind the menu, where the car cruises on its own
+ * (FLRTitleCruise). PlayFromTitle starts the first run. A run resets road, traffic and every other listener through
  * ULRRunContextSubsystem::BeginNewRun without reloading the map, places the car and goes through Countdown to Running.
  *
  * A contact while Running is judged by FLRGameRulesLogic::EvaluateCrash. When the run ends the result is recorded in
@@ -53,14 +55,33 @@ public:
 	void RestartInMode(ELRGameModeType Mode);
 
 	/**
-	 * Loads Data/Vehicles/<VehicleId>.json on the player car and starts a run with a new seed. The vehicle becomes the
-	 * saved selection only if the profile owns it.
+	 * Enters the title screen from any state: unpauses, moves to Garage, resets the world with a new seed and places the
+	 * car on the road cruising at FLRGameRules::TitleCruiseKmh. A run abandoned while Running is not recorded.
+	 * Does nothing until the player car exists.
+	 */
+	void EnterTitle();
+
+	/** Title screen "Play": starts a run in the current mode. Ignored outside the title screen. */
+	void PlayFromTitle();
+
+	/** Modes offered by the title screen, in menu order. */
+	static const TArray<ELRGameModeType>& GetTitleModes();
+
+	/**
+	 * Selects the next (+1) or previous (-1) mode of GetTitleModes. On the title screen the scene is rebuilt in that mode;
+	 * otherwise a run starts in it.
+	 */
+	void CycleMode(int32 Direction);
+
+	/**
+	 * Loads Data/Vehicles/<VehicleId>.json on the player car. On the title screen the car goes back to the title scene;
+	 * otherwise a run starts with a new seed. The vehicle becomes the saved selection only if the profile owns it.
 	 * @return false if there is no player car or the definition cannot be loaded (nothing changes).
 	 */
 	bool SetPlayerVehicle(FName VehicleId);
 
-	/** Switches to the next car in Data/Vehicles and restarts the run (there is no garage screen yet). */
-	void CycleVehicle();
+	/** Switches to the next (+1) or previous (-1) car in Data/Vehicles, see SetPlayerVehicle. */
+	void CycleVehicle(int32 Direction = 1);
 
 	/** Re-reads Data/Gameplay/GameRules.json. Keeps the current rules on failure. */
 	void ReloadRules();
@@ -84,6 +105,9 @@ public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void StartPlay() override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+	//~ AActor
+	virtual void Tick(float DeltaSeconds) override;
 
 protected:
 	//~ AActor
@@ -126,6 +150,12 @@ private:
 
 	/** Score component of the game state, or nullptr. */
 	ULRScoreComponent* GetScoreComponent() const;
+
+	/** Title screen: drives the player car with FLRTitleCruise behind the traffic ahead. */
+	void UpdateTitleCruise();
+
+	/** Traffic around the player car, reused by UpdateTitleCruise every frame. */
+	TArray<FLRTrafficVehicleSnapshot> TitleTrafficScratch;
 
 	/** The player car. Stays alive between runs. */
 	UPROPERTY(Transient)
