@@ -21,6 +21,14 @@ struct LRVEHICLE_API FLRSmoothSteering
 		float MaxD = TNumericLimits<float>::Max();
 	};
 
+	/**
+	 * Range of the car center between the barriers, kept HalfWidthMeters + BarrierMarginMeters away from them. With
+	 * ShoulderAllowanceMeters >= 0 the side of the car also stays within that distance of the outer lane edges, which
+	 * keeps it off the shoulders. A range too narrow for the car collapses to its middle.
+	 */
+	static FLimits ComputeLimits(float LanesLeftD, float LanesRightD, float LeftBarrierD, float RightBarrierD, float HalfWidthMeters,
+		float BarrierMarginMeters, float ShoulderAllowanceMeters);
+
 	/** Clears the ramp and keeps the car where it is. */
 	void Reset(float CurrentD);
 

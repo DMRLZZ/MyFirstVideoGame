@@ -14,6 +14,24 @@ namespace LRSmoothSteeringPrivate
 	constexpr float ArrivedMeters = 0.1f;
 }
 
+FLRSmoothSteering::FLimits FLRSmoothSteering::ComputeLimits(float LanesLeftD, float LanesRightD, float LeftBarrierD, float RightBarrierD,
+	float HalfWidthMeters, float BarrierMarginMeters, float ShoulderAllowanceMeters)
+{
+	FLimits Limits;
+	Limits.MinD = LeftBarrierD + HalfWidthMeters + BarrierMarginMeters;
+	Limits.MaxD = RightBarrierD - HalfWidthMeters - BarrierMarginMeters;
+	if (ShoulderAllowanceMeters >= 0.f)
+	{
+		Limits.MinD = FMath::Max(Limits.MinD, LanesLeftD + HalfWidthMeters - ShoulderAllowanceMeters);
+		Limits.MaxD = FMath::Min(Limits.MaxD, LanesRightD - HalfWidthMeters + ShoulderAllowanceMeters);
+	}
+	if (Limits.MinD > Limits.MaxD)
+	{
+		Limits.MinD = Limits.MaxD = 0.5f * (Limits.MinD + Limits.MaxD);
+	}
+	return Limits;
+}
+
 void FLRSmoothSteering::Reset(float CurrentD)
 {
 	SmoothedInput = 0.f;
