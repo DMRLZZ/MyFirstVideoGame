@@ -8,7 +8,7 @@ Depende de `LRCore`, `LRVehicle` y `SlateCore` (público), y de `Slate`, `InputC
 
 | Estado de la partida | Contenido |
 |---|---|
-| `Garage` | Título, nombre del coche y aviso de teclado o mando |
+| `Garage` | Nada: lo cubre la pantalla de inicio (`SLRTitleMenu`), que abre `ALRPlayerController` |
 | `Loading` | "CARGANDO" con puntos animados |
 | `Countdown` | Instrumentos, puntos, indicador de esquema, panel de controles y "3, 2, 1, ¡YA!" (duración: `CountdownSeconds` de `Data/Gameplay/GameRules.json`, 3 s si falta) |
 | `Running` | Velocímetro (km/h o mph), marcha, barra de RPM con zona roja, multiplicador de velocidad, puntos con separador de miles, combo con barra de tiempo, avisos de near miss, indicador de esquema, panel de controles (primeros 8 s de la primera partida) |
