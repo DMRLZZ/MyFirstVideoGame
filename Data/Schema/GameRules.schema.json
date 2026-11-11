@@ -69,6 +69,12 @@
 			"minimum": 0,
 			"maximum": 500
 		},
+		"ShoulderAllowanceMeters": {
+			"description": "Smooth steering: how far the side of the player car may go past the outer lane edges, meters. Negative = shoulders allowed up to the barriers.",
+			"type": "number",
+			"minimum": -1,
+			"maximum": 10
+		},
 		"TitleCruiseKmh": {
 			"description": "Title screen: speed the player car cruises at behind the menu, km/h.",
 			"type": "number",
