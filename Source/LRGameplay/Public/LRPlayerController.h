@@ -25,6 +25,7 @@ struct FLRRunResetEvent;
  * - Forwards throttle, brake, steering and handbrake to the possessed ALRVehicle. Arcade scheme: the steering axis also
  *   goes through FLRLaneChangeDetector to RequestLaneChange, plus the LaneLeft / LaneRight buttons.
  * - CameraCycle and LookBack go to ALRPlayerCameraManager, Restart to ALRGameModeEndless, Pause toggles the world pause.
+ * - Shows the title screen (SLRTitleMenu) while the run state is Garage and forwards its choices to ALRGameModeEndless.
  * - Plays gamepad rumble on near misses (scaled by tier) and crashes, with the values of FLRGameRules::Rumble.
  */
 UCLASS()
@@ -48,6 +49,9 @@ public:
 	void TogglePauseMenu();
 
 	bool IsPauseMenuOpen() const { return PauseMenu.IsValid(); }
+
+	/** True while the title screen is on screen. */
+	bool IsTitleMenuOpen() const { return TitleMenu.IsValid(); }
 
 	//~ APlayerController
 	virtual void PlayerTick(float DeltaTime) override;
@@ -81,6 +85,14 @@ private:
 	void HandleCycleVehicle();
 	void HandleNextTrack();
 	void ClosePauseMenu();
+	void OpenTitleMenu();
+	void CloseTitleMenu();
+
+	/** Opens the title screen in the Garage state and closes it in every other state. */
+	void SyncTitleMenu();
+
+	/** The game mode, or nullptr. */
+	class ALRGameModeEndless* GetGameMode() const;
 	void ReleaseDrivingInput();
 	void HandleSettingsChanged(const struct FLRUserSettings& Settings);
 
@@ -112,6 +124,10 @@ private:
 	/** Menu on screen and the wrapper that keeps it in the viewport. Null while closed. */
 	TSharedPtr<class SLRPauseMenu> PauseMenu;
 	TSharedPtr<class SWidget> PauseMenuContainer;
+
+	/** Title screen and its viewport wrapper. Null while closed. */
+	TSharedPtr<class SLRTitleMenu> TitleMenu;
+	TSharedPtr<class SWidget> TitleMenuContainer;
 	FDelegateHandle SettingsHandle;
 
 	/** Last steering value, clamped to -1..1. */

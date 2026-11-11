@@ -19,15 +19,18 @@
 #include "LRGameModeEndless.h"
 #include "LRGameRules.h"
 #include "LRGameplay.h"
+#include "LRHUDFormat.h"
 #include "LRInputActions.h"
 #include "LRInputCurves.h"
 #include "LRInputTypes.h"
 #include "LRMusicSubsystem.h"
 #include "LRPlayerCameraManager.h"
+#include "LRProgressionSubsystem.h"
 #include "LRRunContextSubsystem.h"
 #include "LRUserSettings.h"
 #include "LRVehicle.h"
 #include "SLRPauseMenu.h"
+#include "SLRTitleMenu.h"
 #include "Widgets/SWeakWidget.h"
 
 namespace LRPlayerControllerPrivate
@@ -146,6 +149,10 @@ void ALRPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		ClosePauseMenu();
 	}
+	if (TitleMenu.IsValid())
+	{
+		CloseTitleMenu();
+	}
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -153,6 +160,8 @@ void ALRPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ALRPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
+
+	SyncTitleMenu();
 
 	ALRVehicle* Vehicle = GetVehicle();
 	if (const ULRUserSettingsSubsystem* Settings = ULRUserSettingsSubsystem::Get(this); Settings && Vehicle)
@@ -333,6 +342,11 @@ void ALRPlayerController::HandlePause()
 
 void ALRPlayerController::TogglePauseMenu()
 {
+	// The title screen has its own settings and quit.
+	if (TitleMenu.IsValid())
+	{
+		return;
+	}
 	if (PauseMenu.IsValid())
 	{
 		ClosePauseMenu();
@@ -380,6 +394,17 @@ void ALRPlayerController::TogglePauseMenu()
 				WeakThis->HandleCycleVehicle();
 			}
 		})
+		.OnMainMenu_Lambda([WeakThis]()
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->ClosePauseMenu();
+				if (ALRGameModeEndless* GameMode = WeakThis->GetGameMode())
+				{
+					GameMode->EnterTitle();
+				}
+			}
+		})
 		.OnQuit_Lambda([WeakThis]()
 		{
 			if (WeakThis.IsValid())
@@ -416,6 +441,114 @@ void ALRPlayerController::ClosePauseMenu()
 	{
 		FSlateApplication::Get().SetAllUserFocusToGameViewport();
 	}
+}
+
+void ALRPlayerController::SyncTitleMenu()
+{
+	const ULRRunContextSubsystem* Context = ULRRunContextSubsystem::Get(this);
+	const bool bInTitle = Context && Context->GetRunState() == ELRRunState::Garage;
+	if (bInTitle && !TitleMenu.IsValid() && !PauseMenu.IsValid())
+	{
+		OpenTitleMenu();
+	}
+	else if (!bInTitle && TitleMenu.IsValid())
+	{
+		CloseTitleMenu();
+	}
+}
+
+void ALRPlayerController::OpenTitleMenu()
+{
+	UGameViewportClient* Viewport = GEngine ? GEngine->GameViewport : nullptr;
+	if (Viewport == nullptr || !FSlateApplication::IsInitialized())
+	{
+		return;
+	}
+
+	ReleaseDrivingInput();
+
+	TWeakObjectPtr<ALRPlayerController> WeakThis(this);
+	TitleMenu = SNew(SLRTitleMenu)
+		.Settings(ULRUserSettingsSubsystem::Get(this))
+		.Music(ULRMusicSubsystem::Get(this))
+		.ModeName_Lambda([WeakThis]()
+		{
+			const ALRGameModeEndless* GameMode = WeakThis.IsValid() ? WeakThis->GetGameMode() : nullptr;
+			return FLRHUDFormat::GetGameModeName(GameMode ? GameMode->GetModeType() : ELRGameModeType::EndlessOneWay);
+		})
+		.CarName_Lambda([WeakThis]()
+		{
+			const ALRVehicle* Vehicle = WeakThis.IsValid() ? WeakThis->GetVehicle() : nullptr;
+			return Vehicle ? FText::FromString(Vehicle->GetDefinition().DisplayName) : FText::GetEmpty();
+		})
+		.BestScore_Lambda([WeakThis]()
+		{
+			const ALRGameModeEndless* GameMode = WeakThis.IsValid() ? WeakThis->GetGameMode() : nullptr;
+			const ULRProgressionSubsystem* Progression = WeakThis.IsValid() ? ULRProgressionSubsystem::Get(WeakThis.Get()) : nullptr;
+			const int64 Best = GameMode && Progression ? Progression->GetBestScore(GameMode->GetModeType()) : 0;
+			return Best > 0 ? FLRHUDFormat::FormatScore(Best) : FText::FromString(TEXT("-"));
+		})
+		.OnPlay_Lambda([WeakThis]()
+		{
+			if (ALRGameModeEndless* GameMode = WeakThis.IsValid() ? WeakThis->GetGameMode() : nullptr)
+			{
+				GameMode->PlayFromTitle();
+			}
+		})
+		.OnCycleMode([WeakThis](int32 Direction)
+		{
+			if (ALRGameModeEndless* GameMode = WeakThis.IsValid() ? WeakThis->GetGameMode() : nullptr)
+			{
+				GameMode->CycleMode(Direction);
+			}
+		})
+		.OnCycleCar([WeakThis](int32 Direction)
+		{
+			if (ALRGameModeEndless* GameMode = WeakThis.IsValid() ? WeakThis->GetGameMode() : nullptr)
+			{
+				GameMode->CycleVehicle(Direction);
+			}
+		})
+		.OnQuit_Lambda([WeakThis]()
+		{
+			if (WeakThis.IsValid())
+			{
+				UKismetSystemLibrary::QuitGame(WeakThis.Get(), WeakThis.Get(), EQuitPreference::Quit, false);
+			}
+		});
+
+	TitleMenuContainer = SNew(SWeakWidget).PossiblyNullContent(TitleMenu);
+	Viewport->AddViewportWidgetContent(TitleMenuContainer.ToSharedRef(), 90);
+
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(TitleMenu->GetInitialFocus());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
+	SetShowMouseCursor(true);
+	TitleMenu->FocusFirstItem();
+}
+
+void ALRPlayerController::CloseTitleMenu()
+{
+	if (UGameViewportClient* Viewport = GEngine ? GEngine->GameViewport : nullptr; Viewport && TitleMenuContainer.IsValid())
+	{
+		Viewport->RemoveViewportWidgetContent(TitleMenuContainer.ToSharedRef());
+	}
+	TitleMenu.Reset();
+	TitleMenuContainer.Reset();
+
+	SetShowMouseCursor(false);
+	SetInputMode(FInputModeGameOnly());
+	if (FSlateApplication::IsInitialized())
+	{
+		FSlateApplication::Get().SetAllUserFocusToGameViewport();
+	}
+}
+
+ALRGameModeEndless* ALRPlayerController::GetGameMode() const
+{
+	const UWorld* World = GetWorld();
+	return World ? World->GetAuthGameMode<ALRGameModeEndless>() : nullptr;
 }
 
 void ALRPlayerController::ReleaseDrivingInput()
