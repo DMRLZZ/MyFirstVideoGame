@@ -224,6 +224,23 @@ FText FLRHUDFormat::GetControlSchemeLabel(ELRControlScheme Scheme)
 	}
 }
 
+FText FLRHUDFormat::GetGameModeName(ELRGameModeType Mode)
+{
+	switch (Mode)
+	{
+	case ELRGameModeType::EndlessTwoWay:
+		return LOCTEXT("ModeTwoWay", "Doble sentido");
+	case ELRGameModeType::TimeAttack:
+		return LOCTEXT("ModeTimeAttack", "Contrarreloj");
+	case ELRGameModeType::FreeRide:
+		return LOCTEXT("ModeFreeRide", "Paseo libre");
+	case ELRGameModeType::Daily:
+		return LOCTEXT("ModeDaily", "Reto diario");
+	default:
+		return LOCTEXT("ModeOneWay", "Autopista");
+	}
+}
+
 // --- FLRHUDAnim ------------------------------------------------------------------------------
 
 float FLRHUDAnim::EaseOutCubic(float T)

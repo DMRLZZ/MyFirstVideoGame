@@ -85,6 +85,9 @@ struct LRUI_API FLRHUDFormat
 
 	/** Control scheme indicator: "ARCADE" or "SIMCADE". */
 	static FText GetControlSchemeLabel(ELRControlScheme Scheme);
+
+	/** Game mode name for menus: "Autopista", "Doble sentido", "Contrarreloj", "Paseo libre", "Reto diario". */
+	static FText GetGameModeName(ELRGameModeType Mode);
 };
 
 /** Pure animation and layout math used by the HUD (unit-testable). */
