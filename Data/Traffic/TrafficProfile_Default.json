@@ -395,7 +395,7 @@
 				"LaneChangeThresholdMs2": 0.1,
 				"KeepRightBiasMs2": 0.1,
 				"SafeDecelMs2": 5.0,
-				"AggressiveEventChance": 0.08,
+				"AggressiveEventChance": 0.15,
 				"bSpawnInLeftLanes": false
 			},
 			{
