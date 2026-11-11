@@ -133,3 +133,18 @@ Formato: contexto → decisión → alternativas descartadas → consecuencias. 
   - Música con el Media Framework (`ULRMusicSubsystem`): temas propios en `Data/Music` (AAC) y la música del jugador en `Documentos/LeftRight/Music`. El plugin de Windows no abre MP3 ni FLAC, así que esos archivos se convierten una vez a WAV con Media Foundation (`LRAudioFileDecoder`) en `Saved/MusicCache`. Se convierte un tema a la vez, y la caché se mantiene por debajo de 2 GB borrando primero las copias que llevan más tiempo sin sonar.
   - `LRUI` pasa a depender de `LRAudio`: el menú y el HUD muestran y controlan la música. El grafo sigue siendo acíclico.
 - **Consecuencias:** el juego es fácil de controlar desde el primer minuto y tiene ajustes básicos. El menú de M4-06 con CommonUI puede sustituir a este cuando haya arte de interfaz. Los temas propios se generan con `Tools/MusicGen/lrmusicgen.py` y no tienen derechos de terceros.
+
+## ADR-016 · Pantalla de inicio en Slate hasta CommonUI
+
+- **Contexto:** el juego arrancaba directamente conduciendo, sin pantalla de inicio. M4-06 prevé los menús definitivos con CommonUI y MVVM, pero todavía no hay arte de interfaz. ADR-015 solo cubría el menú de pausa en Slate.
+- **Decisión:**
+  - La partida empieza en el estado `Garage` con una pantalla de inicio en Slate (`SLRTitleMenu`): Jugar, modo, coche, ajustes, salir y récord del modo. `ALRPlayerController` la abre mientras el estado es `Garage` y le pasa las elecciones a `ALRGameModeEndless`.
+  - Detrás del menú el mundo sigue vivo: el coche circula solo en su carril (`FLRTitleCruise`, con `TitleCruiseKmh` y `TitleFollowGapMeters` en `GameRules.json`) y el tráfico se mueve. Durante la pantalla de inicio no hay puntuación, choques que cuenten ni vibración.
+  - Los menús de Slate comparten estilo y filas (`LRMenuWidgets`) y la lista de ajustes (`SLRSettingsList`). El menú de pausa gana "Menú principal".
+- **Consecuencias:** el juego tiene un punto de entrada y una forma de elegir modo y coche sin consola. M4-06 sigue abierta: la versión con CommonUI sustituirá estos widgets cuando haya arte, y podrá reutilizar el flujo de estados y las llamadas al modo de juego tal cual.
+
+## ADR-017 · Arcén cerrado con la dirección suave
+
+- **Contexto:** en el arcén no hay tráfico. Con la dirección suave el coche podía ir hasta la barrera y circular por el arcén indefinidamente, lo que quitaba toda la dificultad.
+- **Decisión:** `ShoulderAllowanceMeters` en `GameRules.json` (0,3 m) limita cuánto puede pasar el lateral del coche de la línea de borde de los carriles exteriores. Lo aplica `FLRSmoothSteering::ComputeLimits`; un valor negativo vuelve al comportamiento anterior (hasta las barreras).
+- **Consecuencias:** el esquema Arcade ya no salía de los carriles, y ahora la dirección suave tampoco. Simcade, el esquema para jugadores exigentes, conserva la dirección libre: el arcén sigue siendo físicamente accesible. Si se convierte en un atajo, la respuesta irá por la puntuación (sin puntos fuera de los carriles), no por un muro invisible.
