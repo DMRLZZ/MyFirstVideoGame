@@ -169,7 +169,15 @@ void ULRDevAutopilotSubsystem::Tick(float DeltaTime)
 	}
 
 	const ELRRunState State = Context->GetRunState();
-	if (State == ELRRunState::Running)
+	if (State == ELRRunState::Garage)
+	{
+		// The game opens on the title screen: press "Play".
+		if (ALRGameModeEndless* GameMode = GetWorld()->GetAuthGameMode<ALRGameModeEndless>())
+		{
+			GameMode->PlayFromTitle();
+		}
+	}
+	else if (State == ELRRunState::Running)
 	{
 		RestartAtTime = -1.0;
 		const bool bBraking = BrakeAtSeconds >= 0.0 && ElapsedSeconds >= BrakeAtSeconds && ElapsedSeconds < BrakeAtSeconds + 6.0;
