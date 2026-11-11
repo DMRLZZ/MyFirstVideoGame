@@ -19,6 +19,8 @@ FLRGameRules FLRGameRules::Sanitized() const
 	Out.ForgivingFatalImpactKmh = FMath::Max(Out.ForgivingFatalImpactKmh, 0.f);
 	Out.CrashRecoverySeconds = FMath::Max(Out.CrashRecoverySeconds, 0.01f);
 	Out.FreeRideResetForwardMeters = FMath::Max(Out.FreeRideResetForwardMeters, 0.f);
+	Out.TitleCruiseKmh = FMath::Max(Out.TitleCruiseKmh, 0.f);
+	Out.TitleFollowGapMeters = FMath::Max(Out.TitleFollowGapMeters, 5.f);
 
 	Out.Rumble.NearMissIntensity = FMath::Clamp(Out.Rumble.NearMissIntensity, 0.f, 1.f);
 	Out.Rumble.NearMissDurationSeconds = FMath::Max(Out.Rumble.NearMissDurationSeconds, 0.f);

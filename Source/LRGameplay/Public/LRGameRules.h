@@ -97,6 +97,14 @@ struct LRGAMEPLAY_API FLRGameRules
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rules", meta = (ClampMin = "0.0", Units = "Meters"))
 	float FreeRideResetForwardMeters = 30.f;
 
+	/** Title screen: speed the player car cruises at behind the menu, km/h. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rules", meta = (ClampMin = "0.0"))
+	float TitleCruiseKmh = 100.f;
+
+	/** Title screen: gap the cruising car keeps to the vehicle ahead in its lane, meters. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rules", meta = (ClampMin = "5.0", Units = "Meters"))
+	float TitleFollowGapMeters = 45.f;
+
 	/** Gamepad rumble. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rules")
 	FLRRumbleTuning Rumble;

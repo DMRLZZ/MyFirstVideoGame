@@ -84,10 +84,14 @@ void FLRGameRulesSpec::Define()
 			Rules.CountdownSeconds = -1.f;
 			Rules.ScrapesAllowed = -3;
 			Rules.Rumble.CrashIntensity = 7.f;
+			Rules.TitleCruiseKmh = -20.f;
+			Rules.TitleFollowGapMeters = 1.f;
 			const FLRGameRules Safe = Rules.Sanitized();
 			TestEqual(TEXT("countdown"), Safe.CountdownSeconds, 0.f);
 			TestEqual(TEXT("scrapes"), Safe.ScrapesAllowed, 0);
 			TestEqual(TEXT("rumble"), Safe.Rumble.CrashIntensity, 1.f);
+			TestEqual(TEXT("title cruise"), Safe.TitleCruiseKmh, 0.f);
+			TestEqual(TEXT("title gap"), Safe.TitleFollowGapMeters, 5.f);
 		});
 	});
 
