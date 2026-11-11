@@ -33,6 +33,7 @@ void SLRPauseMenu::Construct(const FArguments& InArgs)
 	OnResume = InArgs._OnResume;
 	OnRestart = InArgs._OnRestart;
 	OnNextCar = InArgs._OnNextCar;
+	OnMainMenu = InArgs._OnMainMenu;
 	OnQuit = InArgs._OnQuit;
 
 	static const FSlateColorBrush DimBrush(FLinearColor::White);
@@ -46,6 +47,7 @@ void SLRPauseMenu::Construct(const FArguments& InArgs)
 	AddMain(MakeButton(LOCTEXT("Resume", "Continuar"), OnResume, &FirstMainButton));
 	AddMain(MakeButton(LOCTEXT("Restart", "Reiniciar carrera"), OnRestart));
 	AddMain(MakeButton(LOCTEXT("Settings", "Ajustes"), FSimpleDelegate::CreateSP(this, &SLRPauseMenu::ShowSettingsPage), &SettingsOpenButton));
+	AddMain(MakeButton(LOCTEXT("MainMenu", "Menú principal"), OnMainMenu));
 	AddMain(MakeButton(LOCTEXT("Quit", "Salir del juego"), OnQuit));
 
 	TWeakPtr<SLRPauseMenu> WeakThis = SharedThis(this);

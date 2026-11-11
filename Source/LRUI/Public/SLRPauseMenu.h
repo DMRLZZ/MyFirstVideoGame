@@ -14,7 +14,7 @@ class ULRMusicSubsystem;
 class ULRUserSettingsSubsystem;
 
 /**
- * Menu that opens with Esc: resume, restart, settings and quit. Works with mouse, keyboard and gamepad.
+ * Menu that opens with Esc: resume, restart, settings, back to the title screen and quit. Works with mouse, keyboard and gamepad.
  *
  * Settings rows change with left / right on the keyboard or gamepad, and with a click on either half of the row.
  * Every change is saved at once by ULRUserSettingsSubsystem. The player controller owns the widget, pauses the game
@@ -31,6 +31,7 @@ public:
 		SLATE_EVENT(FSimpleDelegate, OnResume)
 		SLATE_EVENT(FSimpleDelegate, OnRestart)
 		SLATE_EVENT(FSimpleDelegate, OnNextCar)
+		SLATE_EVENT(FSimpleDelegate, OnMainMenu)
 		SLATE_EVENT(FSimpleDelegate, OnQuit)
 	SLATE_END_ARGS()
 
@@ -53,6 +54,7 @@ private:
 	FSimpleDelegate OnResume;
 	FSimpleDelegate OnRestart;
 	FSimpleDelegate OnNextCar;
+	FSimpleDelegate OnMainMenu;
 	FSimpleDelegate OnQuit;
 
 	TSharedPtr<SWidgetSwitcher> Pages;
