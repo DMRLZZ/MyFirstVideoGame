@@ -507,10 +507,12 @@ void ALRGameModeEndless::HandleCrash(const FLRCrashEvent& Event)
 {
 	if (StateMachine.GetState() == ELRRunState::Garage)
 	{
-		// A hard hit behind the title menu: rebuild the scene, but not from inside the physics callback.
-		if (Event.bSevere)
+		// A hard hit behind the title menu: rebuild the scene, but not from inside the physics callback, and only once
+		// for the several events one impact can raise.
+		FTimerManager& Timers = GetWorldTimerManager();
+		if (Event.bSevere && !Timers.TimerExists(TitleRebuildTimer))
 		{
-			GetWorldTimerManager().SetTimerForNextTick(this, &ALRGameModeEndless::EnterTitle);
+			TitleRebuildTimer = Timers.SetTimerForNextTick(this, &ALRGameModeEndless::HandleTitleRebuild);
 		}
 		return;
 	}
@@ -626,6 +628,18 @@ void ALRGameModeEndless::ClearRunTimers()
 	Timers.ClearTimer(CountdownTimer);
 	Timers.ClearTimer(ResultsTimer);
 	Timers.ClearTimer(CrashRecoveryTimer);
+	Timers.ClearTimer(TitleRebuildTimer);
+}
+
+void ALRGameModeEndless::HandleTitleRebuild()
+{
+	TitleRebuildTimer.Invalidate();
+
+	// "Play" may have been pressed between the hit and this tick.
+	if (StateMachine.GetState() == ELRRunState::Garage)
+	{
+		EnterTitle();
+	}
 }
 
 ULRScoreComponent* ALRGameModeEndless::GetScoreComponent() const

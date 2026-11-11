@@ -154,6 +154,9 @@ private:
 	/** Title screen: drives the player car with FLRTitleCruise behind the traffic ahead. */
 	void UpdateTitleCruise();
 
+	/** Timer callback after a hard hit behind the title menu: rebuilds the scene if the title screen is still on. */
+	void HandleTitleRebuild();
+
 	/** Traffic around the player car, reused by UpdateTitleCruise every frame. */
 	TArray<FLRTrafficVehicleSnapshot> TitleTrafficScratch;
 
@@ -175,6 +178,7 @@ private:
 	FTimerHandle CountdownTimer;
 	FTimerHandle ResultsTimer;
 	FTimerHandle CrashRecoveryTimer;
+	FTimerHandle TitleRebuildTimer;
 
 	FDelegateHandle CrashHandle;
 	FDelegateHandle DataReloadedHandle;
