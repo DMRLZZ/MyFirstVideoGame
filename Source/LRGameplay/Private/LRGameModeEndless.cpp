@@ -368,8 +368,11 @@ const TArray<ELRGameModeType>& ALRGameModeEndless::GetTitleModes()
 void ALRGameModeEndless::CycleMode(int32 Direction)
 {
 	const TArray<ELRGameModeType>& Modes = GetTitleModes();
-	const int32 Current = FMath::Max(Modes.IndexOfByKey(ModeType), 0);
-	ModeType = Modes[(Current + (Direction < 0 ? -1 : 1) + Modes.Num()) % Modes.Num()];
+	const int32 Step = Direction < 0 ? -1 : 1;
+	const int32 Current = Modes.IndexOfByKey(ModeType);
+	// A mode outside the list (lr.Mode TimeAttack) moves to the first entry, or the last going back.
+	const int32 Next = Current == INDEX_NONE ? (Step > 0 ? 0 : Modes.Num() - 1) : (Current + Step + Modes.Num()) % Modes.Num();
+	ModeType = Modes[Next];
 
 	if (StateMachine.GetState() == ELRRunState::Garage)
 	{
