@@ -47,29 +47,9 @@ public:
 	virtual bool SupportsKeyboardFocus() const override { return true; }
 
 private:
-	/** A clickable line of the main page. */
-	TSharedRef<SWidget> MakeButton(const FText& Label, FSimpleDelegate OnPressed, TSharedPtr<SButton>* OutButton = nullptr);
-
-	/** A line of the settings page: label on the left, value on the right. Step receives -1 or +1. */
-	TSharedRef<SWidget> MakeRow(const FText& Label, TAttribute<FText> Value, TFunction<void(int32)> Step);
-
-	/** A section title of the settings page. */
-	TSharedRef<SWidget> MakeHeader(const FText& Label) const;
-
-	void BuildSettingsRows(const TSharedRef<SVerticalBox>& Box);
-
 	void ShowMainPage();
 	void ShowSettingsPage();
 
-	/** Reads the settings, lets Change edit them and stores the result. */
-	void EditSettings(TFunctionRef<void(FLRUserSettings&)> Change) const;
-
-	/** Current settings, defaults if the subsystem is gone. */
-	FLRUserSettings ReadSettings() const;
-
-	TWeakObjectPtr<ULRUserSettingsSubsystem> Settings;
-	TWeakObjectPtr<ULRMusicSubsystem> Music;
-	TAttribute<FText> CarName;
 	FSimpleDelegate OnResume;
 	FSimpleDelegate OnRestart;
 	FSimpleDelegate OnNextCar;
@@ -79,5 +59,4 @@ private:
 	TSharedPtr<SButton> FirstMainButton;
 	TSharedPtr<SButton> SettingsBackButton;
 	TSharedPtr<SButton> SettingsOpenButton;
-	FText FolderNote;
 };
