@@ -337,7 +337,8 @@ void ALRGameModeEndless::EnterTitle()
 		TransitionTo(ELRRunState::Garage);
 	}
 
-	Context->BeginNewRun(FLRGameRulesLogic::MakeRunSeed(ModeType, FDateTime::UtcNow()), ModeType);
+	// A clock seed even in Daily mode: the backdrop must not show the road of the daily challenge before it is played.
+	Context->BeginNewRun(FLRGameRulesLogic::MakeRunSeed(ELRGameModeType::EndlessOneWay, FDateTime::UtcNow()), ModeType);
 
 	const int32 Lane = FLRGameRulesLogic::ResolveStartLane(Road->GetPath().GetLanes(), Road->GetDefaultPlayerLane(), Rules.StartingLaneOffset);
 	PlayerVehicle->ResetForRun(Road->GetSpawnS(), Road->GetLaneCenterD(Lane), Rules.TitleCruiseKmh);
