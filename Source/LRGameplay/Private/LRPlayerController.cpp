@@ -41,6 +41,13 @@ namespace LRPlayerControllerPrivate
 		const ALRGameModeEndless* GameMode = World ? Cast<ALRGameModeEndless>(World->GetAuthGameMode()) : nullptr;
 		return GameMode ? GameMode->GetGameRules().Rumble : FLRRumbleTuning();
 	}
+
+	/** The traffic keeps moving behind the title menu: its near misses and scrapes must not shake the gamepad. */
+	bool IsOnTitleScreen(const UObject* WorldContext)
+	{
+		const ULRRunContextSubsystem* Context = ULRRunContextSubsystem::Get(WorldContext);
+		return Context && Context->GetRunState() == ELRRunState::Garage;
+	}
 }
 
 ALRPlayerController::ALRPlayerController(const FObjectInitializer& ObjectInitializer)
@@ -599,6 +606,10 @@ void ALRPlayerController::HandleToggleControlScheme()
 
 void ALRPlayerController::HandleNearMiss(const FLRNearMissEvent& Event)
 {
+	if (LRPlayerControllerPrivate::IsOnTitleScreen(this))
+	{
+		return;
+	}
 	const FLRRumbleTuning Rumble = LRPlayerControllerPrivate::GetRumble(GetWorld());
 	const float TierScale = static_cast<float>(static_cast<uint8>(Event.Tier));
 	const float Intensity = FMath::Min(Rumble.NearMissIntensity * TierScale, 1.f);
@@ -610,6 +621,10 @@ void ALRPlayerController::HandleNearMiss(const FLRNearMissEvent& Event)
 
 void ALRPlayerController::HandleCrash(const FLRCrashEvent& Event)
 {
+	if (LRPlayerControllerPrivate::IsOnTitleScreen(this))
+	{
+		return;
+	}
 	const FLRRumbleTuning Rumble = LRPlayerControllerPrivate::GetRumble(GetWorld());
 	if (Event.bSevere)
 	{
