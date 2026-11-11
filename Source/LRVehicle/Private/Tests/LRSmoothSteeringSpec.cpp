@@ -39,6 +39,38 @@ void FLRSmoothSteeringSpec::Define()
 		Steering.Reset(D);
 	});
 
+	Describe("ComputeLimits", [this]()
+	{
+		// Lanes from -7 to 7 m, shoulders up to the barriers at -10 and 10 m, a car 2 m wide.
+		It("reaches the barriers without a shoulder rule", [this]()
+		{
+			const FLRSmoothSteering::FLimits Range = FLRSmoothSteering::ComputeLimits(-7.f, 7.f, -10.f, 10.f, 1.f, 0.35f, -1.f);
+			TestEqual(TEXT("min"), Range.MinD, -8.65f, 0.001f);
+			TestEqual(TEXT("max"), Range.MaxD, 8.65f, 0.001f);
+		});
+
+		It("keeps the side of the car within the allowance of the lane edges", [this]()
+		{
+			const FLRSmoothSteering::FLimits Range = FLRSmoothSteering::ComputeLimits(-7.f, 7.f, -10.f, 10.f, 1.f, 0.35f, 0.3f);
+			TestEqual(TEXT("min"), Range.MinD, -6.3f, 0.001f);
+			TestEqual(TEXT("max"), Range.MaxD, 6.3f, 0.001f);
+		});
+
+		It("never lets a large allowance pass the barriers", [this]()
+		{
+			const FLRSmoothSteering::FLimits Range = FLRSmoothSteering::ComputeLimits(-7.f, 7.f, -10.f, 10.f, 1.f, 0.35f, 10.f);
+			TestEqual(TEXT("min"), Range.MinD, -8.65f, 0.001f);
+			TestEqual(TEXT("max"), Range.MaxD, 8.65f, 0.001f);
+		});
+
+		It("collapses a range too narrow for the car to its middle", [this]()
+		{
+			const FLRSmoothSteering::FLimits Range = FLRSmoothSteering::ComputeLimits(-0.5f, 1.5f, -0.6f, 1.6f, 1.f, 0.35f, 0.f);
+			TestEqual(TEXT("same"), Range.MinD, Range.MaxD);
+			TestEqual(TEXT("middle"), Range.MinD, 0.5f, 0.001f);
+		});
+	});
+
 	It("does not jump on the first frame of a key press", [this]()
 	{
 		const float First = Steering.Update(Params, 1.f, 1.f, Dt, D, ForwardSpeed, 0.f, 100.f, Limits);
