@@ -14,6 +14,8 @@
 		"StartingLaneOffset": 0,
 		"CrashRecoverySeconds": 1.5,
 		"FreeRideResetForwardMeters": 30,
+		"TitleCruiseKmh": 100,
+		"TitleFollowGapMeters": 45,
 		"Rumble": {
 			"NearMissIntensity": 0.25,
 			"NearMissDurationSeconds": 0.15,
