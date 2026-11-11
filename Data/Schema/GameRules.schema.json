@@ -69,6 +69,18 @@
 			"minimum": 0,
 			"maximum": 500
 		},
+		"TitleCruiseKmh": {
+			"description": "Title screen: speed the player car cruises at behind the menu, km/h.",
+			"type": "number",
+			"minimum": 0,
+			"maximum": 300
+		},
+		"TitleFollowGapMeters": {
+			"description": "Title screen: gap the cruising car keeps to the vehicle ahead in its lane, meters.",
+			"type": "number",
+			"minimum": 5,
+			"maximum": 300
+		},
 		"Rumble": {
 			"description": "Gamepad rumble. Intensities are normalized.",
 			"type": "object",
