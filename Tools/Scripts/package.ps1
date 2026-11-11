@@ -70,7 +70,6 @@ Write-LRInfo "Packaging Win64 $Configuration into $ArchiveDirectory (log: $log)"
 if ($NoPrereqs) {
 	Write-LRWarn 'Building without the Visual C++ runtime installers (-NoPrereqs).'
 }
-Write-LRInfo "RunUAT $arguments"
 $started = Get-Date
 $exitCode = Invoke-LRProcess -FilePath $runUat -Arguments $arguments -LogFile $log
 $elapsed = [int]((Get-Date) - $started).TotalSeconds
