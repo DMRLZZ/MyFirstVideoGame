@@ -43,6 +43,7 @@ void FLRGameRulesSpec::Define()
 			TestEqual(TEXT("vehicle"), Rules.DefaultVehicleId, FName(TEXT("bauer_r3_sport")));
 			TestFalse(TEXT("forgiving"), Rules.bForgivingArcade);
 			TestEqual(TEXT("scrapes"), Rules.ScrapesAllowed, 2);
+			TestEqual(TEXT("shoulder"), Rules.ShoulderAllowanceMeters, 0.3f);
 		});
 
 		It("reads every kind of field and keeps the default of the missing ones", [this]()

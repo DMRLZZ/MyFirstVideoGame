@@ -97,6 +97,13 @@ struct LRGAMEPLAY_API FLRGameRules
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rules", meta = (ClampMin = "0.0", Units = "Meters"))
 	float FreeRideResetForwardMeters = 30.f;
 
+	/**
+	 * Smooth steering: how far the side of the player car may go past the outer lane edges, meters. Keeps the car off
+	 * the empty shoulders, where it could drive straight forever. Negative = shoulders allowed up to the barriers.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rules", meta = (Units = "Meters"))
+	float ShoulderAllowanceMeters = 0.3f;
+
 	/** Title screen: speed the player car cruises at behind the menu, km/h. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rules", meta = (ClampMin = "0.0"))
 	float TitleCruiseKmh = 100.f;
