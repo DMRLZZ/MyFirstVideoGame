@@ -141,6 +141,10 @@ void ALRGameModeEndless::ReloadRules()
 	if (FLRDataLoader::Load(FLRGameRules::DataPath, Loaded, &Error))
 	{
 		Rules = Loaded.Sanitized();
+		if (PlayerVehicle)
+		{
+			PlayerVehicle->SetShoulderAllowance(Rules.ShoulderAllowanceMeters);
+		}
 	}
 	else
 	{
@@ -243,6 +247,7 @@ bool ALRGameModeEndless::SpawnPlayerVehicle(APlayerController& Player)
 	}
 
 	Vehicle->FinishSpawning(SpawnTransform);
+	Vehicle->SetShoulderAllowance(Rules.ShoulderAllowanceMeters);
 	PlayerVehicle = Vehicle;
 
 	Player.Possess(Vehicle);
