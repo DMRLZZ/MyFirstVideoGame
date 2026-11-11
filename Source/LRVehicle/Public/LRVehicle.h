@@ -55,6 +55,12 @@ public:
 	/** Player setting that scales the sideways speed of the Smooth scheme. 1 = as tuned. */
 	void SetSteeringSensitivity(float Sensitivity) { SteeringSensitivity = FMath::Clamp(Sensitivity, 0.2f, 2.f); }
 
+	/**
+	 * Smooth scheme: how far the side of the car may go past the outer lane edges, meters. Negative (the default) lets
+	 * it use the shoulders up to the barriers.
+	 */
+	void SetShoulderAllowance(float Meters) { ShoulderAllowanceMeters = Meters; }
+
 	/** Handbrake on/off. */
 	void SetHandbrakeInput(bool bEngaged);
 
@@ -250,6 +256,9 @@ private:
 	float BrakeInput = 0.f;
 	float SteeringInput = 0.f;
 	float SteeringSensitivity = 1.f;
+
+	/** See SetShoulderAllowance. */
+	float ShoulderAllowanceMeters = -1.f;
 	bool bHandbrakeInput = false;
 
 	// Values sent to Chaos this tick.

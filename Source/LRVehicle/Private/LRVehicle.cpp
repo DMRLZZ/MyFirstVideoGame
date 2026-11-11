@@ -766,10 +766,9 @@ float ALRVehicle::ComputeSmoothSteering(float RawSteering, float DeltaSeconds)
 	}
 
 	const FLRRoadCrossSection& Section = Road->GetCrossSection();
-	const float Inset = 0.5f * Definition.WidthMeters + Definition.SmoothSteering.EdgeMarginMeters;
-	FLRSmoothSteering::FLimits Limits;
-	Limits.MinD = Section.LeftBarrierD + Inset;
-	Limits.MaxD = Section.RightBarrierD - Inset;
+	const FLRSmoothSteering::FLimits Limits = FLRSmoothSteering::ComputeLimits(Section.LanesLeftD, Section.LanesRightD,
+		Section.LeftBarrierD, Section.RightBarrierD, 0.5f * Definition.WidthMeters, Definition.SmoothSteering.EdgeMarginMeters,
+		ShoulderAllowanceMeters);
 
 	const TArray<FLRLaneDesc>& Lanes = Road->GetPath().GetLanes();
 	const int32 NearestLane = LRVehicleMath::FindNearestLane(Lanes, CachedRoadCoord.D);
