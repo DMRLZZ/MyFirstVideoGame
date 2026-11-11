@@ -1,6 +1,6 @@
 # Registro de terceros (assets, plugins, audio, fuentes)
 
-Todo lo que no hayamos creado nosotros se registra aquí **antes** de entrar en el repo. Sin registro, no se fusiona. Los plugins y el código además pasan la revisión de [05-AGENTS.md §7](05-AGENTS.md) y necesitan aprobación humana.
+Todo lo que no hayamos creado nosotros se registra aquí **antes** de entrar en el repo. Sin registro, no se fusiona. Los plugins y el código que entran en el repo además pasan la revisión de [05-AGENTS.md §7](05-AGENTS.md) y necesitan aprobación humana. Los prerrequisitos del motor que solo viajan con la build empaquetada (por ejemplo, los redistribuibles de Visual C++) se registran aquí con aprobación humana, pero no pasan esa revisión.
 
 | Fecha | Elemento | Tipo | Origen (URL) | Licencia | Versión | Aprobado por | Uso en el proyecto |
 |---|---|---|---|---|---|---|---|
