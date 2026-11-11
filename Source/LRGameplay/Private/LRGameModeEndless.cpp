@@ -289,6 +289,7 @@ void ALRGameModeEndless::StartRun(int32 Seed)
 
 	const int32 StartLane = FLRGameRulesLogic::ResolveStartLane(Road->GetPath().GetLanes(), Road->GetDefaultPlayerLane(), Rules.StartingLaneOffset);
 	PlayerVehicle->ResetForRun(Road->GetSpawnS(), Road->GetLaneCenterD(StartLane), Rules.StartSpeedKmh);
+	PlayerVehicle->SetControlScheme(Context->GetControlScheme());
 	PlayerVehicle->SetInputEnabled(false);
 
 	TransitionTo(ELRRunState::Countdown);
@@ -444,6 +445,13 @@ void ALRGameModeEndless::UpdateTitleCruise()
 	if (!PlayerVehicle || PlayerVehicle->IsWrecked())
 	{
 		return;
+	}
+
+	// Simcade has no lane keeping: with no steering the car would leave the road in the first bend. The player's
+	// scheme comes back in StartRun, also when it is changed in the settings of the title screen.
+	if (PlayerVehicle->GetControlScheme() != ELRControlScheme::Smooth)
+	{
+		PlayerVehicle->SetControlScheme(ELRControlScheme::Smooth);
 	}
 
 	const FLRRoadCoord Coord = PlayerVehicle->GetRoadCoord();
