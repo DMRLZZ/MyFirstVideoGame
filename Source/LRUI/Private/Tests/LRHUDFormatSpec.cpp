@@ -152,6 +152,14 @@ void FLRHUDFormatSpec::Define()
 			TestEqual(TEXT("Arcade"), FLRHUDFormat::GetControlSchemeLabel(ELRControlScheme::Arcade).ToString(), FString(TEXT("ARCADE")));
 			TestEqual(TEXT("Simcade"), FLRHUDFormat::GetControlSchemeLabel(ELRControlScheme::Simcade).ToString(), FString(TEXT("SIMCADE")));
 		});
+
+		It("names the game modes", [this]()
+		{
+			TestEqual(TEXT("One way"), FLRHUDFormat::GetGameModeName(ELRGameModeType::EndlessOneWay).ToString(), FString(TEXT("Autopista")));
+			TestEqual(TEXT("Two way"), FLRHUDFormat::GetGameModeName(ELRGameModeType::EndlessTwoWay).ToString(), FString(TEXT("Doble sentido")));
+			TestEqual(TEXT("Free ride"), FLRHUDFormat::GetGameModeName(ELRGameModeType::FreeRide).ToString(), FString(TEXT("Paseo libre")));
+			TestEqual(TEXT("Daily"), FLRHUDFormat::GetGameModeName(ELRGameModeType::Daily).ToString(), FString(TEXT("Reto diario")));
+		});
 	});
 
 	Describe("Anim", [this]()
