@@ -139,3 +139,4 @@
 | M7-03 | Demo para Steam Next Fest (1 ruta, 2 coches) | Todos |
 | M7-04 | Clasificación por edades (IARC), EULA y revisión legal de nombres | **Persona y asesor legal** |
 | M7-05 | Build Shipping firmada y pipeline de parches | build-release-engineer |
+| M7-06 | Depot de Steam con el redistribuible de Visual C++ activado y build con `package.ps1 -NoPrereqs`; revisión de los términos del redistribuible (ver `docs/THIRD_PARTY.md`). Depende de M7-01 | build-release-engineer + **Persona** (parte legal) |
